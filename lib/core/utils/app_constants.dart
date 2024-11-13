@@ -9,7 +9,7 @@ class LeetcodeConstants {
   LeetcodeConstants._();
   static const leetcodeUrl = "https://leetcode.com";
   static const leetcodeLoginUrl = "https://leetcode.com/accounts/login/";
-  static const leetcodePostLoginUrl = "/api/home";
+  static const leetcodePostLoginUrl = "/api/home/";
   static const weeklyContestBannerImage =
       "https://leetcode.com/_next/static/images/weekly-default-553ede7bcc8e1b4a44c28a9e4a32068c.png";
 

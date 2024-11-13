@@ -123,25 +123,27 @@ class UpcomingContestCard extends HookWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      contest.title ?? "Contest",
-                      style: textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8.0),
-                    if (contest.startTime != null)
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        contest.startTime!
-                                .toLocal()
-                                .formatToDayTimeWithTimezone() ??
-                            "",
-                        style: textTheme.labelMedium
-                            ?.copyWith(color: theme.hintColor),
+                        contest.title ?? "Contest",
+                        style: textTheme.titleMedium,
                       ),
-                    const SizedBox(height: 8.0),
-                  ],
+                      const SizedBox(height: 8.0),
+                      if (contest.startTime != null)
+                        Text(
+                          contest.startTime!
+                                  .toLocal()
+                                  .formatToDayTimeWithTimezone() ??
+                              "",
+                          style: textTheme.labelMedium
+                              ?.copyWith(color: theme.hintColor),
+                        ),
+                      const SizedBox(height: 8.0),
+                    ],
+                  ),
                 ),
                 const SizedBox(
                   width: 8,
