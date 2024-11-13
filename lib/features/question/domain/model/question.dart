@@ -10,6 +10,7 @@ class Question {
   final List<TopicTags>? topicTags;
   final String? content;
   final QuestionStatus? status;
+  final List<String>? hints;
 
   const Question({
     this.title,
@@ -23,6 +24,7 @@ class Question {
     this.topicTags,
     this.content,
     this.status,
+    this.hints,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {

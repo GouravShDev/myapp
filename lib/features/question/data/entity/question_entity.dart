@@ -11,6 +11,7 @@ class QuestionNodeEntity {
   bool? hasSolution;
   String? content;
   List<TopicTagsNodeEntity>? topicTags;
+  List<String>? hints;
   Null? freqBar;
   bool? isFavor;
   String? status;
@@ -26,6 +27,7 @@ class QuestionNodeEntity {
     this.hasSolution,
     this.topicTags,
     this.content,
+    this.hints,
     this.status,
   });
 
@@ -39,6 +41,13 @@ class QuestionNodeEntity {
     hasVideoSolution = json['hasVideoSolution'];
     hasSolution = json['hasSolution'];
     content = json['content'];
+    if (json['hints'] != null) {
+      hints = (json['hints'] as List)
+          .map(
+            (e) => e as String,
+          )
+          .toList();
+    }
     status = json['status'];
     if (json['topicTags'] != null) {
       topicTags = [];
@@ -101,6 +110,7 @@ extension QuestionNodeEntityExt on QuestionNodeEntity {
       content: content,
       topicTags: topicTags?.map((tag) => tag.toTopicTags()).toList(),
       status: _parseQuestionStatus(status),
+      hints: hints,
     );
   }
 }
