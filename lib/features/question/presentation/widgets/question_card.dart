@@ -45,7 +45,7 @@ class QuestionCard extends StatelessWidget {
                     child: Text(
                       ("${question.frontendQuestionId}. ") +
                           (question.title ?? "No Title"),
-                      style: textTheme.titleLarge,
+                      style: textTheme.titleMedium,
                     ),
                   ),
                   Icon(
@@ -54,7 +54,7 @@ class QuestionCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 3),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
