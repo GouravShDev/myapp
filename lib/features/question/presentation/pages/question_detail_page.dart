@@ -5,6 +5,7 @@ import 'package:codersgym/features/question/presentation/blocs/similar_question/
 import 'package:codersgym/features/question/presentation/widgets/question_info_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:codersgym/core/api/api_state.dart';
@@ -22,10 +23,23 @@ class QuestionDetailPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final questionContentCubit = getIt.get<QuestionContentCubit>();
-    final scrollController = useScrollController();
+
+    final currentPage = useState(0);
+
+    final tabController = useTabController(initialLength: 3);
+    final unselectedColor = Theme.of(context).dividerColor;
+    final selectedColor = Theme.of(context).primaryColor;
     useEffect(
       () {
         questionContentCubit.getQuestionContent(question);
+        tabController.animation?.addListener(
+          () {
+            final value = tabController.animation?.value.round();
+            if (value != null && value != currentPage.value) {
+              currentPage.value = value;
+            }
+          },
+        );
         return null;
       },
       [questionContentCubit],
@@ -35,32 +49,107 @@ class QuestionDetailPage extends HookWidget {
         appBar: AppBar(
           title: const Text("Question Descption"),
         ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: BlocBuilder<QuestionContentCubit,
-                  ApiState<Question, Exception>>(
-                bloc: questionContentCubit,
-                builder: (context, state) {
-                  return state.when(
-                    onInitial: () => const CircularProgressIndicator(),
-                    onLoading: () => const CircularProgressIndicator(),
-                    onLoaded: (question) {
-                      return InheritedDataProvider(
-                        data: scrollController,
-                        child: QuestionDetailPageBody(
-                          question: question,
-                        ),
-                      );
-                    },
-                    onError: (exception) => Text(exception.toString()),
-                  );
-                },
+        body: BottomBar(
+          icon: (width, height) => Center(
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              onPressed: null,
+              icon: Icon(
+                Icons.arrow_upward_rounded,
+                color: unselectedColor,
+                size: width,
               ),
             ),
           ),
+          borderRadius: BorderRadius.circular(500),
+          duration: const Duration(seconds: 1),
+          curve: Curves.decelerate,
+          showIcon: true,
+          width: MediaQuery.of(context).size.width * 0.8,
+          barColor: Theme.of(context).canvasColor,
+          start: 2,
+          end: 0,
+          offset: 10,
+          barAlignment: Alignment.bottomCenter,
+          iconHeight: 35,
+          iconWidth: 35,
+          reverse: false,
+          hideOnScroll: true,
+          scrollOpposite: false,
+          onBottomBarHidden: () {},
+          onBottomBarShown: () {},
+          child: TabBar(
+            indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+            controller: tabController,
+            dividerColor: Colors.transparent,
+            splashBorderRadius: BorderRadius.circular(100),
+            indicator: UnderlineTabIndicator(
+              borderSide: BorderSide(
+                color: Theme.of(context).primaryColor,
+                width: 4,
+              ),
+              insets: EdgeInsets.fromLTRB(16, 0, 16, 8),
+            ),
+            tabs: [
+              SizedBox(
+                height: 55,
+                width: 40,
+                child: Center(
+                    child: Icon(
+                  Icons.description_outlined,
+                  color:
+                      currentPage.value == 0 ? selectedColor : unselectedColor,
+                )),
+              ),
+              SizedBox(
+                height: 55,
+                width: 40,
+                child: Center(
+                    child: Icon(
+                  Icons.menu_book_rounded,
+                  color:
+                      currentPage.value == 1 ? selectedColor : unselectedColor,
+                )),
+              ),
+              SizedBox(
+                height: 55,
+                width: 40,
+                child: Center(
+                    child: Icon(
+                  Icons.science_outlined,
+                  color:
+                      currentPage.value == 2 ? selectedColor : unselectedColor,
+                )),
+              ),
+            ],
+          ),
+          body: (context, controller) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SingleChildScrollView(
+                controller: controller,
+                child: BlocBuilder<QuestionContentCubit,
+                    ApiState<Question, Exception>>(
+                  bloc: questionContentCubit,
+                  builder: (context, state) {
+                    return state.when(
+                      onInitial: () => const CircularProgressIndicator(),
+                      onLoading: () => const CircularProgressIndicator(),
+                      onLoaded: (question) {
+                        return InheritedDataProvider(
+                          data: controller,
+                          child: QuestionDetailPageBody(
+                            question: question,
+                          ),
+                        );
+                      },
+                      onError: (exception) => Text(exception.toString()),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -78,18 +167,6 @@ class QuestionDetailPageBody extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final similarQuestionCubit = getIt.get<SimilarQuestionCubit>();
-    final currentPage = 0;
-    final List<Color> colors = [
-      Colors.yellow,
-      Colors.red,
-      Colors.green,
-      Colors.blue,
-      Colors.pink
-    ];
-    final tabController = useTabController(initialLength: 2);
-    final Color unselectedColor = colors[currentPage].computeLuminance() < 0.5
-        ? Colors.black
-        : Colors.white;
 
     useEffect(() {
       similarQuestionCubit.getSimilarQuestions(question);
@@ -97,44 +174,44 @@ class QuestionDetailPageBody extends HookWidget {
     }, []);
     final textTheme = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            ("${question.frontendQuestionId}. ") + (question.title ?? ""),
-            style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          QuestionDifficultyText(question),
-          HtmlWidget(
-            question.content ?? '',
-            renderMode: RenderMode.column,
-            textStyle: const TextStyle(fontSize: 14),
-          ),
-          const SizedBox(
-            height: 12,
-          ),
-          _buildTopicTile(context),
-          ..._buildHintTiles(context),
-          BlocBuilder<SimilarQuestionCubit, SimilarQuestionState>(
-            bloc: similarQuestionCubit,
-            builder: (context, state) {
-              return state.when(
-                onInitial: () => const SizedBox.shrink(),
-                onLoading: () => const SizedBox.shrink(),
-                onLoaded: (similarQuestionList) {
-                  return _buildSimilarQuestionsTiles(
-                    context,
-                    similarQuestionList,
-                  );
-                },
-                onError: (exception) => Text(exception.toString()),
-              );
-            },
-          ),
-        ],
-      ),
-    );
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              ("${question.frontendQuestionId}. ") + (question.title ?? ""),
+              style:
+                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            QuestionDifficultyText(question),
+            HtmlWidget(
+              question.content ?? '',
+              renderMode: RenderMode.column,
+              textStyle: const TextStyle(fontSize: 14),
+            ),
+            const SizedBox(
+              height: 12,
+            ),
+            _buildTopicTile(context),
+            ..._buildHintTiles(context),
+            BlocBuilder<SimilarQuestionCubit, SimilarQuestionState>(
+              bloc: similarQuestionCubit,
+              builder: (context, state) {
+                return state.when(
+                  onInitial: () => const SizedBox.shrink(),
+                  onLoading: () => const SizedBox.shrink(),
+                  onLoaded: (similarQuestionList) {
+                    return _buildSimilarQuestionsTiles(
+                      context,
+                      similarQuestionList,
+                    );
+                  },
+                  onError: (exception) => Text(exception.toString()),
+                );
+              },
+            ),
+          ],
+        ));
   }
 
   QuestionInfoTile _buildTopicTile(BuildContext context) {

@@ -6,14 +6,12 @@ import 'package:codersgym/features/profile/domain/model/user_profile_calendar.da
 import 'package:codersgym/features/profile/presentation/blocs/contest_ranking_info/contest_ranking_info_cubit.dart';
 import 'package:codersgym/features/profile/presentation/blocs/cubit/user_profile_calendar_cubit.dart';
 import 'package:codersgym/features/profile/presentation/widgets/badge_carousel.dart';
-import 'package:codersgym/features/profile/presentation/widgets/leetcode_rating_chart.dart';
 import 'package:codersgym/features/profile/presentation/widgets/leetcode_rating_details.dart';
+import 'package:codersgym/features/profile/presentation/widgets/question_solved.dart';
 import 'package:codersgym/features/profile/presentation/widgets/submission_heat_map_calendart.dart';
 import 'package:codersgym/features/profile/presentation/widgets/user_profile_info.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../../../injection.dart';
 import '../../domain/model/user_profile.dart';
@@ -30,7 +28,7 @@ class LeetcodeProfile extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-
+    final questionStats = userProfile.questionsStats;
     final contestRankingInfoCubit = getIt.get<ContestRankingInfoCubit>();
     final userProfileCalendarCubit = getIt.get<UserProfileCalendarCubit>();
     useEffect(() {
@@ -109,6 +107,14 @@ class LeetcodeProfile extends HookWidget {
             ),
           ),
           const SizedBox(height: 16),
+          DifficultySpeedometer(
+            easyCount: questionStats.easySolved,
+            mediumCount: questionStats.mediumSolved,
+            hardCount: questionStats.hardSolved,
+            totalEasyCount: questionStats.totalEasy,
+            totalMediumCount: questionStats.totalMedium,
+            totalHardCount: questionStats.totalHard,
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
@@ -177,6 +183,7 @@ class LeetcodeProfile extends HookWidget {
               },
             ),
           ),
+     
         ],
       ),
     );

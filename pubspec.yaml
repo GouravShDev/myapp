@@ -63,6 +63,9 @@ dependencies:
   firebase_core: ^3.7.0
   firebase_crashlytics: ^4.1.4
   firebase_analytics: ^11.3.4
+  flutter_floating_bottom_bar: ^1.2.1+1
+  pie_chart: ^5.4.0
+  percent_indicator: ^4.2.3
 
 dev_dependencies:
   flutter_test:
