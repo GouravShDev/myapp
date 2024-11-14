@@ -216,7 +216,7 @@ class BadgeNode {
 extension UserProfileModelConversion on UserProfileEntity {
   UserProfile toUserProfile() {
     final profile = matchedUser?.profile;
-    final submitStats = profile?.submitStats;
+    final submitStats = matchedUser?.submitStats;
 
     return UserProfile(
       username: matchedUser?.username,
@@ -237,10 +237,10 @@ extension UserProfileModelConversion on UserProfileEntity {
       reputation: profile?.reputation,
       ranking: profile?.ranking,
       acSubmissionNum: submitStats?.acSubmissionNum
-          ?.map((acStat) => acStat.toSubmissionStats())
+          ?.map((acStat) => acStat.toQuestionCount())
           .toList(),
       totalSubmissionNum: submitStats?.totalSubmissionNum
-          ?.map((totalStat) => totalStat.toSubmissionStats())
+          ?.map((totalStat) => totalStat.toQuestionCount())
           .toList(),
       allQuestionsCount: allQuestionsCount
           ?.map((questionCount) => questionCount.toQuestionCount())
@@ -295,11 +295,11 @@ extension AllQuestionsCountNodeConversion on AllQuestionsCountNode {
 }
 
 extension AcSubmissionNumNodeConversion on AcSubmissionNumNode {
-  SubmissionStats toSubmissionStats() {
-    return SubmissionStats(
+  QuestionCount toQuestionCount() {
+    return QuestionCount(
       count: count,
       difficulty: difficulty,
-      submissions: submissions,
+      // submissions: submissions,
     );
   }
 }

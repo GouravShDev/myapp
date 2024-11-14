@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:collection/collection.dart';
 
 class UserProfile {
   final String? username;
@@ -18,8 +19,8 @@ class UserProfile {
   final String? userAvatar;
   final int? reputation;
   final int? ranking;
-  final List<SubmissionStats>? acSubmissionNum;
-  final List<SubmissionStats>? totalSubmissionNum;
+  final List<QuestionCount>? acSubmissionNum;
+  final List<QuestionCount>? totalSubmissionNum;
   final List<QuestionCount>? allQuestionsCount;
   final List<LeetCodeBadge>? badges;
   final String? activeBadgeId;
@@ -75,11 +76,11 @@ class UserProfile {
       ranking: json['matchedUser']?['profile']?['ranking'],
       acSubmissionNum:
           (json['matchedUser']?['submitStats']?['acSubmissionNum'] as List?)
-              ?.map((item) => SubmissionStats.fromJson(item))
+              ?.map((item) => QuestionCount.fromJson(item))
               .toList(),
       totalSubmissionNum:
           (json['matchedUser']?['submitStats']?['totalSubmissionNum'] as List?)
-              ?.map((item) => SubmissionStats.fromJson(item))
+              ?.map((item) => QuestionCount.fromJson(item))
               .toList(),
       allQuestionsCount: (json['allQuestionsCount'] as List?)
           ?.map((item) => QuestionCount.fromJson(item))
@@ -91,22 +92,6 @@ class UserProfile {
       streakCounter: json['streakCounter'] != null
           ? StreakCounter.fromJson(json['streakCounter'])
           : null,
-    );
-  }
-}
-
-class SubmissionStats {
-  int? count;
-  String? difficulty;
-  int? submissions;
-
-  SubmissionStats({this.count, this.difficulty, this.submissions});
-
-  factory SubmissionStats.fromJson(Map<String, dynamic> json) {
-    return SubmissionStats(
-      count: json['count'],
-      difficulty: json['difficulty'],
-      submissions: json['submissions'],
     );
   }
 }
@@ -171,4 +156,72 @@ class StreakCounter {
       'currentDayCompleted': currentDayCompleted,
     };
   }
+}
+
+extension UserProfileExt on UserProfile {
+  UserProfileQuestionsStats get questionsStats {
+    final easySolved = acSubmissionNum
+            ?.firstWhereOrNull(
+              (element) => element.difficulty == 'Easy',
+            )
+            ?.count ??
+        0;
+    final mediumSolved = acSubmissionNum
+            ?.firstWhereOrNull(
+              (element) => element.difficulty == 'Medium',
+            )
+            ?.count ??
+        0;
+    final hardSolved = acSubmissionNum
+            ?.firstWhereOrNull(
+              (element) => element.difficulty == 'Hard',
+            )
+            ?.count ??
+        0;
+    final totalEasy = allQuestionsCount
+            ?.firstWhereOrNull(
+              (element) => element.difficulty == 'Easy',
+            )
+            ?.count ??
+        0;
+    final totalMedium = allQuestionsCount
+            ?.firstWhereOrNull(
+              (element) => element.difficulty == 'Medium',
+            )
+            ?.count ??
+        0;
+
+    final totalHard = allQuestionsCount
+            ?.firstWhereOrNull(
+              (element) => element.difficulty == 'Hard',
+            )
+            ?.count ??
+        0;
+    return UserProfileQuestionsStats(
+      easySolved: easySolved,
+      mediumSolved: mediumSolved,
+      hardSolved: hardSolved,
+      totalEasy: totalEasy,
+      totalMedium: totalMedium,
+      totalHard: totalHard,
+    );
+  }
+}
+
+class UserProfileQuestionsStats {
+  final int easySolved;
+  final int mediumSolved;
+  final int hardSolved;
+  final int totalEasy;
+  final int totalMedium;
+  final int totalHard;
+
+  UserProfileQuestionsStats({
+    required this.easySolved,
+    required this.mediumSolved,
+    required this.hardSolved,
+    required this.totalEasy,
+    required this.totalMedium,
+    required this.totalHard,
+  });
 }
