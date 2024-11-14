@@ -36,7 +36,7 @@ class DailyQuestionCard extends StatelessWidget {
               ("${question.frontendQuestionId}. ") +
                   (question.title ?? "No Title"),
               style:
-                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                  textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             Row(

@@ -6,6 +6,7 @@ import 'package:codersgym/features/question/data/entity/contest_entity.dart';
 import 'package:codersgym/features/question/data/entity/daily_question_entity.dart';
 import 'package:codersgym/features/question/data/entity/problem_question_entity.dart';
 import 'package:codersgym/features/question/data/entity/question_entity.dart';
+import 'package:codersgym/features/question/data/entity/similar_question_entity.dart';
 import 'package:codersgym/features/question/data/entity/upcoming_contest_entity.dart';
 import 'package:codersgym/features/question/domain/model/contest.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
@@ -84,6 +85,26 @@ class QuestionRepositoryImpl implements QuestionRepository {
       return Failure(Exception("No Upcoming Contest found"));
     }
     return Success(contestsList!);
+  }
+
+  @override
+  Future<Result<List<Question>, Exception>> getSimilarQuestions(
+    String questionTitleSlug,
+  ) async {
+    final data = await leetcodeApi.getSimilarQuestions(questionTitleSlug);
+    if (data == null) {
+      return Failure(Exception("No data found"));
+    }
+    final similarQuestions = SimilarQuestionEntity.fromJson(data);
+    final similarQuestionsList = similarQuestions.question?.similarQuestionList
+        ?.map(
+          (e) => e.toQuestion(),
+        )
+        .toList();
+    if (similarQuestionsList?.isEmpty ?? true) {
+      return Failure(Exception("No Similar Questions found"));
+    }
+    return Success(similarQuestionsList!);
   }
 }
 

@@ -288,12 +288,12 @@ class LeetCodeRequests {
       query: """
           query userContestRankingInfo(\$username: String!) {
         userContestRanking(username: \$username) {
-          attendedContestsCount
-          rating
-          globalRanking
-          totalParticipants
-          topPercentage
-        }
+            attendedContestsCount
+            rating
+            globalRanking
+            totalParticipants
+            topPercentage
+          }
         userContestRankingHistory(username: \$username) {
           attended
           trendDirection
@@ -354,6 +354,29 @@ class LeetCodeRequests {
                 duration
               }
             }
+    """,
+    );
+  }
+
+  static LeetCodeRequests getSimilarQuestion(String questionTitleSlug) {
+    return LeetCodeRequests(
+      operationName: "SimilarQuestions",
+      variables: Variables(
+        titleSlug: questionTitleSlug,
+      ),
+      query: """
+        query SimilarQuestions(\$titleSlug: String!) {
+            question(titleSlug: \$titleSlug) {
+              similarQuestionList {
+                difficulty
+                titleSlug
+                title
+                translatedTitle
+                isPaidOnly
+              }
+            }
+          }
+        
     """,
     );
   }

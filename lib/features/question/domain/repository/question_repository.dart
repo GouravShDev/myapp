@@ -12,6 +12,8 @@ abstract interface class QuestionRepository {
     ProblemQuestionQueryInput query,
   );
   Future<Result<List<Contest>, Exception>> getUpcomingContests();
+  Future<Result<List<Question>, Exception >> getSimilarQuestions(String questionId);
+
 }
 
 class ProblemQuestionQueryInput {

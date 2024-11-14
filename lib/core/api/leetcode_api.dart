@@ -80,6 +80,10 @@ class LeetcodeApi {
     final request = LeetCodeRequests.getUpcomingContests();
     return _executeGraphQLQuery(request);
   }
+  Future<Map<String, dynamic>?> getSimilarQuestions(String questionId) async {
+    final request = LeetCodeRequests.getSimilarQuestion(questionId);
+    return _executeGraphQLQuery(request);
+  }
 
   Future<Map<String, dynamic>?> _executeGraphQLQuery(
       LeetCodeRequests request) async {

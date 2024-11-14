@@ -5,9 +5,11 @@ import 'package:codersgym/features/question/domain/model/question.dart';
 class QuestionDifficultyText extends HookWidget {
   const QuestionDifficultyText(
     this.question, {
+      this.showLabel = true,
     super.key,
   });
   final Question question;
+  final bool showLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +18,7 @@ class QuestionDifficultyText extends HookWidget {
     final textTheme = theme.textTheme;
     return Row(
       children: [
-        Text(
+    if(showLabel)    Text(
           "Difficulty: \t",
           style: textTheme.bodyMedium?.copyWith(color: theme.hintColor),
         ),

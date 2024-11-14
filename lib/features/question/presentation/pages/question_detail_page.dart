@@ -1,5 +1,7 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:codersgym/core/routes/app_router.gr.dart';
 import 'package:codersgym/core/utils/inherited_provider.dart';
+import 'package:codersgym/features/question/presentation/blocs/similar_question/similar_question_cubit.dart';
 import 'package:codersgym/features/question/presentation/widgets/question_info_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,7 +37,7 @@ class QuestionDetailPage extends HookWidget {
         ),
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(18.0),
+            padding: const EdgeInsets.all(8.0),
             child: SingleChildScrollView(
               controller: scrollController,
               child: BlocBuilder<QuestionContentCubit,
@@ -65,7 +67,7 @@ class QuestionDetailPage extends HookWidget {
   }
 }
 
-class QuestionDetailPageBody extends StatelessWidget {
+class QuestionDetailPageBody extends HookWidget {
   const QuestionDetailPageBody({
     super.key,
     required this.question,
@@ -75,6 +77,24 @@ class QuestionDetailPageBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final similarQuestionCubit = getIt.get<SimilarQuestionCubit>();
+    final currentPage = 0;
+    final List<Color> colors = [
+      Colors.yellow,
+      Colors.red,
+      Colors.green,
+      Colors.blue,
+      Colors.pink
+    ];
+    final tabController = useTabController(initialLength: 2);
+    final Color unselectedColor = colors[currentPage].computeLuminance() < 0.5
+        ? Colors.black
+        : Colors.white;
+
+    useEffect(() {
+      similarQuestionCubit.getSimilarQuestions(question);
+      return null;
+    }, []);
     final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -96,6 +116,22 @@ class QuestionDetailPageBody extends StatelessWidget {
           ),
           _buildTopicTile(context),
           ..._buildHintTiles(context),
+          BlocBuilder<SimilarQuestionCubit, SimilarQuestionState>(
+            bloc: similarQuestionCubit,
+            builder: (context, state) {
+              return state.when(
+                onInitial: () => const SizedBox.shrink(),
+                onLoading: () => const SizedBox.shrink(),
+                onLoaded: (similarQuestionList) {
+                  return _buildSimilarQuestionsTiles(
+                    context,
+                    similarQuestionList,
+                  );
+                },
+                onError: (exception) => Text(exception.toString()),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -148,5 +184,59 @@ class QuestionDetailPageBody extends StatelessWidget {
           },
         ).toList() ??
         [];
+  }
+
+  Widget _buildSimilarQuestionsTiles(
+      BuildContext context, List<Question>? similarQuestions) {
+    if (similarQuestions == null || similarQuestions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return QuestionInfoTile(
+      title: 'Similar Questions',
+      icon: Icons.sticky_note_2_rounded,
+      children: similarQuestions
+          .map(
+            (question) => InkWell(
+              onTap: () {
+                AutoRouter.of(context)
+                    .push(QuestionDetailRoute(question: question));
+              },
+              child: Card(
+                color: Theme.of(context).focusColor.withOpacity(0.1),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8.0,
+                  ).copyWith(
+                    left: 12.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          question.title ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      QuestionDifficultyText(
+                        question,
+                        showLabel: false,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          )
+          .toList(),
+    );
   }
 }

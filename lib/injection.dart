@@ -10,6 +10,7 @@ import 'package:codersgym/features/profile/presentation/blocs/contest_ranking_in
 import 'package:codersgym/features/profile/presentation/blocs/cubit/user_profile_calendar_cubit.dart';
 import 'package:codersgym/features/profile/presentation/blocs/user_profile/user_profile_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_archieve/question_archieve_bloc.dart';
+import 'package:codersgym/features/question/presentation/blocs/similar_question/similar_question_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/upcoming_contests/upcoming_contests_cubit.dart';
 import 'package:get_it/get_it.dart';
 import 'package:codersgym/core/api/leetcode_api.dart';
@@ -104,6 +105,11 @@ Future<void> initializeDependencies() async {
   );
   getIt.registerFactory(
     () => UpcomingContestsCubit(
+      getIt.get(),
+    ),
+  );
+  getIt.registerFactory(
+    () => SimilarQuestionCubit(
       getIt.get(),
     ),
   );

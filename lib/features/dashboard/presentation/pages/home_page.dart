@@ -69,7 +69,7 @@ class HomePageBody extends StatelessWidget {
                   "Ready For Today's Challenge",
                   style: Theme.of(context)
                       .textTheme
-                      .headlineMedium
+                      .headlineSmall
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
