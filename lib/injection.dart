@@ -11,7 +11,7 @@ import 'package:codersgym/features/profile/presentation/blocs/cubit/user_profile
 import 'package:codersgym/features/profile/presentation/blocs/user_profile/user_profile_cubit.dart';
 import 'package:codersgym/features/question/data/parser/leetcode_solution_parser.dart';
 import 'package:codersgym/features/question/presentation/blocs/community_post_detail/community_post_detail_cubit.dart';
-import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_cubit.dart';
+import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/official_solution_available/official_solution_available_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_archieve/question_archieve_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_hints/question_hints_cubit.dart';
@@ -145,7 +145,7 @@ Future<void> initializeDependencies() async {
     ),
   );
   getIt.registerFactory(
-    () => CommunitySolutionsCubit(
+    () => CommunitySolutionsBloc(
       getIt.get(),
     ),
   );

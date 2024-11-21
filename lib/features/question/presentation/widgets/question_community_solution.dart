@@ -5,7 +5,7 @@ import 'package:codersgym/features/common/widgets/app_pagination_list.dart';
 import 'package:codersgym/features/question/domain/model/community_solution_post_detail.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/presentation/blocs/community_post_detail/community_post_detail_cubit.dart';
-import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_cubit.dart';
+import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_bloc.dart';
 import 'package:codersgym/features/question/presentation/widgets/solution_post_tile.dart';
 import 'package:codersgym/injection.dart';
 import 'package:flutter/foundation.dart';
@@ -21,44 +21,46 @@ class QuestionCommunitySolution extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final communitySolutionCubit = context.read<CommunitySolutionsCubit>();
+    final communitySolutionCubit = context.read<CommunitySolutionsBloc>();
 
     useEffect(
       () {
-        communitySolutionCubit.getCommunitySolutions(question);
+        communitySolutionCubit.add(FetchCommunitySolutionListEvent(
+          questionTitleSlug: question.titleSlug ?? '',
+        ));
         return null;
       },
       [],
     );
-    return BlocBuilder<CommunitySolutionsCubit, CommunitySolutionsState>(
+    return BlocBuilder<CommunitySolutionsBloc, CommunitySolutionsState>(
       builder: (context, state) {
-        return state.when(
-          onInitial: () => SizedBox.shrink(),
-          onLoading: () => CircularProgressIndicator(),
-          onLoaded: (solutions) {
-            return AppPaginationList(
-              scrollController:
-                  InheritedDataProvider.of<ScrollController>(context),
-              itemBuilder: (context, index) {
-                return SolutionPostTile(
-                  postDetail: solutions[index],
-                  onCardTap: () {
-                    AutoRouter.of(context).push(
-                      CommunityPostRoute(
-                        postDetail: solutions[index],
-                      ),
-                    );
-                  },
+        final solutions = state.solutions;
+        if (state.isLoading && solutions.isEmpty) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        return AppPaginationList(
+          scrollController: InheritedDataProvider.of<ScrollController>(context),
+          itemBuilder: (context, index) {
+            return SolutionPostTile(
+              postDetail: solutions[index],
+              onCardTap: () {
+                AutoRouter.of(context).push(
+                  CommunityPostRoute(
+                    postDetail: solutions[index],
+                  ),
                 );
-              },
-              itemCount: solutions.length,
-              moreAvailable: false,
-              loadMoreData: () {
-                communitySolutionCubit.getCommunitySolutions(question);
               },
             );
           },
-          onError: (exception) => Text(exception.toString()),
+          itemCount: solutions.length,
+          moreAvailable: state.moreSolutionsAvailable,
+          loadMoreData: () {
+            communitySolutionCubit.add(FetchCommunitySolutionListEvent(
+              questionTitleSlug: question.titleSlug ?? '',
+            ));
+          },
         );
       },
     );

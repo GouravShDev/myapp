@@ -19,7 +19,7 @@ class SolutionPostTile extends StatelessWidget {
     if (post == null || author == null) return const SizedBox.shrink();
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       elevation: 1,
       child: InkWell(
         onTap: onCardTap,

@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/routes/app_router.gr.dart';
 import 'package:codersgym/core/utils/inherited_provider.dart';
-import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_cubit.dart';
+import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/official_solution_available/official_solution_available_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_hints/question_hints_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_solution/question_solution_cubit.dart';
@@ -120,7 +120,7 @@ class QuestionDetailPage extends HookWidget implements AutoRouteWrapper {
           create: (context) => getIt.get<OfficialSolutionAvailableCubit>(),
         ),
         BlocProvider(
-          create: (context) => getIt.get<CommunitySolutionsCubit>(),
+          create: (context) => getIt.get<CommunitySolutionsBloc>(),
         ),
       ],
       child: this,

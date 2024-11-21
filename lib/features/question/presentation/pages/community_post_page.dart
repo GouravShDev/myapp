@@ -10,6 +10,7 @@ import 'package:markdown/markdown.dart' as md;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
 class CommunityPostPage extends HookWidget implements AutoRouteWrapper {
@@ -41,6 +42,13 @@ class CommunityPostPage extends HookWidget implements AutoRouteWrapper {
                 onLoaded: (updatedPostDetail) {
                   return Markdown(
                     data: updatedPostDetail.post?.content ?? '',
+                    onTapLink: (text, href, title) async {
+                      if (href == null) return;
+                      final uri = Uri.parse(href);
+                      if (!await launchUrl(uri)) {
+                        throw Exception('Could not launch $uri');
+                      }
+                    },
                     extensionSet: md.ExtensionSet(
                       md.ExtensionSet.gitHubFlavored.blockSyntaxes,
                       <md.InlineSyntax>[
