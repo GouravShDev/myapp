@@ -3,19 +3,20 @@ import 'package:codersgym/core/api/api_state.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/domain/repository/question_repository.dart';
 
-typedef QuestionContentState = ApiState<Question, Exception>;
+typedef QuestionTagsState = ApiState<List<TopicTags>, Exception>;
 
-class QuestionContentCubit extends Cubit<ApiState<Question, Exception>> {
-  QuestionContentCubit(this._questionRepository) : super(ApiState.initial());
+class QuestionTagsCubit extends Cubit<QuestionTagsState> {
   final QuestionRepository _questionRepository;
-  Future<void> getQuestionContent(Question question) async {
+  QuestionTagsCubit(this._questionRepository) : super(ApiState.initial());
+
+  Future<void> getQuestionTags(Question question) async {
     if (question.titleSlug == null) {
       emit(ApiError(Exception('Question Title is null')));
       return;
     }
     emit(ApiLoading());
     final result =
-        await _questionRepository.getQuestionContent(question.titleSlug!);
+        await _questionRepository.getQuestionTags(question.titleSlug!);
     result.when(
       onSuccess: (content) {
         emit(ApiLoaded(content));

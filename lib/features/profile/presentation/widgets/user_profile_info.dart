@@ -15,7 +15,10 @@ class UserProfileInfo extends StatelessWidget {
 
     return Column(
       children: [
-        Text(title),
+        Text(
+          title,
+          style: textTheme.labelSmall,
+        ),
         Text(
           data,
           style: textTheme.titleMedium,

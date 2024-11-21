@@ -9,7 +9,14 @@ import 'package:codersgym/features/profile/data/repository/profile_repository.da
 import 'package:codersgym/features/profile/presentation/blocs/contest_ranking_info/contest_ranking_info_cubit.dart';
 import 'package:codersgym/features/profile/presentation/blocs/cubit/user_profile_calendar_cubit.dart';
 import 'package:codersgym/features/profile/presentation/blocs/user_profile/user_profile_cubit.dart';
+import 'package:codersgym/features/question/data/parser/leetcode_solution_parser.dart';
+import 'package:codersgym/features/question/presentation/blocs/community_post_detail/community_post_detail_cubit.dart';
+import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_cubit.dart';
+import 'package:codersgym/features/question/presentation/blocs/official_solution_available/official_solution_available_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_archieve/question_archieve_bloc.dart';
+import 'package:codersgym/features/question/presentation/blocs/question_hints/question_hints_cubit.dart';
+import 'package:codersgym/features/question/presentation/blocs/question_solution/question_solution_cubit.dart';
+import 'package:codersgym/features/question/presentation/blocs/question_tags/question_tags_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/similar_question/similar_question_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/upcoming_contests/upcoming_contests_cubit.dart';
 import 'package:get_it/get_it.dart';
@@ -30,6 +37,9 @@ Future<void> initializeDependencies() async {
   final sharedPref = await SharedPreferences.getInstance();
   getIt.registerLazySingleton<StorageManager>(
     () => LocalStorageManager.getInstance(sharedPref),
+  );
+  getIt.registerLazySingleton(
+    () => HTMLMarkdownParser(),
   );
 
   // ROUTER
@@ -110,6 +120,37 @@ Future<void> initializeDependencies() async {
   );
   getIt.registerFactory(
     () => SimilarQuestionCubit(
+      getIt.get(),
+    ),
+  );
+  getIt.registerFactory(
+    () => QuestionSolutionCubit(
+      getIt.get(),
+      getIt.get(),
+    ),
+  );
+  getIt.registerFactory(
+    () => QuestionTagsCubit(
+      getIt.get(),
+    ),
+  );
+  getIt.registerFactory(
+    () => QuestionHintsCubit(
+      getIt.get(),
+    ),
+  );
+  getIt.registerFactory(
+    () => OfficialSolutionAvailableCubit(
+      getIt.get(),
+    ),
+  );
+  getIt.registerFactory(
+    () => CommunitySolutionsCubit(
+      getIt.get(),
+    ),
+  );
+  getIt.registerFactory(
+    () => CommunityPostDetailCubit(
       getIt.get(),
     ),
   );

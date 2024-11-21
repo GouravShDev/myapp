@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
-class DifficultySpeedometer extends StatelessWidget {
+class QuestionDifficultySubmissionChart extends StatelessWidget {
   final int easyCount;
   final int mediumCount;
   final int hardCount;
@@ -9,15 +9,15 @@ class DifficultySpeedometer extends StatelessWidget {
   final int totalMediumCount;
   final int totalHardCount;
 
-  const DifficultySpeedometer({
-    Key? key,
+  const QuestionDifficultySubmissionChart({
+    super.key,
     required this.easyCount,
     required this.mediumCount,
     required this.hardCount,
     required this.totalEasyCount,
     required this.totalMediumCount,
     required this.totalHardCount,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class DifficultySpeedometer extends StatelessWidget {
     final totalQuestions = totalEasyCount + totalMediumCount + totalHardCount;
     const lineWidth = 12.0;
     const animationDuration = 1500;
-    const easyPercentageIndicatorRadius = 60.0;
+    const easyPercentageIndicatorRadius = 70.0;
     const mediumPercentageIndicatorRadius =
         easyPercentageIndicatorRadius + lineWidth + 2;
     const hardPercentageIndicatorRadius =
@@ -37,25 +37,22 @@ class DifficultySpeedometer extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Text(
-                "Questions Solved: ",
-                style: textTheme.titleMedium?.copyWith(color: theme.hintColor),
-              ),
-              const SizedBox(
-                width: 4,
-              ),
-              Text(
-                "$totalSolvedQuestions/ $totalQuestions",
-                style: textTheme.titleMedium,
-              ),
-            ],
-          ),
+        Row(
+          children: [
+            Text(
+              "Questions Solved: ",
+              style: textTheme.titleMedium?.copyWith(color: theme.hintColor),
+            ),
+            const SizedBox(
+              width: 4,
+            ),
+            Text(
+              "$totalSolvedQuestions/ $totalQuestions",
+              style: textTheme.titleMedium,
+            ),
+          ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Row(
@@ -67,6 +64,7 @@ class DifficultySpeedometer extends StatelessWidget {
                   // Hard Progress (outermost layer)
                   CircularPercentIndicator(
                     radius: hardPercentageIndicatorRadius,
+                    animateFromLastPercent: true,
                     lineWidth: lineWidth,
                     percent:
                         totalHardCount == 0 ? 0 : hardCount / totalHardCount,
@@ -111,8 +109,9 @@ class DifficultySpeedometer extends StatelessWidget {
                     children: [
                       Text(
                         "$totalSolvedQuestions",
-                        style: const TextStyle(
-                            fontSize: 32, fontWeight: FontWeight.bold),
+                        style: textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const Text(
                         "Total",
@@ -148,7 +147,6 @@ class DifficultySpeedometer extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 20),
       ],
     );
   }

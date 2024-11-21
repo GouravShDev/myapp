@@ -7,12 +7,14 @@ class AppPaginationList extends StatelessWidget {
     required this.itemCount,
     required this.moreAvailable,
     required this.loadMoreData,
+    this.scrollController,
     this.loadingWidget,
     super.key,
   });
   final VoidCallback loadMoreData;
   final bool moreAvailable;
   final int itemCount;
+  final ScrollController? scrollController;
   final Widget Function(BuildContext context, int index) itemBuilder;
   final Widget? loadingWidget;
 
@@ -29,6 +31,7 @@ class AppPaginationList extends StatelessWidget {
         return false;
       },
       child: ListView.builder(
+        controller: scrollController,
         itemCount: itemCount + 1, // Add 1 for loading indicator
         itemBuilder: (context, index) {
           if (index < itemCount) {

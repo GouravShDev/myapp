@@ -330,3 +330,21 @@ extension StreakCounterNodeConversion on StreakCounterNode {
     );
   }
 }
+
+extension ProfileNodeExt on ProfileNode {
+  UserProfile toProfile() {
+    return UserProfile(
+      realName: realName,
+      websites: websites,
+      countryName: countryName,
+      skillTags: skillTags,
+      company: company,
+      school: school,
+      starRating: starRating,
+      aboutMe: aboutMe,
+      userAvatar: userAvatar,
+      reputation: reputation,
+      ranking: ranking,
+    );
+  }
+}
