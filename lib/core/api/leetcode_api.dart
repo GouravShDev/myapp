@@ -80,8 +80,45 @@ class LeetcodeApi {
     final request = LeetCodeRequests.getUpcomingContests();
     return _executeGraphQLQuery(request);
   }
+
   Future<Map<String, dynamic>?> getSimilarQuestions(String questionId) async {
     final request = LeetCodeRequests.getSimilarQuestion(questionId);
+    return _executeGraphQLQuery(request);
+  }
+
+  Future<Map<String, dynamic>?> hasOfficialSolution(String questionId) async {
+    final request = LeetCodeRequests.hasOfficialSolution(questionId);
+    return _executeGraphQLQuery(request);
+  }
+
+  Future<Map<String, dynamic>?> getOfficialSolution(String questionId) async {
+    final request = LeetCodeRequests.getOfficialSolution(questionId);
+    return _executeGraphQLQuery(request);
+  }
+
+  Future<Map<String, dynamic>?> getQuestionTags(String questionId) async {
+    final request = LeetCodeRequests.getQuestionTags(questionId);
+    return _executeGraphQLQuery(request);
+  }
+
+  Future<Map<String, dynamic>?> getQuestionHints(String questionId) async {
+    final request = LeetCodeRequests.getQuestionHints(questionId);
+    return _executeGraphQLQuery(request);
+  }
+
+  Future<Map<String, dynamic>?> getCommunitySolutions(String questionId) async {
+    final request = LeetCodeRequests.getCommunitySolutions(
+      first: 15,
+      orderBy: 'hot',
+      query: '',
+      questionTitleSlug: questionId,
+      skip: 0,
+    );
+    return _executeGraphQLQuery(request);
+  }
+
+  Future<Map<String, dynamic>?> getCommunitySolutionDetail(int topicId) async {
+    final request = LeetCodeRequests.getCommunitySolutionDetails(topicId);
     return _executeGraphQLQuery(request);
   }
 

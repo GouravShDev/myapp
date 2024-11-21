@@ -37,6 +37,13 @@ class LeetcodeRatingDetails extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          "Contest Ratings",
+          style: textTheme.titleMedium?.copyWith(color: theme.hintColor),
+        ),
+        SizedBox(
+          height: 8,
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [

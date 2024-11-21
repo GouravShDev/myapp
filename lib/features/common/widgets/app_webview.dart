@@ -17,6 +17,7 @@ class AppWebview extends HookWidget {
     this.loadingTitle,
     this.loadingDescription,
     this.onUrlRedirection,
+    this.showAppBar = true,
   })  : assert(
           url == null || htmlText == null || assetFilePath == null,
           'Cannot use url and html text both',
@@ -35,6 +36,7 @@ class AppWebview extends HookWidget {
   final String? loadingTitle;
   final String? loadingDescription;
   final VoidCallback? onUrlRedirection;
+  final bool showAppBar;
 
   @override
   Widget build(BuildContext context) {
@@ -43,35 +45,37 @@ class AppWebview extends HookWidget {
     final canGoForward = useState<bool>(false);
 
     return Scaffold(
-      appBar: AppBar(
-        title: appBarTitle,
-        centerTitle: false,
-        automaticallyImplyLeading: showBackButton ?? true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: canGoBack.value
-                ? () {
-                    webViewController.value?.goBack();
-                  }
-                : null,
-          ),
-          IconButton(
-            icon: const Icon(Icons.arrow_forward),
-            onPressed: canGoForward.value
-                ? () {
-                    webViewController.value?.goForward();
-                  }
-                : null,
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              webViewController.value?.reload();
-            },
-          ),
-        ],
-      ),
+      appBar: showAppBar
+          ? AppBar(
+              title: appBarTitle,
+              centerTitle: false,
+              automaticallyImplyLeading: showBackButton ?? true,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: canGoBack.value
+                      ? () {
+                          webViewController.value?.goBack();
+                        }
+                      : null,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward),
+                  onPressed: canGoForward.value
+                      ? () {
+                          webViewController.value?.goForward();
+                        }
+                      : null,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: () {
+                    webViewController.value?.reload();
+                  },
+                ),
+              ],
+            )
+          : null,
       floatingActionButton: floatingActionButton,
       body: Stack(
         children: [

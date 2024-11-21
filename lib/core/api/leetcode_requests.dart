@@ -358,6 +358,25 @@ class LeetCodeRequests {
     );
   }
 
+  static LeetCodeRequests getQuestionTags(String questionTitleSlug) {
+    return LeetCodeRequests(
+      operationName: "singleQuestionTopicTags",
+      variables: Variables(
+        titleSlug: questionTitleSlug,
+      ),
+      query: """
+          query singleQuestionTopicTags(\$titleSlug: String!) {
+              question(titleSlug: \$titleSlug) {
+                topicTags {
+                  name
+                  slug
+                }
+              }
+            }
+    """,
+    );
+  }
+
   static LeetCodeRequests getSimilarQuestion(String questionTitleSlug) {
     return LeetCodeRequests(
       operationName: "SimilarQuestions",
@@ -380,12 +399,245 @@ class LeetCodeRequests {
     """,
     );
   }
+
+  static LeetCodeRequests hasOfficialSolution(String questionTitleSlug) {
+    return LeetCodeRequests(
+      operationName: "hasOfficialSolution",
+      variables: Variables(
+        titleSlug: questionTitleSlug,
+      ),
+      query: """
+      query hasOfficialSolution(\$titleSlug: String!) {
+          question(titleSlug: \$titleSlug) {
+            solution {
+              id
+            }
+          }
+      }
+    """,
+    );
+  }
+
+  static LeetCodeRequests getOfficialSolution(
+    String questionTitleSlug,
+  ) {
+    return LeetCodeRequests(
+      operationName: "officialSolution",
+      variables: Variables(
+        titleSlug: questionTitleSlug,
+      ),
+      query: """
+        query officialSolution(\$titleSlug: String!) {
+            question(titleSlug: \$titleSlug) {
+              solution {
+                id
+                title
+                content
+                contentTypeId
+                paidOnly
+                hasVideoSolution
+                paidOnlyVideo
+                canSeeDetail
+                rating {
+                  count
+                  average
+                  userRating {
+                    score
+                  }
+                }
+                topic {
+                  id
+                  commentCount
+                  topLevelCommentCount
+                  viewCount
+                  subscribed
+                  solutionTags {
+                    name
+                    slug
+                  }
+                  post {
+                    id
+                    status
+                    creationDate
+                    author {
+                      username
+                      isActive
+                      profile {
+                        userAvatar
+                        reputation
+                      }
+                    }
+                  }
+                }
+              }
+            }
+        }
+    
+    """,
+    );
+  }
+
+  static LeetCodeRequests getQuestionHints(
+    String questionTitleSlug,
+  ) {
+    return LeetCodeRequests(
+      operationName: "questionHints",
+      variables: Variables(
+        titleSlug: questionTitleSlug,
+      ),
+      query: """
+      query questionHints(\$titleSlug: String!) {
+          question(titleSlug: \$titleSlug) {
+            hints
+          }
+        }
+    """,
+    );
+  }
+
+  static LeetCodeRequests getCommunitySolutions(
+  { required int first,
+   required String questionTitleSlug,
+   required int skip,
+   required String query,
+   required String orderBy,}
+  ) {
+    return LeetCodeRequests(
+      operationName: "communitySolutions",
+      variables: Variables(
+        orderBy: orderBy,
+        skip: skip,
+        first: first,
+        query: query,
+        questionSlug: questionTitleSlug,
+        languageTags: [],
+        topicTags: [],
+      ),
+      query: """
+              query communitySolutions(\$questionSlug: String!, \$skip: Int!, \$first: Int!, \$query: String, \$orderBy: TopicSortingOption, \$languageTags: [String!], \$topicTags: [String!]) {
+            questionSolutions(
+              filters: {questionSlug: \$questionSlug, skip: \$skip, first: \$first, query: \$query, orderBy: \$orderBy, languageTags: \$languageTags, topicTags: \$topicTags}
+            ) {
+              hasDirectResults
+              totalNum
+              solutions {
+                id
+                title
+                commentCount
+                topLevelCommentCount
+                viewCount
+                pinned
+                isFavorite
+                solutionTags {
+                  name
+                  slug
+                }
+                post {
+                  id
+                  status
+                  voteStatus
+                  voteCount
+                  creationDate
+                  isHidden
+                  author {
+                    username
+                    isActive
+                    nameColor
+                    activeBadge {
+                      displayName
+                      icon
+                    }
+                    profile {
+                      userAvatar
+                      reputation
+                      realName
+                    }
+                  }
+                }
+                searchMeta {
+                  content
+                  contentType
+                  commentAuthor {
+                    username
+                  }
+                  replyAuthor {
+                    username
+                  }
+                  highlights
+                }
+              }
+            }
+          }
+    
+    """,
+    );
+  }
+
+  static LeetCodeRequests getCommunitySolutionDetails(
+    int topicId,
+  ) {
+    return LeetCodeRequests(
+      operationName: "communitySolution",
+      variables: Variables(
+        topicId: topicId,
+      ),
+      query: """
+          query communitySolution(\$topicId: Int!) {
+                topic(id: \$topicId) {
+                  id
+                  viewCount
+                  topLevelCommentCount
+                  subscribed
+                  title
+                  pinned
+                  solutionTags {
+                    name
+                    slug
+                  }
+                  hideFromTrending
+                  commentCount
+                  isFavorite
+                  post {
+                    id
+                    voteCount
+                    voteStatus
+                    content
+                    updationDate
+                    creationDate
+                    status
+                    isHidden
+                    author {
+                      isDiscussAdmin
+                      isDiscussStaff
+                      username
+                      nameColor
+                      activeBadge {
+                        displayName
+                        icon
+                      }
+                      profile {
+                        userAvatar
+                        reputation
+                        realName
+                      }
+                      isActive
+                    }
+                    authorIsModerator
+                    isOwnPost
+                  }
+                }
+              }
+          
+    """,
+    );
+  }
 }
 
 class Variables {
   final String? username;
   final String? titleSlug;
   final String? categorySlug;
+  final String? questionSlug;
   final String? orderBy;
   final String? query;
   final int? skip;
@@ -396,10 +648,13 @@ class Variables {
   final int? topicId;
   final List<String>? tags;
   final int? limit;
+  final List<String>? languageTags;
+  final List<String>? topicTags;
 
   Variables({
     this.username,
     this.titleSlug,
+    this.questionSlug,
     this.categorySlug,
     this.orderBy,
     this.query,
@@ -411,12 +666,15 @@ class Variables {
     this.topicId,
     this.tags,
     this.limit,
+    this.languageTags,
+    this.topicTags,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'username': username,
       'titleSlug': titleSlug,
+      'questionSlug': questionSlug,
       'categorySlug': categorySlug,
       'orderBy': orderBy,
       'query': query,

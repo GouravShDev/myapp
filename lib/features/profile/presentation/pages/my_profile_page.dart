@@ -23,10 +23,8 @@ class MyProfilePage extends HookWidget {
               onLoading: () => const Center(child: CircularProgressIndicator()),
               onLoaded: (userProfile) {
                 return SafeArea(
-                  child: SingleChildScrollView(
-                    child: LeetcodeProfile(
-                      userProfile: userProfile,
-                    ),
+                  child: LeetcodeProfile(
+                    userProfile: userProfile,
                   ),
                 );
               },
