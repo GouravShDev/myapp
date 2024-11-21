@@ -106,13 +106,17 @@ class LeetcodeApi {
     return _executeGraphQLQuery(request);
   }
 
-  Future<Map<String, dynamic>?> getCommunitySolutions(String questionId) async {
+  Future<Map<String, dynamic>?> getCommunitySolutions({
+    required String questionId,
+    required int skip,
+    required orderBy,
+  }) async {
     final request = LeetCodeRequests.getCommunitySolutions(
       first: 15,
-      orderBy: 'hot',
+      orderBy: orderBy,
       query: '',
       questionTitleSlug: questionId,
-      skip: 0,
+      skip: skip,
     );
     return _executeGraphQLQuery(request);
   }

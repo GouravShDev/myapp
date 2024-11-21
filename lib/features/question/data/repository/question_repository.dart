@@ -191,12 +191,20 @@ class QuestionRepositoryImpl implements QuestionRepository {
   }
 
   @override
-  Future<Result<List<CommunitySolutionPostDetail>, Exception>>
-      getCommunitySolutions(
-    String questiontitleSlug,
-    String orderBy,
+  Future<
+      Result<
+          ({
+            List<CommunitySolutionPostDetail> solutionList,
+            int totalSolutionCount
+          }),
+          Exception>> getCommunitySolutions(
+    CommunitySolutionsInput input,
   ) async {
-    final data = await leetcodeApi.getCommunitySolutions(questiontitleSlug);
+    final data = await leetcodeApi.getCommunitySolutions(
+      questionId: input.questiontitleSlug,
+      orderBy: input.orderBy,
+      skip: input.skip,
+    );
     if (data == null) {
       return Failure(Exception("No data found"));
     }
@@ -210,7 +218,10 @@ class QuestionRepositoryImpl implements QuestionRepository {
     if (communitySolutionsList?.isEmpty ?? true) {
       return Failure(Exception("No Similar Questions found"));
     }
-    return Success(communitySolutionsList ?? []);
+    return Success((
+      solutionList: communitySolutionsList ?? [],
+      totalSolutionCount: communitySolutions.questionSolutions?.totalNum ?? 0
+    ));
   }
 }
 
