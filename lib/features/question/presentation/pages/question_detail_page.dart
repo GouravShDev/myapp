@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/routes/app_router.gr.dart';
 import 'package:codersgym/core/utils/inherited_provider.dart';
 import 'package:codersgym/features/code_editor/domain/model/programming_language.dart';
+import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/official_solution_available/official_solution_available_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_hints/question_hints_cubit.dart';
@@ -79,9 +80,9 @@ class QuestionDetailPage extends HookWidget implements AutoRouteWrapper {
                       initialCode:
                           currentQuestion.codeSnippets?.first?.code ?? '',
                       language: ProgrammingLanguage.cpp,
-                      problemDescription: currentQuestion.content ?? '',
-                      problemTitle: currentQuestion.title ?? '',
+                      question: currentQuestion,
                       testCases: [],
+                      codeEditorBloc: context.read(),
                     ),
                   );
                 },
@@ -152,6 +153,9 @@ class QuestionDetailPage extends HookWidget implements AutoRouteWrapper {
         ),
         BlocProvider(
           create: (context) => getIt.get<CommunitySolutionsBloc>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt.get<CodeEditorBloc>(),
         ),
       ],
       child: this,

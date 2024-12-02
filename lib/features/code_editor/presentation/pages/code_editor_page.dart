@@ -1,28 +1,32 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/features/code_editor/domain/model/programming_language.dart';
+import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/test_case_manager.dart';
+import 'package:codersgym/features/question/domain/model/question.dart';
+import 'package:codersgym/features/question/presentation/widgets/question_description.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_highlight/themes/monokai-sublime.dart';
 import 'package:flutter_code_editor/flutter_code_editor.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 @RoutePage()
-class CodeEditorPage extends HookWidget {
+class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
   final String initialCode;
   final ProgrammingLanguage language;
-  final String problemTitle;
-  final String problemDescription;
+  final Question question;
   final List<TestCase> testCases;
+  final CodeEditorBloc codeEditorBloc;
 
   const CodeEditorPage({
     super.key,
     required this.initialCode,
     required this.language,
-    required this.problemTitle,
-    required this.problemDescription,
+    required this.question,
     required this.testCases,
+    required this.codeEditorBloc,
   });
 
   @override
@@ -43,22 +47,24 @@ class CodeEditorPage extends HookWidget {
     final runCode = useCallback(() {
       isRunning.value = true;
       testResults.value.clear();
-
+      context
+          .read<CodeEditorBloc>()
+          .add(CodeEditorRunCodeEvent(question: question));
       // Simulate code running and test case checking
-      Future.delayed(const Duration(seconds: 2), () {
-        final results = testCases.map((testCase) {
-          // TODO: Implement actual code execution and test case verification
-          final isPass = _checkTestCase(testCase);
-          return TestCaseResult(
-            testCase: testCase,
-            isPassed: isPass,
-            output: isPass ? 'Passed' : 'Failed',
-          );
-        }).toList();
+      // Future.delayed(const Duration(seconds: 2), () {
+      //   final results = testCases.map((testCase) {
+      //     // TODO: Implement actual code execution and test case verification
+      //     final isPass = _checkTestCase(testCase);
+      //     return TestCaseResult(
+      //       testCase: testCase,
+      //       isPassed: isPass,
+      //       output: isPass ? 'Passed' : 'Failed',
+      //     );
+      //   }).toList();
 
-        isRunning.value = false;
-        testResults.value = results;
-      });
+      isRunning.value = false;
+      //   testResults.value = results;
+      // });
     }, [testCases]);
 
     // Check if the device is in mobile view
@@ -80,7 +86,7 @@ class CodeEditorPage extends HookWidget {
                 ),
                 const SizedBox(height: 16),
                 HtmlWidget(
-                  problemDescription,
+                  question.content ?? '',
                   renderMode: RenderMode.column,
                   textStyle: const TextStyle(fontSize: 14),
                 ),
@@ -152,7 +158,7 @@ class CodeEditorPage extends HookWidget {
           ? null
           : AppBar(
               title: Text(
-                problemTitle,
+                question.title ?? '',
               ),
               actions: [
                 // Language Dropdown
@@ -337,7 +343,7 @@ class CodeEditorPage extends HookWidget {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 16),
-                  Text(problemDescription),
+                  Text(question.content ?? ''),
                   const SizedBox(height: 16),
                   const Text(
                     'Test Cases',
@@ -403,6 +409,14 @@ class CodeEditorPage extends HookWidget {
     // In a real implementation, this would involve running the code
     // with the test case input and comparing the output
     return true;
+  }
+
+  @override
+  Widget wrappedRoute(BuildContext context) {
+    return BlocProvider.value(
+      value: codeEditorBloc,
+      child: this,
+    );
   }
 }
 

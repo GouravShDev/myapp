@@ -5,6 +5,9 @@ import 'package:codersgym/core/utils/storage/storage_manager.dart';
 import 'package:codersgym/features/auth/data/service/auth_service.dart';
 import 'package:codersgym/features/auth/domain/service/auth_service.dart';
 import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
+import 'package:codersgym/features/code_editor/data/repository/code_editor_repository.dart';
+import 'package:codersgym/features/code_editor/domain/repository/code_editor_repository.dart';
+import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
 import 'package:codersgym/features/profile/data/repository/profile_repository.dart';
 import 'package:codersgym/features/profile/presentation/blocs/contest_ranking_info/contest_ranking_info_cubit.dart';
 import 'package:codersgym/features/profile/presentation/blocs/cubit/user_profile_calendar_cubit.dart';
@@ -74,6 +77,11 @@ Future<void> initializeDependencies() async {
   getIt.registerSingleton<ProfileRepository>(
     ProfileRepositoryImp(
       getIt.get(),
+    ),
+  );
+  getIt.registerSingleton<CodeEditorRepository>(
+    CodeEditorRepositoryImp(
+      leetcodeApi: getIt.get(),
     ),
   );
 
@@ -151,6 +159,11 @@ Future<void> initializeDependencies() async {
   );
   getIt.registerFactory(
     () => CommunityPostDetailCubit(
+      getIt.get(),
+    ),
+  );
+  getIt.registerFactory(
+    () => CodeEditorBloc(
       getIt.get(),
     ),
   );

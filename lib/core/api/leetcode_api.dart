@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:codersgym/core/network/network_service.dart';
+import 'package:codersgym/core/utils/storage/cookie_encoder.dart';
 import 'package:codersgym/core/utils/storage/storage_manager.dart';
 import 'package:codersgym/features/auth/data/service/auth_service.dart';
 import 'package:codersgym/injection.dart';
@@ -129,15 +130,17 @@ class LeetcodeApi {
   Future<Map<String, dynamic>?> _executeGraphQLQuery(
       LeetCodeRequests request) async {
     try {
-      final sessionToken =
-          await _storageManager.getString(_storageManager.leetcodeSession);
+      final leetcodeCreds =
+          await _storageManager.getObjectMap(_storageManager.leetcodeSession);
+
       final queryOptions = QueryOptions(
         document: gql(request.query),
         variables: request.variables.toJson(),
         context: Context.fromList([
           HttpLinkHeaders(headers: {
-            if (sessionToken != null)
-              'Cookie': 'LEETCODE_SESSION=$sessionToken;',
+            'Cookie': CookieEncoder.encode(
+              leetcodeCreds ?? {},
+            ),
           })
         ]),
       );
@@ -182,6 +185,42 @@ class LeetcodeApi {
         rethrow;
       }
       throw ApiNoNetworkException("There was some network error", e);
+    }
+  }
+
+  Future<Map<String, dynamic>?> runCode({
+    required String questionTitleSlug,
+    required String questionId,
+    required String programmingLanguage,
+    required String code,
+    required String testCases,
+  }) async {
+    try {
+      final res = await _networkService.execute(
+        NetworkRequest(
+          path: '/problems/$questionTitleSlug/interpret_solution',
+          data: NetworkRequestBody.json(
+            {
+              "lang": programmingLanguage,
+              "question_id": questionId,
+              "typed_code":
+                  "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        \n    }\n};",
+              "data_input":
+                  "[2,4,3]\n[5,6,4]\n[0]\n[0]\n[9,9,9,9,9,9,9]\n[9,9,9,9]"
+            },
+          ),
+          type: NetworkRequestType.post,
+        ),
+        (data) => data,
+      );
+      return res.when(
+        ok: (data) => data,
+        error: (error) {
+          throw ApiServerException(error.message ?? '', error.code);
+        },
+      );
+    } catch (e) {
+      rethrow;
     }
   }
 }
