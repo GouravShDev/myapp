@@ -15,7 +15,10 @@ final ThemeData leetcodeTheme = ThemeData(
   appBarTheme: const AppBarTheme(
     color: Color(0xFF2A2A2A), // Darker shade for app bar
     elevation: 0,
-
+    titleTextStyle: TextStyle(
+      color: Color(0xFFD4D4D4),
+      fontSize: 16,
+    ),
     iconTheme: IconThemeData(
       color: Color(0xFFFF9E0F),
     ),
@@ -40,16 +43,31 @@ final ThemeData leetcodeTheme = ThemeData(
 
   textTheme: const TextTheme(
     displayLarge: TextStyle(
-        color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+      color: Colors.white,
+      fontSize: 24,
+      fontWeight: FontWeight.bold,
+    ),
     bodyLarge: TextStyle(
-        color: Color(0xFFD4D4D4), fontSize: 16), // Light gray for readability
-    bodyMedium: TextStyle(color: Color(0xFFD4D4D4), fontSize: 14),
+      color: Color(0xFFD4D4D4),
+      fontSize: 16,
+    ), // Light gray for readability
+    bodyMedium: TextStyle(
+      color: Color(0xFFD4D4D4),
+      fontSize: 14,
+    ),
   ),
-
+  iconButtonTheme: IconButtonThemeData(
+    style: IconButton.styleFrom(
+      backgroundColor: Colors.grey[850],
+      padding: EdgeInsets.all(
+        8,
+      ),
+    ),
+  ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: const Color(0xFFFF9E0F), // LeetCode orange
-      foregroundColor: Colors.white, // Text color
+      foregroundColor: Color(0xFF2A2A2A), // Text color
       textStyle: const TextStyle(fontWeight: FontWeight.bold),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
     ),

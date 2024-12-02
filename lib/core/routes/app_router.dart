@@ -16,5 +16,6 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: LeetcodeWebRoute.page),
         AutoRoute(page: NotificationRoute.page),
         AutoRoute(page: CommunityPostRoute.page),
+        AutoRoute(page: CodeEditorRoute.page),
       ];
 }

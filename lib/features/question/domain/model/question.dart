@@ -11,6 +11,7 @@ class Question {
   final String? content;
   final QuestionStatus? status;
   final List<String>? hints;
+  final List<CodeSnippet>? codeSnippets;
 
   const Question({
     this.title,
@@ -25,6 +26,7 @@ class Question {
     this.content,
     this.status,
     this.hints,
+    this.codeSnippets,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
@@ -97,4 +99,16 @@ extension QuestionStatusExtension on QuestionStatus {
         return "Unattempted";
     }
   }
+}
+
+class CodeSnippet {
+  final String? code;
+  final String? lang;
+  final String? langSlug;
+
+  CodeSnippet({
+    this.code,
+    this.lang,
+    this.langSlug,
+  });
 }

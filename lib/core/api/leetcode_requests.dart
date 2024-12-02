@@ -205,6 +205,11 @@ class LeetCodeRequests {
             hasVideoSolution
             paidOnlyVideo
           }
+          codeSnippets {
+            code
+            lang
+            langSlug
+          }
         }
       }
     ''',
@@ -495,13 +500,13 @@ class LeetCodeRequests {
     );
   }
 
-  static LeetCodeRequests getCommunitySolutions(
-  { required int first,
-   required String questionTitleSlug,
-   required int skip,
-   required String query,
-   required String orderBy,}
-  ) {
+  static LeetCodeRequests getCommunitySolutions({
+    required int first,
+    required String questionTitleSlug,
+    required int skip,
+    required String query,
+    required String orderBy,
+  }) {
     return LeetCodeRequests(
       operationName: "communitySolutions",
       variables: Variables(
