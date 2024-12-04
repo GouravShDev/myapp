@@ -81,7 +81,6 @@ class QuestionDetailPage extends HookWidget implements AutoRouteWrapper {
                           currentQuestion.codeSnippets?.first?.code ?? '',
                       language: ProgrammingLanguage.cpp,
                       question: currentQuestion,
-                      testCases: [],
                       codeEditorBloc: context.read(),
                     ),
                   );

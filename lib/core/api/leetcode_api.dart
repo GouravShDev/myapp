@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:developer';
 
 import 'package:codersgym/core/network/network_service.dart';
 import 'package:codersgym/core/utils/storage/cookie_encoder.dart';
@@ -196,20 +198,65 @@ class LeetcodeApi {
     required String testCases,
   }) async {
     try {
+      final leetcodeCreds =
+          await _storageManager.getObjectMap(_storageManager.leetcodeSession);
+
       final res = await _networkService.execute(
         NetworkRequest(
-          path: '/problems/$questionTitleSlug/interpret_solution',
+          path: '/problems/$questionTitleSlug/interpret_solution/',
           data: NetworkRequestBody.json(
             {
               "lang": programmingLanguage,
               "question_id": questionId,
               "typed_code":
-                  "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        \n    }\n};",
+                  code,
               "data_input":
-                  "[2,4,3]\n[5,6,4]\n[0]\n[0]\n[9,9,9,9,9,9,9]\n[9,9,9,9]"
+               testCases,
             },
           ),
           type: NetworkRequestType.post,
+          headers: {
+            'Cookie': CookieEncoder.encode(
+              leetcodeCreds ?? {},
+            ),
+            'origin': "https://leetcode.com",
+            'referer': "https://leetcode.com/problems/$questionTitleSlug/",
+            'x-csrftoken': leetcodeCreds?['csrftoken'],
+          },
+        ),
+        (data) => data,
+      );
+      return res.when(
+        ok: (data) => data,
+        error: (error) {
+          throw ApiServerException(error.message ?? '', error.code);
+        },
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> checkSubmission({
+    required String submissionId,
+  }) async {
+    try {
+      final leetcodeCreds =
+          await _storageManager.getObjectMap(_storageManager.leetcodeSession);
+
+      final res = await _networkService.execute(
+        NetworkRequest(
+          path: '/submissions/detail/$submissionId/check/',
+          data: NetworkRequestBody.empty(),
+          type: NetworkRequestType.get,
+          headers: {
+            'Cookie': CookieEncoder.encode(
+              leetcodeCreds ?? {},
+            ),
+          'origin': "https://leetcode.com",
+            'referer': "https://leetcode.com",
+            'x-csrftoken': leetcodeCreds?['csrftoken'],
+          },
         ),
         (data) => data,
       );

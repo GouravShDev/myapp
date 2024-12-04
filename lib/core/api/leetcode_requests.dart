@@ -210,6 +210,7 @@ class LeetCodeRequests {
             lang
             langSlug
           }
+          exampleTestcaseList
         }
       }
     ''',

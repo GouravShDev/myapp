@@ -1,73 +1,15 @@
 import 'package:codersgym/features/code_editor/presentation/pages/code_editor_page.dart';
+import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-// Test Case Result Enum
-enum TestCaseResultStatus { pending, passed, failed, error }
+class TestCaseManager extends StatelessWidget {
+  final List<TestCase> testcases;
 
-// Test Case class
-class TestCase {
-  TextEditingController inputController = TextEditingController();
-  TextEditingController expectedOutputController = TextEditingController();
-  TestCaseResult? result;
-}
-
-// Test Case Result Model
-class TestCaseResult {
-  final dynamic output;
-  final TestCaseResultStatus status;
-
-  TestCaseResult({this.output, required this.status});
-}
-
-class TestCaseManager extends StatefulWidget {
-  final String code;
-  final String language;
-
-  const TestCaseManager({Key? key, required this.code, required this.language})
-      : super(key: key);
-
-  @override
-  _TestCaseManagerState createState() => _TestCaseManagerState();
-}
-
-class _TestCaseManagerState extends State<TestCaseManager> {
-  // State Variables
-  List<TestCase> _testCases = [];
-  bool _isRunning = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Add initial test case
-    _addTestCase();
-  }
-
-  void _addTestCase() {
-    setState(() {
-      _testCases.add(TestCase());
-    });
-  }
-
-  void _removeTestCase(int index) {
-    setState(() {
-      _testCases.removeAt(index);
-      // Ensure at least one test case exists
-      if (_testCases.isEmpty) {
-        _addTestCase();
-      }
-    });
-  }
-
-  Future<void> _runTestCases() async {}
-
-  // Placeholder for code execution
-  Future<dynamic> _executeCode(String code, String input) async {
-    // Implement your code execution logic here
-    // This could be a call to a backend service,
-    // or a local code execution environment
-    await Future.delayed(const Duration(seconds: 1));
-    return input; // Dummy implementation
-  }
+  const TestCaseManager({
+    super.key,
+    required this.testcases,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +26,6 @@ class _TestCaseManagerState extends State<TestCaseManager> {
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
             ),
-            boxShadow: [],
           ),
           child: ListView(
             controller: scrollController,
@@ -110,7 +51,7 @@ class _TestCaseManagerState extends State<TestCaseManager> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      'Test Cases',
+                      'Testcases',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -121,11 +62,11 @@ class _TestCaseManagerState extends State<TestCaseManager> {
                         // Add Test Case Button
                         IconButton(
                           icon: const Icon(Icons.add),
-                          onPressed: _addTestCase,
+                          onPressed: () {},
                         ),
                         // Run Test Cases Button
                         OutlinedButton.icon(
-                          onPressed: _runTestCases,
+                          onPressed: () {},
                           icon: const Icon(Icons.play_arrow),
                           label: const Text('Run Code'),
                         ),
@@ -135,13 +76,17 @@ class _TestCaseManagerState extends State<TestCaseManager> {
                 ),
               ),
 
-              // // Test Cases List
+              TestCaseManagerWidget(
+                testcases: testcases,
+              ),
+
+              // Test Cases List
               // ListView.builder(
               //   shrinkWrap: true,
               //   physics: const NeverScrollableScrollPhysics(),
-              //   itemCount: _testCases.length,
+              //   itemCount: testcases.length,
               //   itemBuilder: (context, index) {
-              //     final testCase = _testCases[index];
+              //     final testCase = testcases[index];
               //     return Padding(
               //       padding: const EdgeInsets.all(8.0),
               //       child: Card(
@@ -152,15 +97,14 @@ class _TestCaseManagerState extends State<TestCaseManager> {
               //             children: [
               //               // Input TextField
               //               TextField(
-              //                 controller: testCase.inputController,
               //                 decoration: InputDecoration(
               //                   labelText: 'Input',
               //                   border: const OutlineInputBorder(),
-              //                   suffixIcon: _testCases.length > 1
+              //                   suffixIcon: testcases.length > 1
               //                       ? IconButton(
               //                           icon: const Icon(Icons.delete,
               //                               color: Colors.red),
-              //                           onPressed: () => _removeTestCase(index),
+              //                           onPressed: () {},
               //                         )
               //                       : null,
               //                 ),
@@ -169,21 +113,13 @@ class _TestCaseManagerState extends State<TestCaseManager> {
               //               const SizedBox(height: 12),
 
               //               // Expected Output TextField
-              //               TextField(
-              //                 controller: testCase.expectedOutputController,
-              //                 decoration: const InputDecoration(
+              //               const TextField(
+              //                 decoration: InputDecoration(
               //                   labelText: 'Expected Output',
               //                   border: OutlineInputBorder(),
               //                 ),
               //                 maxLines: 2,
               //               ),
-
-              //               // Test Result Display
-              //               if (testCase.result != null)
-              //                 Padding(
-              //                   padding: const EdgeInsets.only(top: 12.0),
-              //                   child: _buildTestResultWidget(testCase.result!),
-              //                 ),
               //             ],
               //           ),
               //         ),
@@ -197,111 +133,99 @@ class _TestCaseManagerState extends State<TestCaseManager> {
       },
     );
   }
-
-  Widget _buildTestResultWidget(TestCaseResult result) {
-    Color color;
-    IconData icon;
-    String text;
-
-    switch (result.status) {
-      case TestCaseResultStatus.passed:
-        color = Colors.green;
-        icon = Icons.check_circle;
-        text = 'Passed';
-        break;
-      case TestCaseResultStatus.failed:
-        color = Colors.red;
-        icon = Icons.cancel;
-        text = 'Failed';
-        break;
-      case TestCaseResultStatus.error:
-        color = Colors.orange;
-        icon = Icons.error;
-        text = 'Error';
-        break;
-      default:
-        color = Colors.grey;
-        icon = Icons.help;
-        text = 'Pending';
-    }
-
-    return Row(
-      children: [
-        Icon(icon, color: color),
-        const SizedBox(width: 8),
-        Text(
-          text,
-          style: TextStyle(color: color, fontWeight: FontWeight.bold),
-        ),
-        if (result.output != null) ...[
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Output: ${result.output}',
-              style: const TextStyle(color: Colors.grey),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  @override
-  void dispose() {
-    // Clean up controllers
-    for (var testCase in _testCases) {
-      testCase.inputController.dispose();
-      testCase.expectedOutputController.dispose();
-    }
-    super.dispose();
-  }
 }
 
-// Example Usage in a Full Screen
-class CodeEditorScreen extends StatelessWidget {
-  final String initialCode;
-  final String language;
-
-  const CodeEditorScreen(
-      {Key? key, required this.initialCode, required this.language})
-      : super(key: key);
+class TestCaseManagerWidget extends HookWidget {
+  const TestCaseManagerWidget({
+    super.key,
+    required this.testcases,
+  });
+  final List<TestCase> testcases;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Code Editor'),
-      ),
-      body: Stack(
-        children: [
-          // Code Editor Placeholder
-          Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                decoration: const InputDecoration(
-                  hintText: 'Enter your code here',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: null,
-                expands: true,
+    final currentTestcases = useState(testcases);
+    final selectedTestcase = useState(testcases.first);
+    return Column(
+      children: [
+        Row(
+          children: [
+            ...List.generate(
+              currentTestcases.value.length,
+              (index) {
+                // Wrap the Card with Dismissible
+                return Dismissible(
+                  key: Key(
+                      currentTestcases.value[index].toString()), // Unique key
+                  direction: DismissDirection.horizontal,
+                  confirmDismiss: (direction) async {
+                    if (currentTestcases.value.length == 1) {
+                      // Show a snackbar or dialog indicating the last testcase can't be deleted
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Cannot delete the last testcase')),
+                      );
+                      return false; // Prevent dismissal
+                    }
+                    return true; // Allow dismissal
+                  },
+                  onDismissed: (direction) {
+                    currentTestcases.value.removeAt(index);
+                  },
+                  background: Container(
+                    color: Colors.red,
+                    child: const Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 20.0),
+                        child: Icon(Icons.delete, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  child: InkWell(
+                    // Wrap with InkWell for tap functionality
+                    onTap: () {
+                      // Update the selected testcase
+                      selectedTestcase.value = currentTestcases.value[index];
+                    },
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Case ${index + 1}"),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            // Limit adding to a maximum of 5 testcases
+            if (currentTestcases.value.length < 5)
+              IconButton(
+                onPressed: () {
+                  currentTestcases.value.add(selectedTestcase.value);
+                },
+                icon: const Icon(Icons.add),
               ),
-            ),
-          ),
-
-          // Test Case Manager as a bottom sheet
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: TestCaseManager(
-              code: initialCode,
-              language: language,
-            ),
-          ),
-        ],
-      ),
+          ],
+        ),
+        ...List.generate(
+          selectedTestcase.value.inputs.length,
+          (index) {
+            final currentInput = selectedTestcase.value.inputs[index];
+            return Column(
+              children: [
+                Text("Input ${index + 1}"),
+                const SizedBox(
+                  height: 4,
+                ),
+                TextFormField(
+                  initialValue: currentInput,
+                ),
+              ],
+            );
+          },
+        )
+      ],
     );
   }
 }

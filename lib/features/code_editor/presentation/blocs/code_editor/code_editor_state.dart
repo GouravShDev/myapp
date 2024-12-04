@@ -44,6 +44,13 @@ class CodeExcecutionInitial extends CodeExecutionState {}
 
 class CodeExecutionPending extends CodeExecutionState {}
 
-class CodeExecutionSuccess extends CodeExecutionState {}
+class CodeExecutionSuccess extends CodeExecutionState {
+  final CodeExecutionResult result;
+
+  CodeExecutionSuccess(this.result);
+
+    @override
+  List<Object> get props => [result];
+}
 
 class CodeExecutionError extends CodeExecutionState {}

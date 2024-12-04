@@ -7,10 +7,26 @@ sealed class CodeEditorEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class CodeEditorCodeUpdateEvent extends CodeEditorEvent {
+  final String updatedCode;
+
+  const CodeEditorCodeUpdateEvent({
+    required this.updatedCode,
+  });
+}
+
 class CodeEditorRunCodeEvent extends CodeEditorEvent {
   final Question question;
 
   const CodeEditorRunCodeEvent({
     required this.question,
+  });
+}
+
+class CodeEditorRunCodeResultUpdateEvent extends CodeEditorEvent {
+  final CodeExecutionState executionResult;
+
+  const CodeEditorRunCodeResultUpdateEvent({
+    required this.executionResult,
   });
 }

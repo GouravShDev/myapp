@@ -4,6 +4,7 @@ class QuestionNodeEntity {
   String? title;
   String? titleSlug;
   String? difficulty;
+  String? questionId;
   double? acRate;
   bool? paidOnly;
   String? frontendQuestionId;
@@ -16,7 +17,7 @@ class QuestionNodeEntity {
   bool? isFavor;
   String? status;
   List<CodeSnippetEntity>? codeSnippets;
-
+  List<String>? exampleTestcaseList;
   QuestionNodeEntity({
     this.title,
     this.titleSlug,
@@ -31,6 +32,7 @@ class QuestionNodeEntity {
     this.hints,
     this.status,
     this.codeSnippets,
+    this.exampleTestcaseList,
   });
 
   QuestionNodeEntity.fromJson(Map<String, dynamic> json) {
@@ -43,7 +45,7 @@ class QuestionNodeEntity {
     hasVideoSolution = json['hasVideoSolution'];
     hasSolution = json['hasSolution'];
     content = json['content'];
-
+    questionId = json['questionId'];
     if (json['hints'] != null) {
       hints = (json['hints'] as List)
           .map(
@@ -62,6 +64,9 @@ class QuestionNodeEntity {
         ? []
         : List<CodeSnippetEntity>.from(
             json["codeSnippets"]!.map((x) => CodeSnippetEntity.fromJson(x)));
+    exampleTestcaseList = json['exampleTestcaseList'] != null
+        ? List.from(json['exampleTestcaseList'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -107,6 +112,7 @@ extension QuestionNodeEntityExt on QuestionNodeEntity {
   Question toQuestion() {
     return Question(
       title: title,
+      questionId: questionId,
       titleSlug: titleSlug,
       difficulty: difficulty,
       acRate: acRate,
@@ -121,6 +127,12 @@ extension QuestionNodeEntityExt on QuestionNodeEntity {
       codeSnippets: codeSnippets
           ?.map((snippet) => snippet.toCodeSnippet())
           .toList(), // Mapping codeSnippets
+      exampleTestCases: exampleTestcaseList?.map(
+        (e) {
+          final cases = e.split('\n');
+          return TestCase(inputs: cases);
+        },
+      ).toList(),
     );
   }
 }

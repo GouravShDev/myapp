@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/features/code_editor/domain/model/programming_language.dart';
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
+import 'package:codersgym/features/code_editor/presentation/widgets/question_description_bottomsheet.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/test_case_manager.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/presentation/widgets/question_description.dart';
@@ -17,7 +18,6 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
   final String initialCode;
   final ProgrammingLanguage language;
   final Question question;
-  final List<TestCase> testCases;
   final CodeEditorBloc codeEditorBloc;
 
   const CodeEditorPage({
@@ -25,7 +25,6 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
     required this.initialCode,
     required this.language,
     required this.question,
-    required this.testCases,
     required this.codeEditorBloc,
   });
 
@@ -42,14 +41,21 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
       text: initialCode,
       language: language.mode,
     )).value;
+    useEffect(() {
+      codeController.addListener(() {
+        codeEditorBloc
+            .add(CodeEditorCodeUpdateEvent(updatedCode: codeController.text));
+      });
+      return () => codeController.dispose();
+    }, []);
 
     // Run code function
     final runCode = useCallback(() {
       isRunning.value = true;
       testResults.value.clear();
-      context
-          .read<CodeEditorBloc>()
-          .add(CodeEditorRunCodeEvent(question: question));
+      context.read<CodeEditorBloc>().add(
+            CodeEditorRunCodeEvent(question: question),
+          );
       // Simulate code running and test case checking
       // Future.delayed(const Duration(seconds: 2), () {
       //   final results = testCases.map((testCase) {
@@ -65,7 +71,7 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
       isRunning.value = false;
       //   testResults.value = results;
       // });
-    }, [testCases]);
+    }, []);
 
     // Check if the device is in mobile view
     final isMobile = MediaQuery.of(context).size.width < 600;
@@ -74,27 +80,9 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
     void showProblemDescriptionBottomSheet() {
       showModalBottomSheet(
         context: context,
-        builder: (context) => SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Problem Description',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 16),
-                HtmlWidget(
-                  question.content ?? '',
-                  renderMode: RenderMode.column,
-                  textStyle: const TextStyle(fontSize: 14),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ),
+        isScrollControlled: true,
+        builder: (context) =>
+            QuestionDescriptionBottomsheet(question: question),
       );
     }
 
@@ -114,10 +102,10 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
               onPressed: () {
                 showModalBottomSheet(
                   context: context,
+                  isScrollControlled: true,
                   builder: (context) {
                     return TestCaseManager(
-                      code: "",
-                      language: '',
+                      testcases: question.exampleTestCases ?? [],
                     );
                   },
                 );
@@ -349,10 +337,11 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
                     'Test Cases',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  ...testCases.map((testCase) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text('Input: ${testCase.input}'),
-                      )),
+                  ...question.exampleTestCases?.map((testCase) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Text('Input: ${testCase}'),
+                          )) ??
+                      [],
                 ],
               ),
             ),
@@ -418,17 +407,6 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
       child: this,
     );
   }
-}
-
-// Supporting classes (same as previous implementation)
-class TestCase {
-  final String input;
-  final String expectedOutput;
-
-  const TestCase({
-    required this.input,
-    required this.expectedOutput,
-  });
 }
 
 class TestCaseResult {
