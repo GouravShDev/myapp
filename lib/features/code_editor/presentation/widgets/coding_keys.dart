@@ -12,6 +12,7 @@ class CodingKeys extends StatelessWidget {
         onPressed: onPressed,
         style: TextButton.styleFrom(
           minimumSize: Size.zero,
+          foregroundColor: Colors.white,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
 
@@ -34,6 +35,10 @@ class CodingKeys extends StatelessWidget {
               _buildCodingKeyButton(
                 onPressed: () {
                   codeController.insertStr("\t");
+                  codeController.setCursor(
+                    codeController.selection.baseOffset +
+                        codeController.params.tabSpaces,
+                  );
                 },
                 child: const Text('Tab',
                     style: TextStyle(fontWeight: FontWeight.bold)),
@@ -58,9 +63,11 @@ class CodingKeys extends StatelessWidget {
               ),
               _buildCodingKeyButton(
                 onPressed: () {
-                  codeController.insertStr(";");
+                  codeController.insertStr("()");
+                  codeController
+                      .setCursor(codeController.selection.baseOffset - 1);
                 },
-                child: const Text(';',
+                child: const Text('()',
                     style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               _buildCodingKeyButton(
@@ -109,9 +116,9 @@ class CodingKeys extends StatelessWidget {
               ),
               _buildCodingKeyButton(
                 onPressed: () {
-                  codeController.insertStr(",");
+                  codeController.insertStr(";");
                 },
-                child: const Text(',',
+                child: const Text(';',
                     style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               _buildCodingKeyButton(
