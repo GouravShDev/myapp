@@ -135,11 +135,11 @@ class CodeExecutionResultEntity {
 
 extension _CodeExecutionStateExt on String {
   CodeExecutionResultState _determineCodeExecutionState() {
-    if (this == 'pending') {
+    if (this == 'PENDING') {
       return CodeExecutionResultState.pending;
-    } else if (this == 'started') {
+    } else if (this == 'STARTED') {
       return CodeExecutionResultState.started;
-    } else if (this == 'success') {
+    } else if (this == 'SUCCESS') {
       return CodeExecutionResultState.success;
     } else {
       return CodeExecutionResultState.failed;
@@ -149,16 +149,30 @@ extension _CodeExecutionStateExt on String {
 
 extension CodeExecutionResultEntityExt on CodeExecutionResultEntity {
   CodeExecutionResult toCodeExecutionResult() {
-    CodeExecutionResultState codeExecutionState =
-        state?._determineCodeExecutionState() ?? CodeExecutionResultState.failed;
+    final codeExecutionState = state?._determineCodeExecutionState() ??
+        CodeExecutionResultState.failed;
 
     return CodeExecutionResult(
       runTime: statusRuntime,
       statusMessage: statusMsg,
       state: codeExecutionState,
-      codeAnswers: codeAnswer,
-      codePrintOutputs: codeOutput,
-      expectedCodeAnswer: expectedCodeAnswer,
+      // Leetcode gives empty string in each of the list in the response
+      codeAnswers: codeAnswer
+        ?..removeWhere(
+          (element) => element.isEmpty,
+        ),
+      codePrintOutputs: codeOutput
+        ?..removeWhere(
+          (element) => element.isEmpty,
+        ),
+      expectedCodeAnswer: expectedCodeAnswer
+        ?..removeWhere(
+          (element) => element.isEmpty,
+        ),
+      complieError: compileError,
+      fullCompileError: fullCompileError,
+      totalCorrect: totalCorrect,
+      totalTestcases: totalTestcases,
     );
   }
 }

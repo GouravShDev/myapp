@@ -10,6 +10,7 @@ final ThemeData leetcodeTheme = ThemeData(
     primary: Color(0xFFFF9E0F), // Primary color for buttons and main accents
     secondary: Color(0xFF00FFB3),
     surface: Color(0xFF2A2A2A),
+    error: Color(0xffF53836),
   ),
 
   appBarTheme: const AppBarTheme(
@@ -92,3 +93,17 @@ final ThemeData leetcodeTheme = ThemeData(
     ),
   ),
 );
+
+extension ColorSchemeExt on ColorScheme {
+  Color get successColorAccent {
+    return Color(0xff1ABBBB);
+  }
+
+  Color get successColor {
+    return Colors.green;
+  }
+
+  Color get warningColor {
+    return Color(0xffFEB600);
+  }
+}

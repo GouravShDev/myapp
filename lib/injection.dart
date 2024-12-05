@@ -1,4 +1,4 @@
-import 'package:chucker_flutter/chucker_flutter.dart';
+import 'package:codersgym/core/network/app_dio_logger.dart';
 import 'package:codersgym/core/network/dio_network_service.dart';
 import 'package:codersgym/core/network/network_service.dart';
 import 'package:codersgym/core/utils/storage/local_storage_manager.dart';
@@ -60,7 +60,7 @@ Future<void> initializeDependencies() async {
     () => DioNetworkService(
       configuration: NetworkConfiguration(baseUrl: 'https://leetcode.com'),
       interceptors: [
-        ChuckerDioInterceptor(),
+        AppDioLogger(),
       ],
     ),
   );

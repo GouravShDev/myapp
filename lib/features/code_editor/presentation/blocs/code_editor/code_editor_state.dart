@@ -4,11 +4,13 @@ class CodeEditorState extends Equatable {
   final String code;
   final ProgrammingLanguage language;
   final CodeExecutionState executionState;
+  final List<TestCase>? testCases;
 
   const CodeEditorState({
     required this.code,
     required this.language,
     required this.executionState,
+    this.testCases,
   });
 
   factory CodeEditorState.initial() {
@@ -23,16 +25,18 @@ class CodeEditorState extends Equatable {
     String? code,
     ProgrammingLanguage? language,
     CodeExecutionState? executionState,
+    List<TestCase>? testCases,
   }) {
     return CodeEditorState(
       code: code ?? this.code,
       language: language ?? this.language,
       executionState: executionState ?? this.executionState,
+      testCases: testCases ?? this.testCases,
     );
   }
 
   @override
-  List<Object> get props => [code, language, executionState];
+  List<Object?> get props => [code, language, executionState,testCases];
 }
 
 sealed class CodeExecutionState extends Equatable {
@@ -49,7 +53,7 @@ class CodeExecutionSuccess extends CodeExecutionState {
 
   CodeExecutionSuccess(this.result);
 
-    @override
+  @override
   List<Object> get props => [result];
 }
 

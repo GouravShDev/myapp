@@ -39,7 +39,13 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
     CodeEditorRunCodeEvent event,
     Emitter<CodeEditorState> emit,
   ) async {
-    emit(state.copyWith(executionState: CodeExecutionPending()));
+    emit(
+      state.copyWith(
+        executionState: CodeExecutionPending(),
+        // Might need to modify when custom testcase feature is implemented
+        testCases: event.question.exampleTestCases,
+      ),
+    );
     final codeExceutionResult = await _codeEdtiorRepository.runCode(
       questionTitleSlug: event.question.titleSlug ?? "",
       questionId: event.question.questionId ?? '0',
@@ -81,8 +87,8 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
         return;
       }
 
-      if (executionResult.getSuccessValue.state !=
-          CodeExecutionResultState.pending) {
+      if (executionResult.getSuccessValue.state ==
+          CodeExecutionResultState.success) {
         add(CodeEditorRunCodeResultUpdateEvent(
           executionResult: CodeExecutionSuccess(
             executionResult.getSuccessValue,

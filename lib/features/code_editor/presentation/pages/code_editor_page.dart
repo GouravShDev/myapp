@@ -1,17 +1,20 @@
+import 'dart:math';
+
 import 'package:auto_route/auto_route.dart';
+import 'package:codersgym/features/code_editor/domain/model/code_execution_result.dart';
 import 'package:codersgym/features/code_editor/domain/model/programming_language.dart';
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
+import 'package:codersgym/features/code_editor/presentation/widgets/coding_keys.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/question_description_bottomsheet.dart';
-import 'package:codersgym/features/code_editor/presentation/widgets/test_case_manager.dart';
+import 'package:codersgym/features/code_editor/presentation/widgets/run_code_result_sheet.dart';
+import 'package:codersgym/features/code_editor/presentation/widgets/test_case_bottom_sheet.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
-import 'package:codersgym/features/question/presentation/widgets/question_description.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_highlight/themes/monokai-sublime.dart';
 import 'package:flutter_code_editor/flutter_code_editor.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 @RoutePage()
 class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
@@ -32,14 +35,18 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
   Widget build(BuildContext context) {
     // Use hooks for state management
     final selectedLanguage = useState(language);
-    final isRunning = useState(false);
     final testResults = useState<List<TestCaseResult>>([]);
     final isFullScreen = useState(false);
 
     // Create a code controller using useRef to persist across rebuilds
-    final codeController = useRef(CodeController(
+    final codeController = useState(CodeController(
       text: initialCode,
       language: language.mode,
+      modifiers: const [
+        IndentModifier(),
+        CloseBlockModifier(),
+        TabModifier(),
+      ],
     )).value;
     useEffect(() {
       codeController.addListener(() {
@@ -51,25 +58,10 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
 
     // Run code function
     final runCode = useCallback(() {
-      isRunning.value = true;
       testResults.value.clear();
       context.read<CodeEditorBloc>().add(
             CodeEditorRunCodeEvent(question: question),
           );
-      // Simulate code running and test case checking
-      // Future.delayed(const Duration(seconds: 2), () {
-      //   final results = testCases.map((testCase) {
-      //     // TODO: Implement actual code execution and test case verification
-      //     final isPass = _checkTestCase(testCase);
-      //     return TestCaseResult(
-      //       testCase: testCase,
-      //       isPassed: isPass,
-      //       output: isPass ? 'Passed' : 'Failed',
-      //     );
-      //   }).toList();
-
-      isRunning.value = false;
-      //   testResults.value = results;
       // });
     }, []);
 
@@ -87,115 +79,130 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
     }
 
     // Build the main scaffold
-    return Scaffold(
-      bottomNavigationBar: // Action Buttons and Run Results
-          Container(
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: Theme.of(context).canvasColor,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Test Results
-            TextButton.icon(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) {
-                    return TestCaseManager(
-                      testcases: question.exampleTestCases ?? [],
+    return BlocListener<CodeEditorBloc, CodeEditorState>(
+      listenWhen: (previous, current) =>
+          previous.executionState != current.executionState,
+      listener: (context, state) {
+        final executionState = state.executionState;
+        switch (executionState) {
+          case CodeExcecutionInitial():
+          case CodeExecutionPending():
+            break;
+          case CodeExecutionSuccess():
+            _onCodeExecutionSuccess(
+              context,
+              result: executionState.result,
+              testcases: state.testCases ?? [],
+            );
+          case CodeExecutionError():
+          // TODO: Handle this case.
+        }
+      },
+      child: Scaffold(
+          bottomNavigationBar: // Action Buttons and Run Results
+              Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).canvasColor,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Test Results
+                TextButton.icon(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (context) {
+                        return TestCaseBottomSheet(
+                          testcases: question.exampleTestCases ?? [],
+                        );
+                      },
                     );
                   },
-                );
-              },
-              label: Text("Test Cases"),
-              icon: Icon(Icons.bug_report),
-            ),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Visibility(
-                  visible: (isRunning.value),
-                  child: CircularProgressIndicator(),
+                  label: Text("Test Cases"),
+                  icon: Icon(Icons.bug_report),
                 ),
-                Visibility(
-                  maintainAnimation: true,
-                  maintainState: true,
-                  maintainSize: true,
-                  visible: !isRunning.value,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: runCode,
-                        icon: const Icon(Icons.play_arrow),
-                        label: const Text('Run Code'),
-                      ),
-                      const SizedBox(width: 16),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      appBar: isFullScreen.value
-          ? null
-          : AppBar(
-              title: Text(
-                question.title ?? '',
-              ),
-              actions: [
-                // Language Dropdown
-                DropdownButton<ProgrammingLanguage>(
-                  value: selectedLanguage.value,
-                  items: ProgrammingLanguage.values
-                      .map((lang) => DropdownMenuItem(
-                            value: lang,
-                            child: Text(
-                              lang.displayText,
-                              style: TextStyle(
-                                fontSize: isMobile ? 12 : 14,
+                BlocBuilder<CodeEditorBloc, CodeEditorState>(
+                  builder: (context, state) {
+                    final isRunning =
+                        state.executionState == CodeExecutionPending();
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Visibility(
+                          visible: (isRunning),
+                          child: CircularProgressIndicator(),
+                        ),
+                        Visibility(
+                          maintainAnimation: true,
+                          maintainState: true,
+                          maintainSize: true,
+                          visible: !isRunning,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              OutlinedButton.icon(
+                                onPressed: runCode,
+                                icon: const Icon(Icons.play_arrow),
+                                label: const Text('Run Code'),
                               ),
-                            ),
-                          ))
-                      .toList(),
-                  onChanged: (language) {
-                    if (language != null) {
-                      selectedLanguage.value = language;
-                      codeController.language = language.mode;
-                    }
+                              const SizedBox(width: 16),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
                   },
                 ),
               ],
             ),
-      body: isMobile
-          ? _buildMobileLayout(
-              context,
-              codeController,
-              isRunning,
-              testResults,
-              isFullScreen,
-              runCode,
-              showProblemDescriptionBottomSheet,
-            )
-          : _buildDesktopLayout(
-              context,
-              codeController,
-              isRunning,
-              testResults,
-              runCode,
-            ),
+          ),
+          appBar: isFullScreen.value
+              ? null
+              : AppBar(
+                  title: Text(
+                    question.title ?? '',
+                  ),
+                  actions: [
+                    // Language Dropdown
+                    DropdownButton<ProgrammingLanguage>(
+                      value: selectedLanguage.value,
+                      items: ProgrammingLanguage.values
+                          .map((lang) => DropdownMenuItem(
+                                value: lang,
+                                child: Text(
+                                  lang.displayText,
+                                  style: TextStyle(
+                                    fontSize: isMobile ? 12 : 14,
+                                  ),
+                                ),
+                              ))
+                          .toList(),
+                      onChanged: (language) {
+                        if (language != null) {
+                          selectedLanguage.value = language;
+                          codeController.language = language.mode;
+                        }
+                      },
+                    ),
+                  ],
+                ),
+          body: _buildMobileLayout(
+            context,
+            codeController,
+            testResults,
+            isFullScreen,
+            runCode,
+            showProblemDescriptionBottomSheet,
+          )),
     );
   }
 
   Widget _buildMobileLayout(
     BuildContext context,
     CodeController codeController,
-    ValueNotifier<bool> isRunning,
     ValueNotifier<List<TestCaseResult>> testResults,
     ValueNotifier<bool> isFullScreen,
     VoidCallback runCode,
@@ -227,7 +234,6 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
                 ),
                 IconButton(
                   onPressed: () {
-                    codeController.historyController.undo();
                   },
                   icon: Icon(Icons.undo_rounded),
                 ),
@@ -303,6 +309,9 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
               ],
             ),
           ),
+          CodingKeys(
+            codeController: codeController,
+          ),
         ],
       ),
     );
@@ -311,7 +320,6 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
   Widget _buildDesktopLayout(
     BuildContext context,
     CodeController codeController,
-    ValueNotifier<bool> isRunning,
     ValueNotifier<List<TestCaseResult>> testResults,
     VoidCallback runCode,
   ) {
@@ -371,9 +379,7 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
                   children: [
                     ElevatedButton(
                       onPressed: runCode,
-                      child: isRunning.value
-                          ? const CircularProgressIndicator()
-                          : const Text('Run Code'),
+                      child: const Text('Run Code'),
                     ),
                     const SizedBox(width: 16),
                     ElevatedButton(
@@ -405,6 +411,23 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
     return BlocProvider.value(
       value: codeEditorBloc,
       child: this,
+    );
+  }
+
+  void _onCodeExecutionSuccess(
+    BuildContext context, {
+    required CodeExecutionResult result,
+    required List<TestCase> testcases,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return RunCodeResultSheet(
+          testcases: testcases,
+          executionResult: result,
+        );
+      },
     );
   }
 }

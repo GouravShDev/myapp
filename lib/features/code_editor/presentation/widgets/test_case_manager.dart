@@ -1,230 +1,198 @@
+import 'package:codersgym/core/theme/app_theme.dart';
 import 'package:codersgym/features/code_editor/presentation/pages/code_editor_page.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-class TestCaseManager extends StatelessWidget {
-  final List<TestCase> testcases;
-
-  const TestCaseManager({
+class TestCaseManager extends HookWidget {
+  TestCaseManager({
     super.key,
     required this.testcases,
-  });
+    required this.readonly,
+    this.codeOutput,
+    this.expectedOutput,
+  }) : assert(
+            (codeOutput == null && expectedOutput == null) ||
+                (codeOutput?.isEmpty == true &&
+                    expectedOutput?.isEmpty == true) ||
+                (codeOutput != null &&
+                    expectedOutput != null &&
+                    codeOutput.isNotEmpty &&
+                    expectedOutput.isNotEmpty &&
+                    codeOutput.length == expectedOutput.length &&
+                    codeOutput.length == testcases.length),
+            'codeOutput and expectedOutput should either both be null, '
+            'both empty, or have the same length as each other and testcases. '
+            'Lengths: codeOutput: ${codeOutput?.length}, '
+            'expectedOutput: ${expectedOutput?.length}');
 
-  @override
-  Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.5,
-      minChildSize: 0.2,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).canvasColor,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          child: ListView(
-            controller: scrollController,
-            children: [
-              // Drag Handle
-              Center(
-                child: Container(
-                  width: 50,
-                  height: 5,
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-
-              // Header
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Testcases',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        // Add Test Case Button
-                        IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: () {},
-                        ),
-                        // Run Test Cases Button
-                        OutlinedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.play_arrow),
-                          label: const Text('Run Code'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              TestCaseManagerWidget(
-                testcases: testcases,
-              ),
-
-              // Test Cases List
-              // ListView.builder(
-              //   shrinkWrap: true,
-              //   physics: const NeverScrollableScrollPhysics(),
-              //   itemCount: testcases.length,
-              //   itemBuilder: (context, index) {
-              //     final testCase = testcases[index];
-              //     return Padding(
-              //       padding: const EdgeInsets.all(8.0),
-              //       child: Card(
-              //         child: Padding(
-              //           padding: const EdgeInsets.all(12.0),
-              //           child: Column(
-              //             crossAxisAlignment: CrossAxisAlignment.start,
-              //             children: [
-              //               // Input TextField
-              //               TextField(
-              //                 decoration: InputDecoration(
-              //                   labelText: 'Input',
-              //                   border: const OutlineInputBorder(),
-              //                   suffixIcon: testcases.length > 1
-              //                       ? IconButton(
-              //                           icon: const Icon(Icons.delete,
-              //                               color: Colors.red),
-              //                           onPressed: () {},
-              //                         )
-              //                       : null,
-              //                 ),
-              //                 maxLines: 2,
-              //               ),
-              //               const SizedBox(height: 12),
-
-              //               // Expected Output TextField
-              //               const TextField(
-              //                 decoration: InputDecoration(
-              //                   labelText: 'Expected Output',
-              //                   border: OutlineInputBorder(),
-              //                 ),
-              //                 maxLines: 2,
-              //               ),
-              //             ],
-              //           ),
-              //         ),
-              //       ),
-              //     );
-              //   },
-              // ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class TestCaseManagerWidget extends HookWidget {
-  const TestCaseManagerWidget({
-    super.key,
-    required this.testcases,
-  });
   final List<TestCase> testcases;
-
+  final bool readonly;
+  final List<String>? codeOutput;
+  final List<String>? expectedOutput;
   @override
   Widget build(BuildContext context) {
     final currentTestcases = useState(testcases);
-    final selectedTestcase = useState(testcases.first);
+    final selectedTestcaseIndex = useState(0);
+    final inputBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(100),
+      borderSide: BorderSide.none,
+    );
+    final focusInputBorder = inputBorder.copyWith(
+      borderSide: BorderSide(
+        color: Theme.of(context).primaryColor,
+      ),
+    );
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ...List.generate(
               currentTestcases.value.length,
               (index) {
                 // Wrap the Card with Dismissible
-                return Dismissible(
-                  key: Key(
-                      currentTestcases.value[index].toString()), // Unique key
-                  direction: DismissDirection.horizontal,
-                  confirmDismiss: (direction) async {
-                    if (currentTestcases.value.length == 1) {
-                      // Show a snackbar or dialog indicating the last testcase can't be deleted
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Cannot delete the last testcase')),
-                      );
-                      return false; // Prevent dismissal
-                    }
-                    return true; // Allow dismissal
+                return InkWell(
+                  // Wrap with InkWell for tap functionality
+
+                  onTap: () {
+                    // Update the selected testcase
+                    selectedTestcaseIndex.value = index;
                   },
-                  onDismissed: (direction) {
-                    currentTestcases.value.removeAt(index);
-                  },
-                  background: Container(
-                    color: Colors.red,
-                    child: const Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: EdgeInsets.only(right: 20.0),
-                        child: Icon(Icons.delete, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                  child: InkWell(
-                    // Wrap with InkWell for tap functionality
-                    onTap: () {
-                      // Update the selected testcase
-                      selectedTestcase.value = currentTestcases.value[index];
-                    },
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text("Case ${index + 1}"),
-                      ),
+                  child: Card(
+                    color: selectedTestcaseIndex.value == index
+                        ? Theme.of(context).hintColor.withOpacity(0.15)
+                        : null,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Case ${index + 1}"),
                     ),
                   ),
                 );
               },
             ),
             // Limit adding to a maximum of 5 testcases
-            if (currentTestcases.value.length < 5)
+            if (currentTestcases.value.length < 5 && !readonly)
               IconButton(
                 onPressed: () {
-                  currentTestcases.value.add(selectedTestcase.value);
+                  currentTestcases.value = List.from(currentTestcases.value)
+                    ..add(
+                      currentTestcases.value[selectedTestcaseIndex.value],
+                    );
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (timeStamp) {
+                      selectedTestcaseIndex.value =
+                          currentTestcases.value.length - 1;
+                    },
+                  );
                 },
                 icon: const Icon(Icons.add),
               ),
           ],
         ),
+        const SizedBox(
+          height: 4,
+        ),
         ...List.generate(
-          selectedTestcase.value.inputs.length,
+          currentTestcases.value[selectedTestcaseIndex.value].inputs.length,
           (index) {
-            final currentInput = selectedTestcase.value.inputs[index];
+            final currentInput = currentTestcases
+                .value[selectedTestcaseIndex.value].inputs[index];
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(
+                  height: 8,
+                ),
                 Text("Input ${index + 1}"),
                 const SizedBox(
-                  height: 4,
+                  height: 8,
                 ),
                 TextFormField(
+                  // Force child to rebuild when testcases changes
+                  // might need to find better way
+                  key: ValueKey(
+                    currentTestcases.value[selectedTestcaseIndex.value]
+                            .toString() +
+                        selectedTestcaseIndex.value.toString() +
+                        index.toString(),
+                  ),
                   initialValue: currentInput,
+                  readOnly: readonly,
+                  decoration: InputDecoration(
+                    fillColor:
+                        Theme.of(context).highlightColor.withOpacity(0.1),
+                    border: inputBorder,
+                    enabledBorder: inputBorder,
+                    focusedBorder: focusInputBorder,
+                  ),
                 ),
               ],
             );
           },
-        )
+        ),
+        SizedBox(
+          height: 12,
+        ),
+        if (codeOutput != null &&
+            expectedOutput != null &&
+            codeOutput!.isNotEmpty &&
+            expectedOutput!.isNotEmpty) ...[
+          Text("Output"),
+          const SizedBox(
+            height: 8,
+          ),
+          TextFormField(
+            // Force child to rebuild when testcases changes
+            // might need to find better way
+            key: UniqueKey(),
+            initialValue: codeOutput![selectedTestcaseIndex.value],
+            readOnly: readonly,
+            style: TextStyle(
+              color: codeOutput![selectedTestcaseIndex.value] ==
+                      expectedOutput![selectedTestcaseIndex.value]
+                  ? null // Use default color if they match
+                  : Theme.of(context)
+                      .colorScheme
+                      .error, // Use error color if they don't match
+            ),
+            decoration: InputDecoration(
+              fillColor: Theme.of(context).highlightColor.withOpacity(0.1),
+              border: inputBorder,
+              enabledBorder: inputBorder,
+              focusedBorder: focusInputBorder,
+            ),
+          ),
+          SizedBox(
+            height: 8,
+          ),
+          Text("Expected"),
+          const SizedBox(
+            height: 8,
+          ),
+          TextFormField(
+            // Force child to rebuild when testcases changes
+            // might need to find better way
+            key: UniqueKey(),
+            initialValue: expectedOutput![selectedTestcaseIndex.value],
+            readOnly: readonly,
+            style: TextStyle(
+              color: codeOutput![selectedTestcaseIndex.value] ==
+                      expectedOutput![selectedTestcaseIndex.value]
+                  ? null // Use default color if they match
+                  : Theme.of(context)
+                      .colorScheme
+                      .successColor, // Use success color if they don't match
+            ),
+            decoration: InputDecoration(
+              fillColor: Theme.of(context).highlightColor.withOpacity(0.1),
+              border: inputBorder,
+              enabledBorder: inputBorder,
+              focusedBorder: focusInputBorder,
+            ),
+          ),
+        ],
       ],
     );
   }
