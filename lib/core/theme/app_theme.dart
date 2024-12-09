@@ -57,14 +57,7 @@ final ThemeData leetcodeTheme = ThemeData(
       fontSize: 14,
     ),
   ),
-  iconButtonTheme: IconButtonThemeData(
-    style: IconButton.styleFrom(
-      backgroundColor: Colors.grey[850],
-      padding: EdgeInsets.all(
-        8,
-      ),
-    ),
-  ),
+
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: const Color(0xFFFF9E0F), // LeetCode orange

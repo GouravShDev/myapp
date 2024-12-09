@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/features/code_editor/domain/model/code_execution_result.dart';
 import 'package:codersgym/features/code_editor/domain/model/programming_language.dart';
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
+import 'package:codersgym/features/code_editor/presentation/widgets/code_editor_top_action_bar.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/code_successful_submission_dialog.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/coding_keys.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/question_description_bottomsheet.dart';
@@ -72,14 +73,6 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
     final isMobile = MediaQuery.of(context).size.width < 600;
 
     // Mobile-friendly bottom sheet for problem description
-    void showProblemDescriptionBottomSheet() {
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        builder: (context) =>
-            QuestionDescriptionBottomsheet(question: question),
-      );
-    }
 
     // Build the main scaffold
     return MultiBlocListener(
@@ -223,7 +216,6 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
             testResults,
             isFullScreen,
             runCode,
-            showProblemDescriptionBottomSheet,
           )),
     );
   }
@@ -234,92 +226,25 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
     ValueNotifier<List<TestCaseResult>> testResults,
     ValueNotifier<bool> isFullScreen,
     VoidCallback runCode,
-    VoidCallback showProblemDescriptionBottomSheet,
   ) {
     final theme = Theme.of(context);
     return SafeArea(
       child: Column(
         children: [
-          // Problem Description Button
+          SizedBox(
+            height: 8,
+          ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: showProblemDescriptionBottomSheet,
-                  icon: Icon(Icons.description_outlined),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.copy),
-                  onPressed: () {
-                    Clipboard.setData(
-                      ClipboardData(text: codeController.text),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Code copied to clipboard')),
-                    );
-                  },
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.undo_rounded),
-                ),
-                IconButton(
-                  onPressed: () {
-                    codeController.historyController.redo();
-                  },
-                  icon: Icon(Icons.redo_rounded),
-                ),
-                IconButton(
-                  onPressed: () {
-                    isFullScreen.value = !isFullScreen.value;
-                  },
-                  icon: !isFullScreen.value
-                      ? Icon(Icons.fullscreen_outlined)
-                      : Icon(Icons.fullscreen_exit_outlined),
-                ),
-                Spacer(),
-                BlocBuilder<CodeEditorBloc, CodeEditorState>(
-                  builder: (context, state) {
-                    final isRunning =
-                        state.codeSubmissionState == CodeExecutionPending();
-
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Visibility(
-                          visible: (isRunning),
-                          child: CircularProgressIndicator(),
-                        ),
-                        Visibility(
-                          maintainAnimation: true,
-                          maintainState: true,
-                          maintainSize: true,
-                          visible: !isRunning,
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 18.0,
-                                vertical: 4.0,
-                              ),
-                            ),
-                            icon: Icon(Icons.upload_file_outlined),
-                            onPressed: () {
-                              codeEditorBloc.add(
-                                CodeEditorSubmitCodeEvent(question: question),
-                              );
-                            },
-                            label: const Text('Submit'),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ],
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: CodeEditorTopActionBar(
+              onToggleFullScreen: () {
+                isFullScreen.value = !isFullScreen.value;
+              },
+              codeController: codeController,
+              isFullScreen: isFullScreen.value,
+              question: question,
             ),
           ),
-
           // Code Editor
           Expanded(
             child: Stack(
@@ -358,18 +283,6 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
                     ),
                   ),
                 ),
-                // Positioned(
-                //   bottom: 0,
-                //   left: 0,
-                //   right: 0,
-                //   child: SizedBox(
-                //     height: 700,
-                //     child: TestCaseManager(
-                //       code: initialCode,
-                //       language: 'cpp',
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           ),
