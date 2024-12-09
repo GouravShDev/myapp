@@ -34,10 +34,10 @@ class CodingKeys extends StatelessWidget {
             children: [
               _buildCodingKeyButton(
                 onPressed: () {
+                  final offset = codeController.selection.baseOffset;
                   codeController.insertStr("\t");
                   codeController.setCursor(
-                    codeController.selection.baseOffset +
-                        codeController.params.tabSpaces,
+                    offset + codeController.params.tabSpaces,
                   );
                 },
                 child: const Text('Tab',

@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/features/code_editor/domain/model/code_execution_result.dart';
 import 'package:codersgym/features/code_editor/domain/model/programming_language.dart';
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
+import 'package:codersgym/features/code_editor/presentation/widgets/code_successful_submission_dialog.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/coding_keys.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/question_description_bottomsheet.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/run_code_result_sheet.dart';
@@ -40,7 +41,9 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
 
     // Create a code controller using useRef to persist across rebuilds
     final codeController = useState(CodeController(
-      text: initialCode,
+      text: codeEditorBloc.state.code.isNotEmpty
+          ? codeEditorBloc.state.code
+          : initialCode,
       language: language.mode,
       modifiers: const [
         IndentModifier(),
@@ -79,25 +82,49 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
     }
 
     // Build the main scaffold
-    return BlocListener<CodeEditorBloc, CodeEditorState>(
-      listenWhen: (previous, current) =>
-          previous.executionState != current.executionState,
-      listener: (context, state) {
-        final executionState = state.executionState;
-        switch (executionState) {
-          case CodeExcecutionInitial():
-          case CodeExecutionPending():
-            break;
-          case CodeExecutionSuccess():
-            _onCodeExecutionSuccess(
-              context,
-              result: executionState.result,
-              testcases: state.testCases ?? [],
-            );
-          case CodeExecutionError():
-          // TODO: Handle this case.
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<CodeEditorBloc, CodeEditorState>(
+          listenWhen: (previous, current) =>
+              previous.executionState != current.executionState,
+          listener: (context, state) {
+            final executionState = state.executionState;
+            switch (executionState) {
+              case CodeExcecutionInitial():
+              case CodeExecutionPending():
+                break;
+              case CodeExecutionSuccess():
+                _onCodeExecutionSuccess(
+                  context,
+                  result: executionState.result,
+                  testcases: state.testCases ?? [],
+                );
+              case CodeExecutionError():
+              // TODO: Handle this case.
+            }
+          },
+        ),
+        BlocListener<CodeEditorBloc, CodeEditorState>(
+          listenWhen: (previous, current) =>
+              previous.codeSubmissionState != current.codeSubmissionState,
+          listener: (context, state) {
+            final codeSubmissionState = state.codeSubmissionState;
+            switch (codeSubmissionState) {
+              case CodeExcecutionInitial():
+              case CodeExecutionPending():
+                break;
+              case CodeExecutionSuccess():
+                _onCodeSubmissionExecutionSuccess(
+                  context,
+                  result: codeSubmissionState.result,
+                  testcases: state.testCases ?? [],
+                );
+              case CodeExecutionError():
+              // TODO: Handle this case.
+            }
+          },
+        ),
+      ],
       child: Scaffold(
           bottomNavigationBar: // Action Buttons and Run Results
               Container(
@@ -117,6 +144,7 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
                       builder: (context) {
                         return TestCaseBottomSheet(
                           testcases: question.exampleTestCases ?? [],
+                          onRunCode: runCode,
                         );
                       },
                     );
@@ -233,8 +261,7 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
                   },
                 ),
                 IconButton(
-                  onPressed: () {
-                  },
+                  onPressed: () {},
                   icon: Icon(Icons.undo_rounded),
                 ),
                 IconButton(
@@ -252,18 +279,42 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
                       : Icon(Icons.fullscreen_exit_outlined),
                 ),
                 Spacer(),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 18.0,
-                      vertical: 4.0,
-                    ),
-                  ),
-                  icon: Icon(Icons.upload_file_outlined),
-                  onPressed: () {
-                    // TODO: Implement submit logic
+                BlocBuilder<CodeEditorBloc, CodeEditorState>(
+                  builder: (context, state) {
+                    final isRunning =
+                        state.codeSubmissionState == CodeExecutionPending();
+
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Visibility(
+                          visible: (isRunning),
+                          child: CircularProgressIndicator(),
+                        ),
+                        Visibility(
+                          maintainAnimation: true,
+                          maintainState: true,
+                          maintainSize: true,
+                          visible: !isRunning,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 18.0,
+                                vertical: 4.0,
+                              ),
+                            ),
+                            icon: Icon(Icons.upload_file_outlined),
+                            onPressed: () {
+                              codeEditorBloc.add(
+                                CodeEditorSubmitCodeEvent(question: question),
+                              );
+                            },
+                            label: const Text('Submit'),
+                          ),
+                        ),
+                      ],
+                    );
                   },
-                  label: const Text('Submit'),
                 ),
               ],
             ),
@@ -283,13 +334,26 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
                         enabledBorder: InputBorder.none,
                       ),
                     ),
-                    child: CodeField(
-                      controller: codeController,
-                      expands: true,
-                      background: theme.scaffoldBackgroundColor,
-                      gutterStyle: GutterStyle(
-                        width: 68,
+                    child: SingleChildScrollView(
+                      child: CodeField(
+                        controller: codeController,
+                        expands: false,
+                        wrap: false,
+                        textStyle: Theme.of(context).textTheme.bodyMedium,
                         background: theme.scaffoldBackgroundColor,
+                        gutterStyle: GutterStyle(
+                          width: 44,
+                          showFoldingHandles: true,
+                          showErrors: false,
+                          textAlign: TextAlign.right,
+                          textStyle:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).hintColor,
+                                    height: 1.46,
+                                  ),
+                          margin: 2,
+                          background: theme.scaffoldBackgroundColor,
+                        ),
                       ),
                     ),
                   ),
@@ -384,7 +448,9 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
                     const SizedBox(width: 16),
                     ElevatedButton(
                       onPressed: () {
-                        // TODO: Implement submit logic
+                        codeEditorBloc.add(
+                          CodeEditorSubmitCodeEvent(question: question),
+                        );
                       },
                       child: const Text('Submit'),
                     ),
@@ -424,10 +490,39 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
       isScrollControlled: true,
       builder: (context) {
         return RunCodeResultSheet(
-          testcases: testcases,
+          sampleTestcases: testcases,
           executionResult: result,
+          isCodeSubmitted: false,
         );
       },
+    );
+  }
+
+  void _onCodeSubmissionExecutionSuccess(
+    BuildContext context, {
+    required CodeExecutionResult result,
+    required List<TestCase> testcases,
+  }) {
+    if (result.didCodeResultInError) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return RunCodeResultSheet(
+            sampleTestcases: testcases,
+            executionResult: result,
+            isCodeSubmitted: true,
+          );
+        },
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => CodeSuccessfulSubmissionDialog(
+        result: result,
+      ),
     );
   }
 }

@@ -25,6 +25,12 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
         case CodeEditorCodeUpdateEvent():
           _onCodeEditorCodeUpdateEvent(event, emit);
           break;
+        case CodeEditorSubmitCodeEvent():
+          await _onCodeEditorSubmitCodeEvent(event, emit);
+          break;
+        case CodeEditorSubmitCodeResultUpdateEvent():
+          _onCodeEditorSubmitCodeResultUpdateEvent(event, emit);
+          break;
       }
     });
   }
@@ -46,7 +52,7 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
         testCases: event.question.exampleTestCases,
       ),
     );
-    final codeExceutionResult = await _codeEdtiorRepository.runCode(
+    final runCodeResult = await _codeEdtiorRepository.runCode(
       questionTitleSlug: event.question.titleSlug ?? "",
       questionId: event.question.questionId ?? '0',
       programmingLanguage: ProgrammingLanguage.cpp.name,
@@ -58,45 +64,22 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
               .join('\n') ??
           '',
     );
-    if (codeExceutionResult.isFailure) {
+    if (runCodeResult.isFailure) {
       emit(state.copyWith(executionState: CodeExecutionError()));
       return;
     }
 
     // Start polling for execution result
-    int timeoutInSeconds = 5;
-    int elapsedSeconds = 0;
-
-    _timer = Timer.periodic(const Duration(seconds: 2), (timer) async {
-      if (elapsedSeconds >= timeoutInSeconds) {
-        add(CodeEditorRunCodeResultUpdateEvent(
-          executionResult: CodeExecutionError(),
-        ));
-        _timer?.cancel();
-        return;
-      }
-      elapsedSeconds++;
-
-      final executionResult = await _codeEdtiorRepository.checkExcecutionResult(
-          executionId: codeExceutionResult.getSuccessValue);
-      if (executionResult.isFailure) {
-        add(CodeEditorRunCodeResultUpdateEvent(
-          executionResult: CodeExecutionError(),
-        ));
-        _timer?.cancel();
-        return;
-      }
-
-      if (executionResult.getSuccessValue.state ==
-          CodeExecutionResultState.success) {
-        add(CodeEditorRunCodeResultUpdateEvent(
-          executionResult: CodeExecutionSuccess(
-            executionResult.getSuccessValue,
+    _monitorCodeExecution(
+      executionId: runCodeResult.getSuccessValue,
+      onCodeExecutionResultRecieved: (executionResultState) {
+        add(
+          CodeEditorRunCodeResultUpdateEvent(
+            executionResult: executionResultState,
           ),
-        ));
-        _timer?.cancel();
-      }
-    });
+        );
+      },
+    );
   }
 
   void _onCodeEdtiorRunCodeResultUpdate(
@@ -115,6 +98,96 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
     emit(
       state.copyWith(
         code: event.updatedCode,
+      ),
+    );
+  }
+
+  Future<void> _onCodeEditorSubmitCodeEvent(
+    CodeEditorSubmitCodeEvent event,
+    Emitter<CodeEditorState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        codeSubmissionState: CodeExecutionPending(),
+        // Might need to modify when custom testcase feature is implemented
+        testCases: event.question.exampleTestCases,
+      ),
+    );
+    final runSubmitCodeResult = await _codeEdtiorRepository.submitCode(
+      questionTitleSlug: event.question.titleSlug ?? "",
+      questionId: event.question.questionId ?? '0',
+      programmingLanguage: ProgrammingLanguage.cpp.name,
+      code: state.code,
+      testCases: event.question.exampleTestCases
+              ?.map(
+                (e) => e.inputs.join('\n'),
+              )
+              .join('\n') ??
+          '',
+    );
+    if (runSubmitCodeResult.isFailure) {
+      emit(state.copyWith(executionState: CodeExecutionError()));
+      return;
+    }
+
+    // Start polling for execution result
+    _monitorCodeExecution(
+      executionId: runSubmitCodeResult.getSuccessValue.toString(),
+      onCodeExecutionResultRecieved: (executionResultState) {
+        add(
+          CodeEditorSubmitCodeResultUpdateEvent(
+            executionResult: executionResultState,
+          ),
+        );
+      },
+    );
+  }
+
+  void _monitorCodeExecution({
+    required String executionId,
+    required Function(CodeExecutionState) onCodeExecutionResultRecieved,
+  }) {
+    int timeoutInSeconds = 5;
+    int elapsedSeconds = 0;
+
+    _timer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      if (elapsedSeconds >= timeoutInSeconds) {
+        onCodeExecutionResultRecieved(CodeExecutionError());
+
+        _timer?.cancel();
+        return;
+      }
+      elapsedSeconds++;
+
+      final executionResult = await _codeEdtiorRepository.checkExcecutionResult(
+        executionId: executionId,
+      );
+      if (executionResult.isFailure) {
+        onCodeExecutionResultRecieved(
+          CodeExecutionError(),
+        );
+        _timer?.cancel();
+        return;
+      }
+
+      if (executionResult.getSuccessValue.state ==
+          CodeExecutionResultState.success) {
+        onCodeExecutionResultRecieved(
+          CodeExecutionSuccess(
+            executionResult.getSuccessValue,
+          ),
+        );
+        _timer?.cancel();
+      }
+    });
+  }
+
+  void _onCodeEditorSubmitCodeResultUpdateEvent(
+      CodeEditorSubmitCodeResultUpdateEvent event,
+      Emitter<CodeEditorState> emit) {
+    emit(
+      state.copyWith(
+        codeSubmissionState: event.executionResult,
       ),
     );
   }

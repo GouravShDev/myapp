@@ -1,13 +1,16 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/test_case_manager.dart';
+import 'package:codersgym/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:flutter/material.dart';
 
 class TestCaseBottomSheet extends StatelessWidget {
   final List<TestCase> testcases;
-
+  final VoidCallback onRunCode;
   const TestCaseBottomSheet({
     super.key,
     required this.testcases,
+    required this.onRunCode,
   });
 
   @override
@@ -47,30 +50,33 @@ class TestCaseBottomSheet extends StatelessWidget {
                 ),
 
                 // Header
-                Padding(
-                  padding: const EdgeInsets.symmetric(
+                const Padding(
+                  padding: EdgeInsets.symmetric(
                     vertical: 8,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Testcases',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Row(
-                        children: [
-                          // Run Test Cases Button
-                          OutlinedButton.icon(
-                            onPressed: () {},
-                            icon: const Icon(Icons.play_arrow),
-                            label: const Text('Run Code'),
-                          ),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     // Run Test Cases Button
+                      //     OutlinedButton.icon(
+                      //       onPressed: () {
+                      //         context.maybePop();
+                      //         onRunCode();
+                      //       },
+                      //       icon: const Icon(Icons.play_arrow),
+                      //       label: const Text('Run Code'),
+                      //     ),
+                      //   ],
+                      // ),
                     ],
                   ),
                 ),

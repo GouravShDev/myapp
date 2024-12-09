@@ -66,7 +66,30 @@ class TestCaseManager extends HookWidget {
                         : null,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text("Case ${index + 1}"),
+                      child: Row(
+                        children: [
+                          if ((codeOutput?.isNotEmpty ?? false) &&
+                              (expectedOutput?.isNotEmpty ?? false)) ...[
+                            Icon(
+                              Icons.circle,
+                              size: 6,
+                              color: codeOutput![index] ==
+                                      expectedOutput![index]
+                                  ? Theme.of(context).colorScheme.successColor
+                                  : Theme.of(context).colorScheme.error,
+                            ),
+                            SizedBox(width: 4),
+                          ],
+                          Text(
+                            "Case ${index + 1}",
+                            style: TextStyle(
+                              fontWeight: selectedTestcaseIndex.value == index
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

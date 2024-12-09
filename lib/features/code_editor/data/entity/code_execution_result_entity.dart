@@ -16,6 +16,7 @@ class CodeExecutionResultEntity {
   final int? elapsedTime;
   final int? taskFinishTime;
   final String? taskName;
+  final String? expectedOutput;
   final int? expectedStatusCode;
   final String? expectedLang;
   final bool? expectedRunSuccess;
@@ -25,6 +26,7 @@ class CodeExecutionResultEntity {
   final List<String>? expectedCodeAnswer;
   final List<String>? expectedCodeOutput;
   final List<String>? expectedStdOutputList;
+  final String? lastTestcase;
   final int? expectedElapsedTime;
   final int? expectedTaskFinishTime;
   final String? expectedTaskName;
@@ -65,6 +67,7 @@ class CodeExecutionResultEntity {
     this.expectedStdOutputList,
     this.expectedElapsedTime,
     this.expectedTaskFinishTime,
+    this.expectedOutput,
     this.expectedTaskName,
     this.correctAnswer,
     this.compareResult,
@@ -77,6 +80,7 @@ class CodeExecutionResultEntity {
     this.submissionId,
     this.statusMsg,
     this.state,
+    this.lastTestcase,
   });
 
   factory CodeExecutionResultEntity.fromJson(Map<String, dynamic> json) =>
@@ -93,13 +97,18 @@ class CodeExecutionResultEntity {
             : List<String>.from(json["code_answer"]!.map((x) => x)),
         codeOutput: json["code_output"] == null
             ? []
-            : List<String>.from(json["code_output"]!.map((x) => x)),
+            : (json["code_output"] is String)
+                ? [json["code_output"]]
+                : List<String>.from(json["code_output"]!.map((x) => x)),
         stdOutputList: json["std_output_list"] == null
             ? []
-            : List<String>.from(json["std_output_list"]!.map((x) => x)),
+            : (json["std_output_list"] is String)
+                ? json["std_output_list"]
+                : List<String>.from(json["std_output_list"]!.map((x) => x)),
         elapsedTime: json["elapsed_time"],
         taskFinishTime: json["task_finish_time"],
         taskName: json["task_name"],
+        expectedOutput: json['expected_output'],
         expectedStatusCode: json["expected_status_code"],
         expectedLang: json["expected_lang"],
         expectedRunSuccess: json["expected_run_success"],
@@ -130,6 +139,7 @@ class CodeExecutionResultEntity {
         submissionId: json["submission_id"],
         statusMsg: json["status_msg"],
         state: json["state"],
+        lastTestcase: json['last_testcase'],
       );
 }
 
@@ -153,15 +163,17 @@ extension CodeExecutionResultEntityExt on CodeExecutionResultEntity {
         CodeExecutionResultState.failed;
 
     return CodeExecutionResult(
-      runTime: statusRuntime,
+      runTime: statusRuntime != 'N/A' ? statusRuntime : null,
       statusMessage: statusMsg,
       state: codeExecutionState,
+      lastTestCasesInputs: lastTestcase?.split('\n'),
+      lastExpectedOutput: expectedOutput,
       // Leetcode gives empty string in each of the list in the response
       codeAnswers: codeAnswer
         ?..removeWhere(
           (element) => element.isEmpty,
         ),
-      codePrintOutputs: codeOutput
+      codePrintOutputs: stdOutputList
         ?..removeWhere(
           (element) => element.isEmpty,
         ),
@@ -173,6 +185,10 @@ extension CodeExecutionResultEntityExt on CodeExecutionResultEntity {
       fullCompileError: fullCompileError,
       totalCorrect: totalCorrect,
       totalTestcases: totalTestcases,
+      memoryPercentile: memoryPercentile,
+      runtimePercentile: runtimePercentile,
+      statusMemory: statusMemory,
+      lastCodeOutput: codeOutput?.first,
     );
   }
 }

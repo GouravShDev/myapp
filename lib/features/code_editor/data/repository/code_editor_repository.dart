@@ -10,7 +10,7 @@ class CodeEditorRepositoryImp implements CodeEditorRepository {
 
   CodeEditorRepositoryImp({required this.leetcodeApi});
   @override
-Future<Result<String, Exception>> runCode({
+  Future<Result<String, Exception>> runCode({
     required String questionTitleSlug,
     required String questionId,
     required String programmingLanguage,
@@ -24,6 +24,7 @@ Future<Result<String, Exception>> runCode({
         programmingLanguage: programmingLanguage,
         code: code,
         testCases: testCases,
+        submitCode: false,
       );
       final interpretId = data?['interpret_id'] as String?;
       if (data == null || interpretId == null) {
@@ -47,6 +48,33 @@ Future<Result<String, Exception>> runCode({
       }
       final result = CodeExecutionResultEntity.fromJson(data);
       return Success(result.toCodeExecutionResult());
+    } on ApiException catch (e) {
+      return Failure(Exception(e.message));
+    }
+  }
+
+  @override
+  Future<Result<int, Exception>> submitCode({
+    required String questionTitleSlug,
+    required String questionId,
+    required String programmingLanguage,
+    required String code,
+    required String testCases,
+  }) async {
+    try {
+      final data = await leetcodeApi.runCode(
+        questionTitleSlug: questionTitleSlug,
+        questionId: questionId,
+        programmingLanguage: programmingLanguage,
+        code: code,
+        testCases: testCases,
+        submitCode: true,
+      );
+      final submissionId = data?['submission_id'] as int?;
+      if (data == null || submissionId == null) {
+        return Failure(Exception("No data found"));
+      }
+      return Success(submissionId);
     } on ApiException catch (e) {
       return Failure(Exception(e.message));
     }

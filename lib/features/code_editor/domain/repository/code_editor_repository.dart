@@ -10,6 +10,14 @@ abstract interface class CodeEditorRepository {
     required String testCases,
   });
 
+  Future<Result<int, Exception>> submitCode({
+    required String questionTitleSlug,
+    required String questionId,
+    required String programmingLanguage,
+    required String code,
+    required String testCases,
+  });
+
   Future<Result<CodeExecutionResult, Exception>> checkExcecutionResult({
     required String executionId,
   });

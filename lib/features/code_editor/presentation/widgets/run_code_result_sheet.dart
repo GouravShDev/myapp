@@ -7,11 +7,13 @@ import 'package:flutter/material.dart';
 class RunCodeResultSheet extends StatelessWidget {
   const RunCodeResultSheet({
     super.key,
-    required this.testcases,
+    required this.sampleTestcases,
     required this.executionResult,
+    required this.isCodeSubmitted,
   });
-  final List<TestCase> testcases;
+  final List<TestCase> sampleTestcases;
   final CodeExecutionResult executionResult;
+  final bool isCodeSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -54,26 +56,15 @@ class RunCodeResultSheet extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                     vertical: 4.0,
                   ),
-                  child: Row(
-                    children: [
-                      Text(
-                        executionResult.codeExecutionResultMessage,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: executionResult.didCodeResultInError
-                                  ? Theme.of(context).colorScheme.error
-                                  : Theme.of(context).colorScheme.successColor,
-                            ),
-                      ),
-                    ],
-                  ),
+                  child: CodeExecutionResultHeading(
+                      executionResult: executionResult),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 12.0,
                 ),
                 if (executionResult.fullCompileError != null)
                   Container(
-                    padding: EdgeInsets.all(6.0),
+                    padding: const EdgeInsets.all(6.0),
                     decoration: BoxDecoration(
                       color:
                           Theme.of(context).colorScheme.error.withOpacity(0.1),
@@ -88,16 +79,76 @@ class RunCodeResultSheet extends StatelessWidget {
                   )
                 else
                   TestCaseManager(
-                    testcases: testcases,
+                    testcases: isCodeSubmitted
+                        ? [
+                            TestCase(
+                              inputs: executionResult.lastTestCasesInputs ?? [],
+                            )
+                          ]
+                        : sampleTestcases,
                     readonly: true,
-                    codeOutput: executionResult.codeAnswers,
-                    expectedOutput: executionResult.expectedCodeAnswer,
+                    codeOutput: isCodeSubmitted
+                        ? [executionResult.lastCodeOutput ?? '']
+                        : executionResult.codeAnswers,
+                    expectedOutput: isCodeSubmitted
+                        ? [(executionResult.lastExpectedOutput ?? '')]
+                        : executionResult.expectedCodeAnswer,
                   )
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class CodeExecutionResultHeading extends StatelessWidget {
+  const CodeExecutionResultHeading({
+    super.key,
+    required this.executionResult,
+  });
+
+  final CodeExecutionResult executionResult;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          executionResult.codeExecutionResultMessage,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: executionResult.didCodeResultInError
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.successColor,
+              ),
+        ),
+        const SizedBox(
+          width: 4,
+        ),
+        const SizedBox(
+          height: 12,
+          child: VerticalDivider(),
+        ),
+        const SizedBox(
+          width: 4,
+        ),
+        if (executionResult.totalCorrect == executionResult.totalTestcases)
+          Text(
+            executionResult.runTime ?? '',
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          )
+        else
+          Text(
+            '${executionResult.totalCorrect}/${executionResult.totalTestcases} testcase passed',
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).hintColor,
+                ),
+          ),
+      ],
     );
   }
 }

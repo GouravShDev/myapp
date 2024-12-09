@@ -196,22 +196,23 @@ class LeetcodeApi {
     required String programmingLanguage,
     required String code,
     required String testCases,
+    required bool submitCode,
   }) async {
     try {
       final leetcodeCreds =
           await _storageManager.getObjectMap(_storageManager.leetcodeSession);
 
+      final url =
+          '/problems/$questionTitleSlug/${submitCode ? 'submit' : 'interpret_solution'}/';
       final res = await _networkService.execute(
         NetworkRequest(
-          path: '/problems/$questionTitleSlug/interpret_solution/',
+          path: url,
           data: NetworkRequestBody.json(
             {
               "lang": programmingLanguage,
               "question_id": questionId,
-              "typed_code":
-                  code,
-              "data_input":
-               testCases,
+              "typed_code": code,
+              "data_input": testCases,
             },
           ),
           type: NetworkRequestType.post,
@@ -253,7 +254,7 @@ class LeetcodeApi {
             'Cookie': CookieEncoder.encode(
               leetcodeCreds ?? {},
             ),
-          'origin': "https://leetcode.com",
+            'origin': "https://leetcode.com",
             'referer': "https://leetcode.com",
             'x-csrftoken': leetcodeCreds?['csrftoken'],
           },

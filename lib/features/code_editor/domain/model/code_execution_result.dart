@@ -12,6 +12,16 @@ class CodeExecutionResult extends Equatable {
   final String? complieError;
   final String? fullCompileError;
 
+  final String? statusMemory;
+
+  final double? runtimePercentile;
+
+  final double? memoryPercentile;
+
+  final List<String>? lastTestCasesInputs;
+  final String? lastExpectedOutput;
+  final String? lastCodeOutput;
+
   const CodeExecutionResult({
     required this.runTime,
     required this.statusMessage,
@@ -23,6 +33,12 @@ class CodeExecutionResult extends Equatable {
     this.totalTestcases,
     this.complieError,
     this.fullCompileError,
+    this.statusMemory,
+    this.runtimePercentile,
+    this.memoryPercentile,
+    this.lastTestCasesInputs,
+    this.lastExpectedOutput,
+    this.lastCodeOutput,
   });
 
   bool get didCodeResultInError =>
@@ -50,6 +66,12 @@ class CodeExecutionResult extends Equatable {
         totalTestcases,
         complieError,
         fullCompileError,
+        statusMemory,
+        runtimePercentile,
+        memoryPercentile,
+        lastTestCasesInputs,
+        lastExpectedOutput,
+        lastCodeOutput,
       ];
 }
 
