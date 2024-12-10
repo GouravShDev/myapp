@@ -77,3 +77,7 @@ class CodeEditorLanguageUpdateEvent extends CodeEditorEvent {
   @override
   List<Object> get props => [language, question];
 }
+
+class CodeEditorResetCodeEvent extends CodeEditorEvent {}
+
+class CodeEditorFormatCodeEvent extends CodeEditorEvent {}

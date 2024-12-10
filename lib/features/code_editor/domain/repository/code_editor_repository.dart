@@ -21,4 +21,9 @@ abstract interface class CodeEditorRepository {
   Future<Result<CodeExecutionResult, Exception>> checkExcecutionResult({
     required String executionId,
   });
+  Future<Result<String, Exception>> formatCode({
+    required String code,
+    required int tabSize,
+    required String programmingLanguageCode,
+  });
 }

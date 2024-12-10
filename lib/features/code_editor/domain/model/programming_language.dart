@@ -24,4 +24,26 @@ extension ProgrammingLanguageExt on ProgrammingLanguage {
         return 'Python';
     }
   }
+
+  /* 
+  {
+    "c": "c",
+    "cpp": "cpp",
+    "python": "py2",
+    "python3": "py3",
+    "java": "java",
+    "golang": "go",
+    "cangjie": "cangjie"
+}
+  */
+  String get formatUrlCode {
+    switch (this) {
+      case ProgrammingLanguage.cpp:
+        return 'cpp';
+      case ProgrammingLanguage.java:
+        return 'java';
+      case ProgrammingLanguage.python:
+        return 'py3'; // not sure using py3 here
+    }
+  }
 }

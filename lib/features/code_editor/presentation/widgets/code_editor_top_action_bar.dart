@@ -36,7 +36,7 @@ class CodeEditorTopActionBar extends StatelessWidget {
     final codeEditorBloc = context.read<CodeEditorBloc>();
     final iconStyle = IconButton.styleFrom(
       backgroundColor: Colors.grey[850],
-      padding: EdgeInsets.all(
+      padding: const EdgeInsets.all(
         8,
       ),
     );
@@ -44,7 +44,7 @@ class CodeEditorTopActionBar extends StatelessWidget {
       children: [
         IconButton(
           onPressed: () => showProblemDescriptionBottomSheet(context),
-          icon: Icon(Icons.description_outlined),
+          icon: const Icon(Icons.description_outlined),
           style: iconStyle,
         ),
         IconButton(
@@ -59,18 +59,60 @@ class CodeEditorTopActionBar extends StatelessWidget {
           },
           style: iconStyle,
         ),
-        IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.format_align_left),
-          style: iconStyle,
+        BlocBuilder<CodeEditorBloc, CodeEditorState>(
+          buildWhen: (previous, current) =>
+              previous.isCodeFormatting != current.isCodeFormatting,
+          builder: (context, state) {
+            return IconButton(
+              onPressed: () {
+                codeEditorBloc.add(
+                  CodeEditorFormatCodeEvent(),
+                );
+              },
+              icon: state.isCodeFormatting
+                  ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(),
+                    )
+                  : const Icon(Icons.format_align_left),
+              style: iconStyle,
+            );
+          },
         ),
         IconButton(
           onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Warning'),
+                  content: const Text(
+                      'Are you sure you want to reset the code? This action cannot be undone.'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Dismiss the dialog
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Reset the code and dismiss the dialog
+                        codeEditorBloc.add(CodeEditorResetCodeEvent());
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Reset'),
+                    ),
+                  ],
+                );
+              },
+            );
           },
           icon: Transform(
             transform: Matrix4.identity()..rotateY(pi), // Flips horizontally
             alignment: Alignment.center,
-            child: Icon(
+            child: const Icon(
               Icons.refresh_rounded,
             ),
           ),
@@ -79,11 +121,11 @@ class CodeEditorTopActionBar extends StatelessWidget {
         IconButton(
           onPressed: onToggleFullScreen,
           icon: !isFullScreen
-              ? Icon(Icons.fullscreen_outlined)
-              : Icon(Icons.fullscreen_exit_outlined),
+              ? const Icon(Icons.fullscreen_outlined)
+              : const Icon(Icons.fullscreen_exit_outlined),
           style: iconStyle,
         ),
-        Spacer(),
+        const Spacer(),
         BlocBuilder<CodeEditorBloc, CodeEditorState>(
           builder: (context, state) {
             final isRunning =
@@ -94,7 +136,7 @@ class CodeEditorTopActionBar extends StatelessWidget {
               children: [
                 Visibility(
                   visible: (isRunning),
-                  child: CircularProgressIndicator(),
+                  child: const CircularProgressIndicator(),
                 ),
                 Visibility(
                   maintainAnimation: true,
@@ -103,12 +145,12 @@ class CodeEditorTopActionBar extends StatelessWidget {
                   visible: !isRunning,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                         horizontal: 18.0,
                         vertical: 4.0,
                       ),
                     ),
-                    icon: Icon(Icons.upload_file_outlined),
+                    icon: const Icon(Icons.upload_file_outlined),
                     onPressed: () {
                       codeEditorBloc.add(
                         CodeEditorSubmitCodeEvent(question: question),

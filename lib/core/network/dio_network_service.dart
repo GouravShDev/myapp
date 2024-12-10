@@ -20,10 +20,7 @@ class DioNetworkService extends NetworkService {
 
   Dio _getDefaultDioClient() {
     _headers.addAll(configuration.headers ?? {});
-    _headers['content-type'] = 'application/json; charset=utf-8';
-    _headers['User-Agent'] =
-        'Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Mobile Safari/537.36';
-    final dio = Dio()
+  final dio = Dio()
       ..options.baseUrl = configuration.baseUrl
       ..options.headers = _headers
       ..options.connectTimeout = const Duration(seconds: 15)

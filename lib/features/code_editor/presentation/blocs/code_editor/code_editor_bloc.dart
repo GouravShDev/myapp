@@ -45,6 +45,12 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
         case CodeEditorLanguageUpdateEvent():
           _onCodeEditorLanguageUpdateEvent(event, emit);
           break;
+        case CodeEditorFormatCodeEvent():
+          await _onCodeEditorFormatCodeEvent(event, emit);
+          break;
+        case CodeEditorResetCodeEvent():
+          _onCodeEditorResetCodeEvent(event, emit);
+          break;
       }
     });
   }
@@ -63,7 +69,7 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
     }
   }
 
-  _onCodeEditorRunCodeEvent(
+  Future<void> _onCodeEditorRunCodeEvent(
     CodeEditorRunCodeEvent event,
     Emitter<CodeEditorState> emit,
   ) async {
@@ -234,6 +240,7 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
         isStateInitialized: true,
         language: language,
         code: code ?? '',
+        question: event.question,
       ),
     );
   }
@@ -254,6 +261,43 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
         language: event.language,
         code: code,
       ),
+    );
+  }
+
+  Future<void> _onCodeEditorFormatCodeEvent(
+    CodeEditorFormatCodeEvent event,
+    Emitter<CodeEditorState> emit,
+  ) async {
+    emit(state.copyWith(
+      isCodeFormatting: true,
+    ));
+    final codeFormatResult = await _codeEdtiorRepository.formatCode(
+        code: state.code,
+        tabSize: 4,
+        programmingLanguageCode: state.language.formatUrlCode);
+
+    codeFormatResult.when(
+      onSuccess: (formattedCode) {
+        emit(state.copyWith(
+          code: formattedCode,
+          isCodeFormatting: false,
+        ));
+      },
+      onFailure: (exception) {},
+    );
+  }
+
+  void _onCodeEditorResetCodeEvent(
+    CodeEditorResetCodeEvent event,
+    Emitter<CodeEditorState> emit,
+  ) {
+    final code = state.question?.codeSnippets
+        ?.firstWhereOrNull(
+          (element) => element.langSlug == state.language.name,
+        )
+        ?.code;
+    emit(
+      state.copyWith(code: code),
     );
   }
 }

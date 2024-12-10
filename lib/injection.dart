@@ -63,13 +63,24 @@ Future<void> initializeDependencies() async {
         AppDioLogger(),
       ],
     ),
+    instanceName: 'leetcodeNetworkService',
+  );
+  getIt.registerLazySingleton<NetworkService>(
+    () => DioNetworkService(
+      configuration: NetworkConfiguration(baseUrl: ''),
+      interceptors: [
+        AppDioLogger(),
+      ],
+    ),
+    instanceName: 'dynamicBaseUrlNetworkService',
   );
 
   // REPOSITORY
   getIt.registerLazySingleton(
     () => LeetcodeApi(
       storageManger: getIt.get(),
-      networkService: getIt.get(),
+      leetcodeNetworkService: getIt.get(instanceName: 'leetcodeNetworkService'),
+      dynamicBaseUrlNetworkService: getIt.get(instanceName: 'dynamicBaseUrlNetworkService'),
     ),
   );
   getIt.registerSingleton<QuestionRepository>(

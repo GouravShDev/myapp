@@ -14,6 +14,9 @@ class CodeSuccessfulSubmissionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: 18,
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -49,7 +52,7 @@ class CodeSuccessfulSubmissionDialog extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: Text('CONTINUE'),
+              child: const Text('CONTINUE'),
             ),
           ],
         ),
@@ -165,7 +168,7 @@ class CodeSuccessfulSubmissionDialog extends StatelessWidget {
         Text(
           value,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),

@@ -93,16 +93,14 @@ class CodeEditorPageBody extends HookWidget {
     CodeEditorState newState,
   ) {
     if (prevState.language != newState.language) {
-      if (newState.code != codeController.value.code.text) {
-        dev.log(
-          newState.code,
-          name: "Updated Code",
-        );
-        codeController.value = CodeController(
-          text: newState.code,
-          language: newState.language.mode,
-        );
-      }
+      codeController.value = CodeController(
+        text: newState.code,
+        language: newState.language.mode,
+      );
+      return;
+    }
+    if (newState.code != codeController.value.code.text) {
+      codeController.value.fullText = newState.code;
     }
   }
 
@@ -205,9 +203,6 @@ class CodeEditorPageBody extends HookWidget {
           );
       // });
     }, []);
-
-    // Check if the device is in mobile view
-    final isMobile = MediaQuery.of(context).size.width < 600;
 
     // Build the main scaffold
     return Scaffold(

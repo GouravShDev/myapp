@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:codersgym/core/network/network_service.dart';
+import 'package:codersgym/core/utils/app_constants.dart';
 import 'package:codersgym/core/utils/storage/cookie_encoder.dart';
 import 'package:codersgym/core/utils/storage/storage_manager.dart';
 import 'package:codersgym/features/auth/data/service/auth_service.dart';
@@ -15,14 +16,16 @@ import 'package:codersgym/core/api/leetcode_requests.dart';
 
 class LeetcodeApi {
   late GraphQLClient _graphQLClient;
-  late NetworkService _networkService;
+  late NetworkService _leetcodeNetworkService;
+  late NetworkService _dynamicBaseUrlNetworkService;
 
   final StorageManager _storageManager;
 
   LeetcodeApi({
     GraphQLClient? client,
     required StorageManager storageManger,
-    required NetworkService networkService,
+    required NetworkService leetcodeNetworkService,
+    required NetworkService dynamicBaseUrlNetworkService,
   }) : _storageManager = storageManger {
     _graphQLClient = client ??
         GraphQLClient(
@@ -31,7 +34,8 @@ class LeetcodeApi {
           ),
           cache: GraphQLCache(),
         );
-    _networkService = networkService;
+    _leetcodeNetworkService = leetcodeNetworkService;
+    _dynamicBaseUrlNetworkService = dynamicBaseUrlNetworkService;
   }
 
   Future<Map<String, dynamic>?> getDailyQuestion() async {
@@ -197,65 +201,79 @@ class LeetcodeApi {
     required String code,
     required String testCases,
     required bool submitCode,
-  }) async {
-    try {
-      final leetcodeCreds =
-          await _storageManager.getObjectMap(_storageManager.leetcodeSession);
-
-      final url =
-          '/problems/$questionTitleSlug/${submitCode ? 'submit' : 'interpret_solution'}/';
-      final res = await _networkService.execute(
-        NetworkRequest(
-          path: url,
-          data: NetworkRequestBody.json(
-            {
-              "lang": programmingLanguage,
-              "question_id": questionId,
-              "typed_code": code,
-              "data_input": testCases,
-            },
-          ),
-          type: NetworkRequestType.post,
-          headers: {
-            'Cookie': CookieEncoder.encode(
-              leetcodeCreds ?? {},
-            ),
-            'origin': "https://leetcode.com",
-            'referer': "https://leetcode.com/problems/$questionTitleSlug/",
-            'x-csrftoken': leetcodeCreds?['csrftoken'],
-          },
-        ),
-        (data) => data,
-      );
-      return res.when(
-        ok: (data) => data,
-        error: (error) {
-          throw ApiServerException(error.message ?? '', error.code);
+  }) {
+    final url =
+        '/problems/$questionTitleSlug/${submitCode ? 'submit' : 'interpret_solution'}/';
+    return _executeApiRequest(
+      path: url,
+      data: NetworkRequestBody.json(
+        {
+          "lang": programmingLanguage,
+          "question_id": questionId,
+          "typed_code": code,
+          "data_input": testCases,
         },
-      );
-    } catch (e) {
-      rethrow;
-    }
+      ),
+      type: NetworkRequestType.post,
+      referer: "https://leetcode.com/problems/$questionTitleSlug/",
+    );
   }
 
   Future<Map<String, dynamic>?> checkSubmission({
     required String submissionId,
   }) async {
+    return _executeApiRequest(
+      path: '/submissions/detail/$submissionId/check/',
+      data: NetworkRequestBody.empty(),
+      type: NetworkRequestType.get,
+    );
+  }
+
+  Future<Map<String, dynamic>?> formatCode({
+    required String code,
+    required String languageCode,
+    required bool insertSpaces,
+    required int tabSize,
+  }) async {
+    return _executeApiRequest(
+      path: LeetcodeConstants.leetcodeFormatUrl.replaceFirst(
+        '{lang}',
+        languageCode,
+      ),
+      data: NetworkRequestBody.json({
+        'code': code,
+        'insertSpaces': insertSpaces,
+        'tabSize': tabSize,
+      }),
+      type: NetworkRequestType.post,
+      isDynamicBaseUrl: true,
+    );
+  }
+
+  Future<Map<String, dynamic>?> _executeApiRequest({
+    required String path,
+    required NetworkRequestBody data,
+    required NetworkRequestType type,
+    String? referer,
+    bool? isDynamicBaseUrl = false,
+  }) async {
     try {
       final leetcodeCreds =
           await _storageManager.getObjectMap(_storageManager.leetcodeSession);
-
-      final res = await _networkService.execute(
+      final networkServie = (isDynamicBaseUrl ?? false)
+          ? _dynamicBaseUrlNetworkService
+          : _leetcodeNetworkService;
+      final res = await networkServie.execute(
         NetworkRequest(
-          path: '/submissions/detail/$submissionId/check/',
-          data: NetworkRequestBody.empty(),
-          type: NetworkRequestType.get,
+          path: path,
+          data: data,
+          type: type,
           headers: {
             'Cookie': CookieEncoder.encode(
               leetcodeCreds ?? {},
             ),
             'origin': "https://leetcode.com",
-            'referer': "https://leetcode.com",
+            'referer': referer ?? "https://leetcode.com",
             'x-csrftoken': leetcodeCreds?['csrftoken'],
           },
         ),

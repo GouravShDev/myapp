@@ -3,18 +3,22 @@ part of 'code_editor_bloc.dart';
 class CodeEditorState extends Equatable {
   final bool isStateInitialized;
   final String code;
+  final Question? question;
   final ProgrammingLanguage language;
   final CodeExecutionState executionState;
   final CodeExecutionState codeSubmissionState;
   final List<TestCase>? testCases;
+  final bool isCodeFormatting;
 
   const CodeEditorState({
     required this.isStateInitialized,
     required this.code,
+    this.question,
     required this.language,
     required this.executionState,
     required this.codeSubmissionState,
     this.testCases,
+    required this.isCodeFormatting,
   });
 
   factory CodeEditorState.initial() {
@@ -24,6 +28,7 @@ class CodeEditorState extends Equatable {
       language: ProgrammingLanguage.cpp,
       executionState: CodeExcecutionInitial(),
       codeSubmissionState: CodeExcecutionInitial(),
+      isCodeFormatting: false,
     );
   }
 
@@ -34,6 +39,8 @@ class CodeEditorState extends Equatable {
     CodeExecutionState? executionState,
     CodeExecutionState? codeSubmissionState,
     List<TestCase>? testCases,
+    Question? question,
+    bool? isCodeFormatting,
   }) {
     return CodeEditorState(
       isStateInitialized: isStateInitialized ?? this.isStateInitialized,
@@ -42,6 +49,8 @@ class CodeEditorState extends Equatable {
       executionState: executionState ?? this.executionState,
       testCases: testCases ?? this.testCases,
       codeSubmissionState: codeSubmissionState ?? this.codeSubmissionState,
+      question: question ?? this.question,
+      isCodeFormatting: isCodeFormatting ?? this.isCodeFormatting,
     );
   }
 
@@ -52,7 +61,8 @@ class CodeEditorState extends Equatable {
         executionState,
         testCases,
         codeSubmissionState,
-        isStateInitialized
+        isStateInitialized,
+        isCodeFormatting,
       ];
 
   @override

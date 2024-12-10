@@ -79,4 +79,27 @@ class CodeEditorRepositoryImp implements CodeEditorRepository {
       return Failure(Exception(e.message));
     }
   }
+
+  @override
+  Future<Result<String, Exception>> formatCode({
+    required String code,
+    required int tabSize,
+    required String programmingLanguageCode,
+  }) async {
+    try {
+      final data = await leetcodeApi.formatCode(
+        code: code,
+        insertSpaces: true, // not sure usecase of this in formatting
+        tabSize: tabSize,
+        languageCode: programmingLanguageCode,
+      );
+      final formatedCode = data?['code'] as String?;
+      if (data == null || formatedCode == null) {
+        return Failure(Exception("No data found"));
+      }
+      return Success(formatedCode);
+    } on ApiException catch (e) {
+      return Failure(Exception(e.message));
+    }
+  }
 }
