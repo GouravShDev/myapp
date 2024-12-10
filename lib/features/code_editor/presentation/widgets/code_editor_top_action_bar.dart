@@ -1,6 +1,9 @@
 import 'dart:math';
+import 'dart:ui';
 
+import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
+import 'package:codersgym/features/code_editor/presentation/widgets/leetcode_login_dialog.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/question_description_bottomsheet.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +37,10 @@ class CodeEditorTopActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final codeEditorBloc = context.read<CodeEditorBloc>();
+    final authBloc = context.read<AuthBloc>();
+    final allowCodeRun =
+        false ?? authBloc.isUserAuthenticatedWithLeetcodeAccount;
+
     final iconStyle = IconButton.styleFrom(
       backgroundColor: Colors.grey[850],
       padding: const EdgeInsets.all(
@@ -139,26 +146,49 @@ class CodeEditorTopActionBar extends StatelessWidget {
                   child: const CircularProgressIndicator(),
                 ),
                 Visibility(
-                  maintainAnimation: true,
-                  maintainState: true,
-                  maintainSize: true,
-                  visible: !isRunning,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18.0,
-                        vertical: 4.0,
-                      ),
-                    ),
-                    icon: const Icon(Icons.upload_file_outlined),
-                    onPressed: () {
-                      codeEditorBloc.add(
-                        CodeEditorSubmitCodeEvent(question: question),
-                      );
-                    },
-                    label: const Text('Submit'),
-                  ),
-                ),
+                    maintainAnimation: true,
+                    maintainState: true,
+                    maintainSize: true,
+                    visible: !isRunning,
+                    child: (allowCodeRun)
+                        ? ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18.0,
+                                vertical: 4.0,
+                              ),
+                            ),
+                            icon: const Icon(Icons.upload_file_outlined),
+                            onPressed: () {
+                              codeEditorBloc.add(
+                                CodeEditorSubmitCodeEvent(question: question),
+                              );
+                            },
+                            label: const Text('Submit'),
+                          )
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                                8.0), // Match button shape
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(
+                                  sigmaX: 10.0, sigmaY: 10.0), // Blur intensity
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 18.0,
+                                    vertical: 4.0,
+                                  ),
+                                  backgroundColor: Colors.white
+                                      .withOpacity(0.3), // Semi-transparent
+                                ),
+                                icon: const Icon(Icons
+                                    .lock), // Replace icon for disabled state
+                                onPressed: () =>
+                                    LeetcodeLoginDialog.show(context),
+                                label: const Text('Locked'),
+                              ),
+                            ),
+                          )),
               ],
             );
           },

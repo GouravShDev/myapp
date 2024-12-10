@@ -22,6 +22,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     });
   }
+
+  bool get isUserAuthenticatedWithLeetcodeAccount =>
+      state is AuthenticatedWithLeetcodeAccount;
+
   void _onAuthCheckStatus(
       AuthCheckStatus event, Emitter<AuthState> emit) async {
     final authStatus = await _authService.checkAuthentication();

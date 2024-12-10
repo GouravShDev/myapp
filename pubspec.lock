@@ -526,10 +526,11 @@ packages:
   flutter_code_editor:
     dependency: "direct main"
     description:
-      name: flutter_code_editor
-      sha256: "505ad56dcc8a7be4b782c8113574571bc4b9723499b0c1f385b3e2c3fae11f5d"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "fix/editor_new_flutter_version"
+      resolved-ref: a25703ea62bfe43199172b4ef9aa52bf428bf8fb
+      url: "https://github.com/GouravShDev/flutter-code-editor.git"
+    source: git
     version: "0.3.2"
   flutter_floating_bottom_bar:
     dependency: "direct main"
@@ -870,7 +871,7 @@ packages:
     source: hosted
     version: "2.0.0"
   highlight:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: highlight
       sha256: "5353a83ffe3e3eca7df0abfb72dcf3fa66cc56b953728e7113ad4ad88497cf21"
