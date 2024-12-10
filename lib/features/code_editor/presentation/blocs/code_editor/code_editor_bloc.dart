@@ -1,18 +1,26 @@
 import 'package:bloc/bloc.dart';
+import 'package:codersgym/core/utils/storage/local_storage_manager.dart';
+import 'package:codersgym/core/utils/storage/storage_manager.dart';
 import 'package:codersgym/features/code_editor/domain/model/code_execution_result.dart';
 import 'package:codersgym/features/code_editor/domain/model/programming_language.dart';
 import 'package:codersgym/features/code_editor/domain/repository/code_editor_repository.dart';
+import 'package:codersgym/features/profile/domain/model/user_profile.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:equatable/equatable.dart';
 import 'dart:async';
+import 'package:collection/collection.dart';
 
 part 'code_editor_event.dart';
 part 'code_editor_state.dart';
 
 class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
   final CodeEditorRepository _codeEdtiorRepository;
+  final StorageManager _localStorageManager;
+
+  static const _preferedCodingLanguageKey = 'preferedCodingLang';
   Timer? _timer;
-  CodeEditorBloc(this._codeEdtiorRepository)
+  CodeEditorState previousState = CodeEditorState.initial();
+  CodeEditorBloc(this._codeEdtiorRepository, this._localStorageManager)
       : super(CodeEditorState.initial()) {
     on<CodeEditorEvent>((event, emit) async {
       switch (event) {
@@ -31,6 +39,12 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
         case CodeEditorSubmitCodeResultUpdateEvent():
           _onCodeEditorSubmitCodeResultUpdateEvent(event, emit);
           break;
+        case CodeEditorCodeLoadConfig():
+          _onCodeEditorCodeLoadConfig(event, emit);
+          break;
+        case CodeEditorLanguageUpdateEvent():
+          _onCodeEditorLanguageUpdateEvent(event, emit);
+          break;
       }
     });
   }
@@ -39,6 +53,14 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
   Future<void> close() {
     _timer?.cancel();
     return super.close();
+  }
+
+  @override
+  void onTransition(Transition<CodeEditorEvent, CodeEditorState> transition) {
+    super.onTransition(transition);
+    if (transition.currentState != previousState) {
+      previousState = transition.currentState;
+    }
   }
 
   _onCodeEditorRunCodeEvent(
@@ -188,6 +210,49 @@ class CodeEditorBloc extends Bloc<CodeEditorEvent, CodeEditorState> {
     emit(
       state.copyWith(
         codeSubmissionState: event.executionResult,
+      ),
+    );
+  }
+
+  Future<void> _onCodeEditorCodeLoadConfig(
+    CodeEditorCodeLoadConfig event,
+    Emitter<CodeEditorState> emit,
+  ) async {
+    final lastSelectedLanguage =
+        await _localStorageManager.getString(_preferedCodingLanguageKey);
+
+    final language = lastSelectedLanguage != null
+        ? ProgrammingLanguage.values.byName(lastSelectedLanguage)
+        : ProgrammingLanguage.cpp;
+    final code = event.question.codeSnippets
+        ?.firstWhereOrNull(
+          (element) => element.langSlug == language.name,
+        )
+        ?.code;
+    emit(
+      state.copyWith(
+        isStateInitialized: true,
+        language: language,
+        code: code ?? '',
+      ),
+    );
+  }
+
+  void _onCodeEditorLanguageUpdateEvent(
+      CodeEditorLanguageUpdateEvent event, Emitter<CodeEditorState> emit) {
+    _localStorageManager.putString(
+      _preferedCodingLanguageKey,
+      event.language.name,
+    );
+    final code = event.question.codeSnippets
+        ?.firstWhereOrNull(
+          (element) => element.langSlug == event.language.name,
+        )
+        ?.code;
+    emit(
+      state.copyWith(
+        language: event.language,
+        code: code,
       ),
     );
   }

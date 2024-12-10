@@ -1,18 +1,25 @@
 import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:codersgym/core/routes/app_router.gr.dart';
 import 'package:codersgym/features/code_editor/domain/model/code_execution_result.dart';
 import 'package:codersgym/features/code_editor/domain/model/programming_language.dart';
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
+import 'package:codersgym/features/code_editor/presentation/widgets/code_editor_back_confirmation_dialog.dart';
+import 'package:codersgym/features/code_editor/presentation/widgets/code_editor_language_dropdown.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/code_editor_top_action_bar.dart';
+import 'package:codersgym/features/code_editor/presentation/widgets/code_run_button.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/code_successful_submission_dialog.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/coding_keys.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/question_description_bottomsheet.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/run_code_result_sheet.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/test_case_bottom_sheet.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
+import 'package:codersgym/injection.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
+import 'dart:developer' as dev;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_highlight/themes/monokai-sublime.dart';
@@ -20,49 +27,179 @@ import 'package:flutter_code_editor/flutter_code_editor.dart';
 
 @RoutePage()
 class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
-  final String initialCode;
-  final ProgrammingLanguage language;
   final Question question;
-  final CodeEditorBloc codeEditorBloc;
 
   const CodeEditorPage({
     super.key,
-    required this.initialCode,
-    required this.language,
     required this.question,
-    required this.codeEditorBloc,
   });
+
+  @override
+  Widget wrappedRoute(BuildContext context) {
+    return BlocProvider(
+      create: (context) => getIt.get<CodeEditorBloc>(),
+      child: this,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    useEffect(() {
+      context.read<CodeEditorBloc>().add(CodeEditorCodeLoadConfig(question));
+      return null;
+    }, []);
+    return BlocBuilder<CodeEditorBloc, CodeEditorState>(
+      buildWhen: (previous, current) {
+        return previous.isStateInitialized != current.isStateInitialized;
+      },
+      builder: (context, state) {
+        if (!state.isStateInitialized) {
+          return const Scaffold(
+            body: CircularProgressIndicator(),
+          );
+        }
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (bool didPop, __) async {
+            if (didPop) {
+              return;
+            }
+            final shouldPop = await CodeEditorBackConfirmationDialog.show(
+                    context) ??
+                false; // Default to staying on the page if the dialog is dismissed
+            if (shouldPop && context.mounted) {
+              Navigator.pop(context);
+            }
+          },
+          child: CodeEditorPageBody(
+            question: question,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class CodeEditorPageBody extends HookWidget {
+  const CodeEditorPageBody({
+    super.key,
+    required this.question,
+  });
+  final Question question;
+
+  void _handleCodeAndLanguageChanges(
+    ValueNotifier<CodeController> codeController,
+    CodeEditorState prevState,
+    CodeEditorState newState,
+  ) {
+    if (prevState.language != newState.language) {
+      if (newState.code != codeController.value.code.text) {
+        dev.log(
+          newState.code,
+          name: "Updated Code",
+        );
+        codeController.value = CodeController(
+          text: newState.code,
+          language: newState.language.mode,
+        );
+      }
+    }
+  }
+
+  void _handleExecutionStateChanges(
+    BuildContext context,
+    CodeEditorState prevState,
+    CodeEditorState newState,
+  ) {
+    if (prevState.executionState != newState.executionState) {
+      final executionState = newState.executionState;
+      switch (executionState) {
+        case CodeExecutionSuccess():
+          _onCodeExecutionSuccess(
+            context,
+            result: executionState.result,
+            testcases: newState.testCases ?? [],
+          );
+          break;
+        case CodeExecutionError():
+          // TODO: Handle this case.
+          break;
+        default:
+          break; // Ignore other states
+      }
+    }
+  }
+
+  void _handleCodeSubmissionStateChanges(
+    BuildContext context,
+    CodeEditorState prevState,
+    CodeEditorState newState,
+  ) {
+    if (prevState.codeSubmissionState != newState.codeSubmissionState) {
+      final codeSubmissionState = newState.codeSubmissionState;
+      switch (codeSubmissionState) {
+        case CodeExecutionSuccess():
+          _onCodeSubmissionExecutionSuccess(
+            context,
+            result: codeSubmissionState.result,
+            testcases: newState.testCases ?? [],
+          );
+          break;
+        case CodeExecutionError():
+          // TODO: Handle this case.
+          break;
+        default:
+          break; // Ignore other states
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     // Use hooks for state management
-    final selectedLanguage = useState(language);
-    final testResults = useState<List<TestCaseResult>>([]);
     final isFullScreen = useState(false);
+    final codeEditorBloc = context.read<CodeEditorBloc>();
 
     // Create a code controller using useRef to persist across rebuilds
-    final codeController = useState(CodeController(
-      text: codeEditorBloc.state.code.isNotEmpty
-          ? codeEditorBloc.state.code
-          : initialCode,
-      language: language.mode,
-      modifiers: const [
-        IndentModifier(),
-        CloseBlockModifier(),
-        TabModifier(),
-      ],
-    )).value;
+    final codeControllerState = useState(
+      CodeController(
+        text: codeEditorBloc.state.code,
+        language: codeEditorBloc.state.language.mode,
+      ),
+    );
+    final codeController = codeControllerState.value;
+
     useEffect(() {
       codeController.addListener(() {
-        codeEditorBloc
-            .add(CodeEditorCodeUpdateEvent(updatedCode: codeController.text));
+        // Prevent unnecessary emittion of state when code is already updated
+        if (codeController.text == codeEditorBloc.state.code) return;
+        codeEditorBloc.add(
+          CodeEditorCodeUpdateEvent(
+            updatedCode: codeController.text,
+          ),
+        );
       });
-      return () => codeController.dispose();
+      final stateListner = codeEditorBloc.stream.listen(
+        (newState) {
+          final prevState = codeEditorBloc.previousState;
+          _handleCodeAndLanguageChanges(
+            codeControllerState,
+            prevState,
+            newState,
+          );
+          if (!context.mounted) return;
+          _handleExecutionStateChanges(context, prevState, newState);
+          _handleCodeSubmissionStateChanges(context, prevState, newState);
+        },
+      );
+      return () {
+        stateListner.cancel();
+        codeController.dispose();
+      };
     }, []);
 
     // Run code function
-    final runCode = useCallback(() {
-      testResults.value.clear();
+    final onCodeRun = useCallback(() {
       context.read<CodeEditorBloc>().add(
             CodeEditorRunCodeEvent(question: question),
           );
@@ -72,158 +209,63 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
     // Check if the device is in mobile view
     final isMobile = MediaQuery.of(context).size.width < 600;
 
-    // Mobile-friendly bottom sheet for problem description
-
     // Build the main scaffold
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<CodeEditorBloc, CodeEditorState>(
-          listenWhen: (previous, current) =>
-              previous.executionState != current.executionState,
-          listener: (context, state) {
-            final executionState = state.executionState;
-            switch (executionState) {
-              case CodeExcecutionInitial():
-              case CodeExecutionPending():
-                break;
-              case CodeExecutionSuccess():
-                _onCodeExecutionSuccess(
-                  context,
-                  result: executionState.result,
-                  testcases: state.testCases ?? [],
-                );
-              case CodeExecutionError():
-              // TODO: Handle this case.
-            }
-          },
-        ),
-        BlocListener<CodeEditorBloc, CodeEditorState>(
-          listenWhen: (previous, current) =>
-              previous.codeSubmissionState != current.codeSubmissionState,
-          listener: (context, state) {
-            final codeSubmissionState = state.codeSubmissionState;
-            switch (codeSubmissionState) {
-              case CodeExcecutionInitial():
-              case CodeExecutionPending():
-                break;
-              case CodeExecutionSuccess():
-                _onCodeSubmissionExecutionSuccess(
-                  context,
-                  result: codeSubmissionState.result,
-                  testcases: state.testCases ?? [],
-                );
-              case CodeExecutionError():
-              // TODO: Handle this case.
-            }
-          },
-        ),
-      ],
-      child: Scaffold(
-          bottomNavigationBar: // Action Buttons and Run Results
-              Container(
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).canvasColor,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Test Results
-                TextButton.icon(
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (context) {
-                        return TestCaseBottomSheet(
-                          testcases: question.exampleTestCases ?? [],
-                          onRunCode: runCode,
-                        );
-                      },
-                    );
-                  },
-                  label: Text("Test Cases"),
-                  icon: Icon(Icons.bug_report),
-                ),
-                BlocBuilder<CodeEditorBloc, CodeEditorState>(
-                  builder: (context, state) {
-                    final isRunning =
-                        state.executionState == CodeExecutionPending();
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Visibility(
-                          visible: (isRunning),
-                          child: CircularProgressIndicator(),
-                        ),
-                        Visibility(
-                          maintainAnimation: true,
-                          maintainState: true,
-                          maintainSize: true,
-                          visible: !isRunning,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              OutlinedButton.icon(
-                                onPressed: runCode,
-                                icon: const Icon(Icons.play_arrow),
-                                label: const Text('Run Code'),
-                              ),
-                              const SizedBox(width: 16),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
+    return Scaffold(
+        bottomNavigationBar: // Action Buttons and Run Results
+            Container(
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).canvasColor,
           ),
-          appBar: isFullScreen.value
-              ? null
-              : AppBar(
-                  title: Text(
-                    question.title ?? '',
-                  ),
-                  actions: [
-                    // Language Dropdown
-                    DropdownButton<ProgrammingLanguage>(
-                      value: selectedLanguage.value,
-                      items: ProgrammingLanguage.values
-                          .map((lang) => DropdownMenuItem(
-                                value: lang,
-                                child: Text(
-                                  lang.displayText,
-                                  style: TextStyle(
-                                    fontSize: isMobile ? 12 : 14,
-                                  ),
-                                ),
-                              ))
-                          .toList(),
-                      onChanged: (language) {
-                        if (language != null) {
-                          selectedLanguage.value = language;
-                          codeController.language = language.mode;
-                        }
-                      },
-                    ),
-                  ],
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Test Results
+              TextButton.icon(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) {
+                      return TestCaseBottomSheet(
+                        testcases: question.exampleTestCases ?? [],
+                        onRunCode: onCodeRun,
+                      );
+                    },
+                  );
+                },
+                label: const Text("Test Cases"),
+                icon: const Icon(Icons.bug_report),
+              ),
+
+              CodeRunButton(runCode: onCodeRun),
+            ],
+          ),
+        ),
+        appBar: isFullScreen.value
+            ? null
+            : AppBar(
+                title: Text(
+                  question.title ?? '',
                 ),
-          body: _buildMobileLayout(
-            context,
-            codeController,
-            testResults,
-            isFullScreen,
-            runCode,
-          )),
-    );
+                actions: [
+                  // Language Dropdown
+                  CodeEditorLanguageDropDown(
+                    question: question,
+                  ),
+                ],
+              ),
+        body: _buildEditorLayout(
+          context,
+          codeController,
+          isFullScreen,
+          onCodeRun,
+        ));
   }
 
-  Widget _buildMobileLayout(
+  Widget _buildEditorLayout(
     BuildContext context,
     CodeController codeController,
-    ValueNotifier<List<TestCaseResult>> testResults,
     ValueNotifier<bool> isFullScreen,
     VoidCallback runCode,
   ) {
@@ -231,7 +273,7 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
     return SafeArea(
       child: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 8,
           ),
           Padding(
@@ -263,7 +305,7 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
                       child: CodeField(
                         controller: codeController,
                         expands: false,
-                        wrap: false,
+                        wrap: true,
                         textStyle: Theme.of(context).textTheme.bodyMedium,
                         background: theme.scaffoldBackgroundColor,
                         gutterStyle: GutterStyle(
@@ -291,105 +333,6 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildDesktopLayout(
-    BuildContext context,
-    CodeController codeController,
-    ValueNotifier<List<TestCaseResult>> testResults,
-    VoidCallback runCode,
-  ) {
-    return Row(
-      children: [
-        // Problem Description Panel
-        Expanded(
-          flex: 2,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Problem Description',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(question.content ?? ''),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Test Cases',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  ...question.exampleTestCases?.map((testCase) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text('Input: ${testCase}'),
-                          )) ??
-                      [],
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        // Code Editor Panel
-        Expanded(
-          flex: 3,
-          child: Column(
-            children: [
-              Expanded(
-                child: CodeTheme(
-                  data: CodeThemeData(styles: monokaiSublimeTheme),
-                  child: CodeField(
-                    controller: codeController,
-                    expands: true,
-                  ),
-                ),
-              ),
-
-              // Action Buttons and Run Results
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                color: Colors.grey[200],
-                child: Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: runCode,
-                      child: const Text('Run Code'),
-                    ),
-                    const SizedBox(width: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        codeEditorBloc.add(
-                          CodeEditorSubmitCodeEvent(question: question),
-                        );
-                      },
-                      child: const Text('Submit'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Placeholder method for test case checking
-  bool _checkTestCase(TestCase testCase) {
-    // Placeholder for actual test case checking logic
-    // In a real implementation, this would involve running the code
-    // with the test case input and comparing the output
-    return true;
-  }
-
-  @override
-  Widget wrappedRoute(BuildContext context) {
-    return BlocProvider.value(
-      value: codeEditorBloc,
-      child: this,
     );
   }
 
@@ -438,16 +381,4 @@ class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
       ),
     );
   }
-}
-
-class TestCaseResult {
-  final TestCase testCase;
-  final bool isPassed;
-  final String output;
-
-  const TestCaseResult({
-    required this.testCase,
-    required this.isPassed,
-    required this.output,
-  });
 }

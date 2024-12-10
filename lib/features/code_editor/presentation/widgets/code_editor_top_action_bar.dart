@@ -65,7 +65,8 @@ class CodeEditorTopActionBar extends StatelessWidget {
           style: iconStyle,
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+          },
           icon: Transform(
             transform: Matrix4.identity()..rotateY(pi), // Flips horizontally
             alignment: Alignment.center,

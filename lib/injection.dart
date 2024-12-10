@@ -168,6 +168,7 @@ Future<void> initializeDependencies() async {
   getIt.registerFactory(
     () => CodeEditorBloc(
       getIt.get(),
+      getIt.get(),
     ),
   );
 }

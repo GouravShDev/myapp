@@ -188,7 +188,8 @@ extension CodeExecutionResultEntityExt on CodeExecutionResultEntity {
       memoryPercentile: memoryPercentile,
       runtimePercentile: runtimePercentile,
       statusMemory: statusMemory,
-      lastCodeOutput: codeOutput?.first,
+      lastCodeOutput:
+          (codeOutput?.isNotEmpty ?? false) ? codeOutput?.first : null,
     );
   }
 }

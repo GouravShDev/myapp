@@ -77,11 +77,7 @@ class QuestionDetailPage extends HookWidget implements AutoRouteWrapper {
                 onPressed: () {
                   AutoRouter.of(context).push(
                     CodeEditorRoute(
-                      initialCode:
-                          currentQuestion.codeSnippets?.first?.code ?? '',
-                      language: ProgrammingLanguage.cpp,
                       question: currentQuestion,
-                      codeEditorBloc: context.read(),
                     ),
                   );
                 },
@@ -152,9 +148,6 @@ class QuestionDetailPage extends HookWidget implements AutoRouteWrapper {
         ),
         BlocProvider(
           create: (context) => getIt.get<CommunitySolutionsBloc>(),
-        ),
-        BlocProvider(
-          create: (context) => getIt.get<CodeEditorBloc>(),
         ),
       ],
       child: this,
