@@ -38,8 +38,7 @@ class CodeEditorTopActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final codeEditorBloc = context.read<CodeEditorBloc>();
     final authBloc = context.read<AuthBloc>();
-    final allowCodeRun =
-        false ?? authBloc.isUserAuthenticatedWithLeetcodeAccount;
+    final allowCodeRun = authBloc.isUserAuthenticatedWithLeetcodeAccount;
 
     final iconStyle = IconButton.styleFrom(
       backgroundColor: Colors.grey[850],
