@@ -11,20 +11,24 @@ class AuthServiceImp implements AuthService {
   AuthServiceImp(this._storageManager, this._leetcodeApi);
   @override
   Future<AuthenticationStatus> checkAuthentication() async {
-    final credentials =
-        await _storageManager.getObjectMap(_storageManager.leetcodeSession);
-    final leetcodeUserName =
-        await _storageManager.getString(_storageManager.leetcodeUserName);
-    if (leetcodeUserName == null) {
+    try {
+      final credentials =
+          await _storageManager.getObjectMap(_storageManager.leetcodeSession);
+      final leetcodeUserName =
+          await _storageManager.getString(_storageManager.leetcodeUserName);
+      if (leetcodeUserName == null) {
+        return UnAuthenticatedStatus();
+      }
+      if (credentials != null) {
+        return LeetcodeAccountAuthenticated(
+          credentials: credentials,
+          userName: leetcodeUserName,
+        );
+      }
+      return LeetcodeUsernameAuthenticated(userName: leetcodeUserName);
+    } catch (e) {
       return UnAuthenticatedStatus();
     }
-    if (credentials != null) {
-      return LeetcodeAccountAuthenticated(
-        credentials: credentials,
-        userName: leetcodeUserName,
-      );
-    }
-    return LeetcodeUsernameAuthenticated(userName: leetcodeUserName);
   }
 
   @override
