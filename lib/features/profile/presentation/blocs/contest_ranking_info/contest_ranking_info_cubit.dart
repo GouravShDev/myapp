@@ -3,8 +3,9 @@ import 'package:codersgym/core/api/api_state.dart';
 import 'package:codersgym/features/profile/domain/model/contest_ranking_info.dart';
 import 'package:codersgym/features/profile/domain/repository/profile_repository.dart';
 
-class ContestRankingInfoCubit
-    extends Cubit<ApiState<ContestRankingInfo, Exception>> {
+typedef ContestRankingInfoState = ApiState<ContestRankingInfo, Exception>;
+
+class ContestRankingInfoCubit extends Cubit<ContestRankingInfoState> {
   ContestRankingInfoCubit(this._profileRepository) : super(ApiState.initial());
   final ProfileRepository _profileRepository;
 

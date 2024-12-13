@@ -32,8 +32,8 @@ class LeetcodeProfile extends HookWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final questionStats = userProfile.questionsStats;
-    final contestRankingInfoCubit = getIt.get<ContestRankingInfoCubit>();
-    final userProfileCalendarCubit = getIt.get<UserProfileCalendarCubit>();
+    final contestRankingInfoCubit = context.read<ContestRankingInfoCubit>();
+    final userProfileCalendarCubit = context.read<UserProfileCalendarCubit>();
     useEffect(() {
       contestRankingInfoCubit.getContestRankingInfo(userProfile.username ?? '');
       userProfileCalendarCubit

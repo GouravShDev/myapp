@@ -8,11 +8,15 @@ import 'package:collection/collection.dart';
 class LeetcodeRatingChart extends HookWidget {
   final List<DataPoint> dataPoints;
   final bool showAnimation;
+  final bool showLeftTile;
+  final bool showMaxRating;
 
   const LeetcodeRatingChart({
     super.key,
     required this.dataPoints,
     this.showAnimation = true,
+    this.showLeftTile = true,
+    this.showMaxRating = true,
   });
 
   @override
@@ -61,22 +65,23 @@ class LeetcodeRatingChart extends HookWidget {
             showingTooltipIndicators: animationShown.value
                 ? [
                     ShowingTooltipIndicators([
-                      LineBarSpot(
-                        LineChartBarData(
-                          spots: dataPoints.map((e) => e.toFlSpot()).toList(),
-                          isCurved: false,
-                          color: Theme.of(context).primaryColor,
-                          barWidth: 3,
-                          isStrokeCapRound: true,
-                          dotData: const FlDotData(
-                            show: true,
+                      if (showMaxRating)
+                        LineBarSpot(
+                          LineChartBarData(
+                            spots: dataPoints.map((e) => e.toFlSpot()).toList(),
+                            isCurved: false,
+                            color: Theme.of(context).primaryColor,
+                            barWidth: 3,
+                            isStrokeCapRound: true,
+                            dotData: const FlDotData(
+                              show: true,
+                            ),
+                            curveSmoothness: 0.5,
+                            preventCurveOverShooting: true,
                           ),
-                          curveSmoothness: 0.5,
-                          preventCurveOverShooting: true,
+                          maxIndex,
+                          maxPoint.toFlSpot(),
                         ),
-                        maxIndex,
-                        maxPoint.toFlSpot(),
-                      ),
                     ])
                   ]
                 : [],
@@ -95,7 +100,7 @@ class LeetcodeRatingChart extends HookWidget {
               ),
               leftTitles: AxisTitles(
                 sideTitles: SideTitles(
-                  showTitles: true,
+                  showTitles: showLeftTile,
                   interval: calculateInterval(dataPoints),
                   getTitlesWidget: leftTitleWidgets,
                   maxIncluded: false,

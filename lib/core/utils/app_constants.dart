@@ -3,6 +3,8 @@ class AppConstants {
   static const appName = "CodersGym";
   static const sourceCodeUrl = "https://github.com/GouravShDev/codersgym";
   static const reportBugEmail = "gourav0sharma1@gmail.com";
+  static const profileReportWidth = 627;
+  static const profileReportHeight = 1200;
 }
 
 class LeetcodeConstants {

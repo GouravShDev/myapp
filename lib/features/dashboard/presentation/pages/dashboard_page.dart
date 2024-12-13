@@ -5,6 +5,8 @@ import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
 import 'package:codersgym/features/auth/presentation/pages/login_page.dart';
 import 'package:codersgym/features/profile/domain/model/user_profile.dart';
 import 'package:codersgym/features/profile/domain/repository/profile_repository.dart';
+import 'package:codersgym/features/profile/presentation/blocs/contest_ranking_info/contest_ranking_info_cubit.dart';
+import 'package:codersgym/features/profile/presentation/blocs/cubit/user_profile_calendar_cubit.dart';
 import 'package:codersgym/features/profile/presentation/blocs/user_profile/user_profile_cubit.dart';
 import 'package:codersgym/features/profile/presentation/pages/my_profile_page.dart';
 import 'package:codersgym/features/dashboard/presentation/pages/home_page.dart';
@@ -124,6 +126,12 @@ class DashboardPage extends HookWidget implements AutoRouteWrapper {
         ),
         BlocProvider(
           create: (context) => getIt.get<UpcomingContestsCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt.get<ContestRankingInfoCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt.get<UserProfileCalendarCubit>(),
         ),
       ],
       child: this,

@@ -21,7 +21,9 @@ class UserProfileInfo extends StatelessWidget {
         ),
         Text(
           data,
-          style: textTheme.titleMedium,
+          style: textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );

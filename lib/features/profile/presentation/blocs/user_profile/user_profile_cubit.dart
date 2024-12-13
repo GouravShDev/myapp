@@ -4,7 +4,9 @@ import 'package:codersgym/features/profile/domain/model/user_profile.dart';
 import 'package:codersgym/features/profile/domain/repository/profile_repository.dart';
 import 'package:equatable/equatable.dart';
 
-class UserProfileCubit extends Cubit<ApiState<UserProfile, Exception>> {
+typedef UserProfileState = ApiState<UserProfile, Exception>;
+
+class UserProfileCubit extends Cubit<UserProfileState> {
   UserProfileCubit(this._profileRepository) : super(ApiState.initial());
   final ProfileRepository _profileRepository;
 
