@@ -25,6 +25,7 @@ class UserProfile {
   final List<LeetCodeBadge>? badges;
   final String? activeBadgeId;
   final StreakCounter? streakCounter;
+  final LeetCodeBadge? contestBadge;
 
   UserProfile({
     this.username,
@@ -50,6 +51,7 @@ class UserProfile {
     this.badges,
     this.activeBadgeId,
     this.streakCounter,
+    this.contestBadge,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -114,11 +116,13 @@ class LeetCodeBadge {
   final String? id;
   final String? displayName;
   final String? icon;
+  final bool? isExpired;
 
   LeetCodeBadge({
     required this.id,
     required this.displayName,
     required this.icon,
+    required this.isExpired,
   });
 
   factory LeetCodeBadge.fromJson(Map<String, dynamic> json) {
@@ -126,6 +130,7 @@ class LeetCodeBadge {
       id: json['id'],
       displayName: json['displayName'],
       icon: json['icon'],
+      isExpired: json['isExpired'],
     );
   }
 }

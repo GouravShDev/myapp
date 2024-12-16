@@ -69,6 +69,13 @@ class LeetCodeRequests {
                   matchedUser(username: \$username) {
                     username
                     socialAccounts
+                    contestBadge {
+                      id
+                      name
+                      expired
+                      hoverText
+                      icon
+                    }
                     githubUrl
                     contributions {
                       points

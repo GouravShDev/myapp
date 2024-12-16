@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:codersgym/core/utils/leetcode_asset_url_converter.dart';
 import 'package:codersgym/features/profile/domain/model/user_profile.dart';
 
 class UserProfileEntity {
@@ -51,6 +52,7 @@ class MatchedUserNode {
   SubmitStatsNode? submitStats;
   List<BadgeNode>? badges;
   String? activeBadgeId;
+  ContestBadge? contestBadge;
 
   MatchedUserNode({
     this.username,
@@ -62,6 +64,7 @@ class MatchedUserNode {
     this.submitStats,
     this.badges,
     this.activeBadgeId,
+    this.contestBadge,
   });
 
   factory MatchedUserNode.fromJson(Map<String, dynamic> json) {
@@ -86,6 +89,9 @@ class MatchedUserNode {
               .toList()
           : null,
       activeBadgeId: json['activeBadge']?['id'],
+      contestBadge: json['contestBadge'] != null
+          ? ContestBadge.fromJson(json['contestBadge'])
+          : null,
     );
   }
 }
@@ -213,6 +219,28 @@ class BadgeNode {
   }
 }
 
+class ContestBadge {
+  bool? expired;
+  String? name;
+  String? icon;
+  String? id;
+  ContestBadge({
+    this.name,
+    this.expired,
+    this.icon,
+    this.id,
+  });
+
+  factory ContestBadge.fromJson(Map<String, dynamic> json) {
+    return ContestBadge(
+      id: json['id'],
+      name: json['name'],
+      icon: json['icon'],
+      expired: json['expired'],
+    );
+  }
+}
+
 extension UserProfileModelConversion on UserProfileEntity {
   UserProfile toUserProfile() {
     final profile = matchedUser?.profile;
@@ -252,6 +280,15 @@ extension UserProfileModelConversion on UserProfileEntity {
           .toList(),
       activeBadgeId: matchedUser?.activeBadgeId,
       streakCounter: streakCounter?.toStreakCounter(),
+      contestBadge: LeetCodeBadge(
+        displayName: matchedUser?.contestBadge?.name,
+        icon: matchedUser?.contestBadge?.icon != null
+            ? LeetcodeAssetUrlConverter.convertRelativeUrlToAbsoluteUrl(
+                matchedUser!.contestBadge!.icon!)
+            : null,
+        isExpired: matchedUser?.contestBadge?.expired,
+        id: matchedUser?.contestBadge?.id,
+      ),
     );
   }
 }
@@ -306,17 +343,13 @@ extension AcSubmissionNumNodeConversion on AcSubmissionNumNode {
 
 extension BadgeNodeConversion on BadgeNode {
   LeetCodeBadge toBadge() {
-    String? iconUrl = icon;
-
-    // Check if the icon URL is relative
-    if (iconUrl != null && !Uri.parse(iconUrl).isAbsolute) {
-      // Prepend the base URL for relative URLs
-      iconUrl = 'https://leetcode.com/$iconUrl';
-    }
     return LeetCodeBadge(
       id: id,
       displayName: displayName,
-      icon: iconUrl,
+      icon: icon != null
+          ? LeetcodeAssetUrlConverter.convertRelativeUrlToAbsoluteUrl(icon!)
+          : null,
+      isExpired: false,
     );
   }
 }

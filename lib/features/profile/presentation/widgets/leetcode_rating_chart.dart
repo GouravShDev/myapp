@@ -10,6 +10,7 @@ class LeetcodeRatingChart extends HookWidget {
   final bool showAnimation;
   final bool showLeftTile;
   final bool showMaxRating;
+  final double? aspectRatio;
 
   const LeetcodeRatingChart({
     super.key,
@@ -17,6 +18,7 @@ class LeetcodeRatingChart extends HookWidget {
     this.showAnimation = true,
     this.showLeftTile = true,
     this.showMaxRating = true,
+    this.aspectRatio,
   });
 
   @override
@@ -47,7 +49,7 @@ class LeetcodeRatingChart extends HookWidget {
     DataPoint maxPoint = maxContestRating.value;
 
     return AspectRatio(
-      aspectRatio: 1.80,
+      aspectRatio: aspectRatio ?? 1.80,
       child: Padding(
         padding: const EdgeInsets.only(
           right: 18,

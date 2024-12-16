@@ -4,8 +4,9 @@ import 'package:codersgym/features/profile/domain/model/user_profile_calendar.da
 import 'package:codersgym/features/profile/domain/repository/profile_repository.dart';
 import 'package:equatable/equatable.dart';
 
-class UserProfileCalendarCubit
-    extends Cubit<ApiState<UserProfileCalendar, Exception>> {
+typedef UserProfileCalendarState = ApiState<UserProfileCalendar, Exception>;
+
+class UserProfileCalendarCubit extends Cubit<UserProfileCalendarState> {
   UserProfileCalendarCubit(this._profileRepository) : super(ApiState.initial());
   final ProfileRepository _profileRepository;
 

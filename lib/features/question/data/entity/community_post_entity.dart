@@ -93,7 +93,8 @@ extension CommunityPostEntityExt on CommunityPostEntity {
               username: author!.username,
               activeBadge: author!.activeBadge?.toBadge(),
               profile: author!.profile?.toProfile(),
-              isActive: author!.isActive)
+              isActive: author!.isActive,
+            )
           : null,
       authorIsModerator: authorIsModerator,
       isOwnPost: isOwnPost,
