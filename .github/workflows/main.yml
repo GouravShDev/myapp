@@ -28,10 +28,10 @@ jobs:
           distribution: 'temurin'  # Use 'temurin' or 'zulu'
           java-version: '17'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.3'  # Specify Flutter version 3.24.3
+      # - name: Set up Flutter
+      #   uses: subosito/flutter-action@v2
+      #   with:
+      #     flutter-version: '3.24.3'  # Specify Flutter version 3.24.3
 
       - name: Install dependencies
         run: flutter pub get
@@ -94,16 +94,11 @@ jobs:
           platform: android
           args: "--verbose --artifact=apk"
 
-      - name: 📦 Upload APK
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: flutter_and_friends-${{ github.ref_name }}.apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-      # - name: Create GitHub Release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     tag_name: ${{ github.ref_name }}  # Automatically picks the tag name from the trigger
-      #     release_name: Release ${{ github.ref_name }}  # Release name will match the tag name
-      #     files: ${{ steps.sign_app.outputs.signedReleaseFile }}  # Directly references the signed APK output from the signing step
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub Token for authentication
+          tag_name: ${{ github.ref_name }}  # Automatically picks the tag name from the trigger
+          release_name: Release ${{ github.ref_name }}  # Release name will match the tag name
+          files: build/app/outputs/flutter-apk/app-release.apk # Directly references the APK
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub Token for authentication
