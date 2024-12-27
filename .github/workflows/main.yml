@@ -84,10 +84,6 @@ jobs:
       - name: 🔐 Decode Keystore
         run: echo ${{ secrets.SIGNING_KEY }} | base64 --decode > ${{ github.workspace }}/keystore.jks
 
-        
-      - name: Build APK
-        run: flutter build apk --release
-
       - name: 🚀 Shorebird Release
         uses: shorebirdtech/shorebird-release@v0
         env:
