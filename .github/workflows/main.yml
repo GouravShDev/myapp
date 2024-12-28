@@ -2,8 +2,6 @@ name: Flutter APK Build
 
 on:
   push:
-    branches:
-      - feat/shorebird_cicd  # This ensures the workflow runs on the release branch
     tags:
       - 'v*'  # This ensures the workflow runs on any tag that starts with 'v'
 env:
