@@ -2,7 +2,7 @@ name: Flutter APK Build
 
 on:
   push:
-    branch:
+    branches:
       - feat/fastlane_playstore
     tags:
       - 'v*'  # This ensures the workflow runs on any tag that starts with 'v'
