@@ -91,7 +91,21 @@ jobs:
         with:
           platform: android
           args: "--verbose --artifact=apk"
-
+      - name: Set up Fastlane
+        run: |
+          sudo apt-get install ruby-full
+          gem install fastlane --no-document
+      - name: Create Google Service Account creds
+        env:
+          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+        run: |
+          mkdir -p android/fastlane
+          echo $GOOGLE_SERVICE_ACCOUNT | base64 --decode > android/fastlane/coders-gym-creds.json
+      - name: Deploy to Google Play Store
+        run: |
+          cd android
+          fastlane supply 
+      
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:

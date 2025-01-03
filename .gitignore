@@ -53,3 +53,8 @@ app.*.map.json
 # **/firebase_app_id_file.json
 # **/firebase_options.dart
 # **/firebase.json
+
+
+# Fastlane files
+android/fastlane/coders-gym-creds.json
+android/fastlane/report.xml
