@@ -93,16 +93,23 @@ jobs:
         with:
           platform: android
           args: "--verbose --artifact=apk"
-      - name: Set up Fastlane
-        run: |
-          sudo apt-get install ruby-full
-          gem install fastlane --no-document
       - name: Create Google Service Account creds
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
         run: |
-          mkdir -p android/fastlane
           echo $GOOGLE_SERVICE_ACCOUNT | base64 --decode > android/fastlane/coders-gym-creds.json
+      - name: Set up Fastlane
+        - uses: actions/checkout@v2
+        - uses: ruby/setup-ruby@v1
+          with:
+            ruby-version: '3.0'
+            bundler-cache: true
+            working-directory: 'android'
+        - uses: maierj/fastlane-action@v3.1.0
+          with:
+            lane: 'deploy'
+            subdirectory: 'android'
+
       - name: Deploy to Google Play Store
         run: |
           cd android
