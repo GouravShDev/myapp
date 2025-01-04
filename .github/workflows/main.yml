@@ -97,7 +97,7 @@ jobs:
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
         run: |
-          echo ${{ secrets.GOOGLE_SERVICE_ACCOUNT }} | base64 --decode > android/fastlane/coders-gym-creds.json
+          echo $GOOGLE_SERVICE_ACCOUNT | base64 --decode > android/fastlane/coders-gym-creds.json
       - name: Set up Fastlane
         - uses: actions/checkout@v2
         - uses: ruby/setup-ruby@v1
