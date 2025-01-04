@@ -99,10 +99,10 @@ jobs:
         run: echo $GOOGLE_SERVICE_ACCOUNT | base64 --decode > android/fastlane/coders-gym-creds.json
       - name: Set up Fastlane
         uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: '3.0'
-            bundler-cache: true
-            working-directory: 'android'
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+          working-directory: 'android'
 
       - name: Deploy to Google Play Store
         uses: maierj/fastlane-action@v3.1.0
