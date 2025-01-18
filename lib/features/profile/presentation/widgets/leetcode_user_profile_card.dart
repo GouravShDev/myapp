@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codersgym/core/utils/number_extension.dart';
 import 'package:codersgym/features/profile/presentation/widgets/leetcode_streak_fire.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class LeetcodeUserProfileCard extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 40,
-          backgroundImage: NetworkImage(userProfile.userAvatar ?? ""),
+          backgroundImage: CachedNetworkImageProvider(userProfile.userAvatar ?? ""),
         ),
         const SizedBox(width: 12),
         Column(

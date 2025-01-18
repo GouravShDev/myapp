@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codersgym/core/utils/number_extension.dart';
 import 'package:codersgym/features/question/domain/model/community_solution_post_detail.dart';
 import 'package:flutter/foundation.dart';
@@ -32,7 +33,8 @@ class SolutionPostTile extends StatelessWidget {
                 contentPadding: const EdgeInsets.all(2),
                 leading: CircleAvatar(
                   radius: 18,
-                  foregroundImage: NetworkImage(author.profile!.userAvatar!),
+                  foregroundImage:
+                      CachedNetworkImageProvider(author.profile!.userAvatar!),
                   child: author.profile?.userAvatar == null
                       ? Text(
                           author.username?[0].toUpperCase() ?? '?',

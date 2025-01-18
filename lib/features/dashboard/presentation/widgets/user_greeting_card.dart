@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codersgym/features/profile/domain/model/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -23,7 +24,7 @@ class UserGreetingCard extends StatelessWidget {
         CircleAvatar(
           radius: 30.0,
           backgroundImage:
-              (avatarUrl.isNotEmpty) ? NetworkImage(avatarUrl) : null,
+              (avatarUrl.isNotEmpty) ? CachedNetworkImageProvider(avatarUrl) : null,
           // You can use AssetImage('assets/images/avatar.png') for a local image
         ),
         const SizedBox(width: 16.0),
