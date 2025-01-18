@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/api/api_state.dart';
 import 'package:codersgym/core/routes/app_router.gr.dart';
+import 'package:codersgym/core/services/analytics.dart';
 import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
 import 'package:codersgym/features/common/bloc/app_file_downloader/app_file_downloader_bloc.dart';
 import 'package:codersgym/features/common/widgets/app_updater.dart';
@@ -37,6 +38,9 @@ class DashboardPage extends HookWidget {
             final currentState = profileState;
             if (currentState is ApiError<UserProfile, Exception> &&
                 currentState.error is UserProfileNotFoundFailure) {
+              AnalyticsService().logError(
+                error: currentState.error.toString(),
+              );
               if (context.mounted) {
                 showUserNotFoundDialog(context);
               }

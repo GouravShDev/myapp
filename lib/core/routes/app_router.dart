@@ -1,11 +1,36 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/routes/app_router.gr.dart';
-import 'package:codersgym/features/profile/presentation/pages/my_profile_page.dart';
+import 'package:codersgym/core/routes/observer/analytic_router_observer.dart';
+import 'package:flutter/src/foundation/change_notifier.dart';
+import 'package:flutter/src/widgets/framework.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page,Route')
 class AppRouter extends RootStackRouter {
   @override
   RouteType get defaultRouteType => const RouteType.adaptive();
+
+  @override
+  AutoRouterDelegate delegate({
+    String? navRestorationScopeId,
+    WidgetBuilder? placeholder,
+    NavigatorObserversBuilder navigatorObservers =
+        AutoRouterDelegate.defaultNavigatorObserversBuilder,
+    DeepLinkBuilder? deepLinkBuilder,
+    bool rebuildStackOnDeepLink = false,
+    Listenable? reevaluateListenable,
+  }) {
+    return super.delegate(
+        navRestorationScopeId: navRestorationScopeId,
+        placeholder: placeholder,
+        navigatorObservers: () {
+          return [
+            AnalyticsRouteObserver(),
+          ];
+        },
+        deepLinkBuilder: deepLinkBuilder,
+        rebuildStackOnDeepLink: rebuildStackOnDeepLink,
+        reevaluateListenable: reevaluateListenable);
+  }
 
   @override
   List<AutoRoute> get routes => [

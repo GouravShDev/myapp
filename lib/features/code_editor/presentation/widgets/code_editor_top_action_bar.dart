@@ -1,10 +1,12 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:codersgym/core/services/analytics.dart';
 import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/leetcode_login_dialog.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/question_description_bottomsheet.dart';
+import 'package:codersgym/features/common/data/models/analytics_events.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,6 +27,7 @@ class CodeEditorTopActionBar extends StatelessWidget {
   final CodeController codeController;
 
   void showProblemDescriptionBottomSheet(BuildContext context) {
+    AnalyticsService().logCustomEvent(name: AnalyticsEvents.viewQuestionSheet);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -56,6 +59,7 @@ class CodeEditorTopActionBar extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.copy),
           onPressed: () {
+            AnalyticsService().logCustomEvent(name: AnalyticsEvents.copyCode);
             Clipboard.setData(
               ClipboardData(text: codeController.text),
             );
@@ -79,6 +83,10 @@ class CodeEditorTopActionBar extends StatelessWidget {
                     CodeEditorFormatCodeEvent(),
                   );
                 } else {
+                  AnalyticsService().logError(
+                    error:
+                        "User tried to use code formatting feature with leetcode account",
+                  );
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(

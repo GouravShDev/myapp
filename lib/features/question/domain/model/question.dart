@@ -81,6 +81,14 @@ class Question {
       'exampleTestCases': exampleTestCases?.map((v) => v.toJson()).toList(),
     };
   }
+
+  Map<String, Object> toAnalyticsMap() {
+    return {
+      "questionId" : questionId ?? '',
+      "title" : title ?? '',
+      "titleSlug" : titleSlug ?? '',
+    };
+  }
 }
 
 class TopicTags {

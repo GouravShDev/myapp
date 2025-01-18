@@ -17,4 +17,12 @@ abstract interface class ProfileRepository {
 
 class UserProfileFailure implements Exception {}
 
-class UserProfileNotFoundFailure implements UserProfileFailure {}
+class UserProfileNotFoundFailure implements UserProfileFailure {
+  final String username;
+
+  UserProfileNotFoundFailure({required this.username});
+  @override
+  String toString() {
+    return 'User with username $username not found';
+  }
+}

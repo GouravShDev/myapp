@@ -1,27 +1,23 @@
-import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:codersgym/core/routes/app_router.gr.dart';
+import 'package:codersgym/core/services/analytics.dart';
 import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
 import 'package:codersgym/features/code_editor/domain/model/code_execution_result.dart';
 import 'package:codersgym/features/code_editor/domain/model/programming_language.dart';
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
-import 'package:codersgym/features/code_editor/presentation/widgets/code_editor_back_confirmation_dialog.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/code_editor_language_dropdown.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/code_editor_top_action_bar.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/code_run_button.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/code_successful_submission_dialog.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/coding_keys.dart';
-import 'package:codersgym/features/code_editor/presentation/widgets/question_description_bottomsheet.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/run_code_result_sheet.dart';
 import 'package:codersgym/features/code_editor/presentation/widgets/test_case_bottom_sheet.dart';
+import 'package:codersgym/features/common/data/models/analytics_events.dart';
 import 'package:codersgym/features/profile/presentation/blocs/user_profile/user_profile_cubit.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/injection.dart';
 import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
-import 'dart:developer' as dev;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_highlight/themes/monokai-sublime.dart';
@@ -364,6 +360,10 @@ class CodeEditorPageBody extends HookWidget {
     required CodeExecutionResult result,
     required List<TestCase> testcases,
   }) {
+    AnalyticsService().logCustomEvent(
+      name: AnalyticsEvents.questionsCompleted,
+      parameters: question.toAnalyticsMap(),
+    );
     final codeEditorBloc = context.read<CodeEditorBloc>();
     if (result.didCodeResultInError) {
       showModalBottomSheet(

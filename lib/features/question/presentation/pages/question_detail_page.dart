@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/routes/app_router.gr.dart';
+import 'package:codersgym/core/services/analytics.dart';
 import 'package:codersgym/core/utils/inherited_provider.dart';
+import 'package:codersgym/features/common/data/models/analytics_events.dart';
 import 'package:codersgym/features/profile/presentation/blocs/user_profile/user_profile_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/official_solution_available/official_solution_available_cubit.dart';
@@ -168,6 +170,10 @@ class QuestionDetailPageBody extends HookWidget {
 
     useEffect(
       () {
+        AnalyticsService().logCustomEvent(
+          name: AnalyticsEvents.viewQuestion,
+          parameters: question.toAnalyticsMap(),
+        );
         questionContentCubit.getQuestionContent(question);
         questionTopicCubit.getQuestionTags(question);
         questionHintsCubit.getQuestionHints(question);

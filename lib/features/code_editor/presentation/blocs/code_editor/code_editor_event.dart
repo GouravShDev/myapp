@@ -25,17 +25,20 @@ class CodeEditorCodeUpdateEvent extends CodeEditorEvent {
   List<Object> get props => [updatedCode];
 }
 
-class CodeEditorRunCodeEvent extends CodeEditorEvent {
+class CodeEditorRunCodeEvent extends CodeEditorEvent with TrackAnalytic {
   final Question question;
 
   const CodeEditorRunCodeEvent({
     required this.question,
   });
   @override
-  List<Object> get props => [question];
+  String get eventName => AnalyticsEvents.runCode;
+
+  @override
+  Map<String, Object> get properties => question.toAnalyticsMap();
 }
 
-class CodeEditorSubmitCodeEvent extends CodeEditorEvent {
+class CodeEditorSubmitCodeEvent extends CodeEditorEvent with TrackAnalytic {
   final Question question;
 
   const CodeEditorSubmitCodeEvent({
@@ -43,6 +46,12 @@ class CodeEditorSubmitCodeEvent extends CodeEditorEvent {
   });
   @override
   List<Object> get props => [question];
+
+  @override
+  String get eventName => AnalyticsEvents.questionsAttempted;
+
+  @override
+  Map<String, Object> get properties => question.toAnalyticsMap();
 }
 
 class CodeEditorRunCodeResultUpdateEvent extends CodeEditorEvent {
@@ -65,7 +74,7 @@ class CodeEditorSubmitCodeResultUpdateEvent extends CodeEditorEvent {
   List<Object> get props => [executionResult];
 }
 
-class CodeEditorLanguageUpdateEvent extends CodeEditorEvent {
+class CodeEditorLanguageUpdateEvent extends CodeEditorEvent with TrackAnalytic {
   final ProgrammingLanguage language;
   final Question question;
 
@@ -76,19 +85,31 @@ class CodeEditorLanguageUpdateEvent extends CodeEditorEvent {
 
   @override
   List<Object> get props => [language, question];
+
+  @override
+  String get eventName => AnalyticsEvents.programmingLanguage;
 }
 
-class CodeEditorResetCodeEvent extends CodeEditorEvent {}
+class CodeEditorResetCodeEvent extends CodeEditorEvent with TrackAnalytic {
+  @override
+  String get eventName => AnalyticsEvents.resetCode;
+}
 
-class CodeEditorFormatCodeEvent extends CodeEditorEvent {}
+class CodeEditorFormatCodeEvent extends CodeEditorEvent with TrackAnalytic {
+  @override
+  String get eventName => AnalyticsEvents.formatCode;
+}
 
-class CodeEditorUpdateTestcaseEvent extends CodeEditorEvent {
+class CodeEditorUpdateTestcaseEvent extends CodeEditorEvent with TrackAnalytic {
   final List<TestCase> testcases;
 
   const CodeEditorUpdateTestcaseEvent({
     required this.testcases,
   });
-  
+
   @override
   List<Object> get props => [testcases];
+
+  @override
+  String get eventName => AnalyticsEvents.updateTestCase;
 }

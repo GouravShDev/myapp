@@ -1,8 +1,11 @@
 import 'package:bloc/bloc.dart';
+import 'package:codersgym/core/services/analytics.dart';
 import 'package:codersgym/core/utils/storage/storage_manager.dart';
+import 'package:codersgym/core/utils/track_analytic_mixin.dart';
 import 'package:codersgym/features/code_editor/domain/model/code_execution_result.dart';
 import 'package:codersgym/features/code_editor/domain/model/programming_language.dart';
 import 'package:codersgym/features/code_editor/domain/repository/code_editor_repository.dart';
+import 'package:codersgym/features/common/data/models/analytics_events.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:equatable/equatable.dart';
 import 'dart:async';
@@ -16,6 +19,8 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
   final CodeEditorRepository _codeEdtiorRepository;
   final StorageManager _localStorageManager;
   final String _questionId;
+
+  final AnalyticsService _analyticsService = AnalyticsService();
 
   static const _preferedCodingLanguageKey = 'preferedCodingLang';
   Timer? _timer;
@@ -261,6 +266,10 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
     _localStorageManager.putString(
       _preferedCodingLanguageKey,
       event.language.name,
+    );
+    _analyticsService.setUserProperties(
+      name: AnalyticsEvents.programmingLanguage,
+      value: event.language.displayText,
     );
     final code = event.question.codeSnippets
         ?.firstWhereOrNull(

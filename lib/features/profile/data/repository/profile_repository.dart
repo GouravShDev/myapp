@@ -19,13 +19,21 @@ class ProfileRepositoryImp implements ProfileRepository {
     try {
       final data = await _leetcodeApi.getUserProfile(userName);
       if (data == null) {
-        return Failure(UserProfileNotFoundFailure());
+        return Failure(
+          UserProfileNotFoundFailure(
+            username: userName,
+          ),
+        );
       }
       final userProfile = UserProfileEntity.fromJson(data);
       return Success(userProfile.toUserProfile());
     } catch (e) {
       if (e is ApiNotFoundException) {
-        return Failure(UserProfileNotFoundFailure());
+        return Failure(
+          UserProfileNotFoundFailure(
+            username: userName,
+          ),
+        );
       }
       return Failure(UserProfileFailure());
     }

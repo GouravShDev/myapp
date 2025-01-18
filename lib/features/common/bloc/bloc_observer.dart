@@ -1,11 +1,14 @@
 import 'dart:developer';
 
+import 'package:codersgym/core/services/analytics.dart';
+import 'package:codersgym/core/utils/track_analytic_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A comprehensive BlocObserver utility for tracking and logging Bloc events and state changes
 class AppBlocObserver extends BlocObserver {
   /// Called when a Bloc is initially created
+  final AnalyticsService _analyticsService = AnalyticsService();
   @override
   void onCreate(BlocBase bloc) {
     super.onCreate(bloc);
@@ -27,6 +30,10 @@ class AppBlocObserver extends BlocObserver {
   @override
   void onChange(BlocBase bloc, Change change) {
     super.onChange(bloc, change);
+
+    if (change.currentState is TrackAnalytic) {
+      _analyticsService.logAnalyticEvent(change.nextState);
+    }
     log('[AppBlocObserver] Bloc State Change: '
         'Type = ${bloc.runtimeType}, '
         'Current State = ${change.currentState}, '
@@ -37,6 +44,8 @@ class AppBlocObserver extends BlocObserver {
   @override
   void onEvent(Bloc bloc, Object? event) {
     super.onEvent(bloc, event);
+
+    if (event is TrackAnalytic) _analyticsService.logAnalyticEvent(event);
     log('[AppBlocObserver] Bloc Event Added: '
         'Type = ${bloc.runtimeType}, '
         'Event = ${event.runtimeType}, '

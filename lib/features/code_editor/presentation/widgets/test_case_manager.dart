@@ -1,8 +1,10 @@
 import 'dart:math';
 
+import 'package:codersgym/core/services/analytics.dart';
 import 'package:codersgym/core/theme/app_theme.dart';
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
 import 'package:codersgym/features/code_editor/presentation/pages/code_editor_page.dart';
+import 'package:codersgym/features/common/data/models/analytics_events.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -116,28 +118,32 @@ class TestCaseManager extends HookWidget {
                           selectedTestcaseIndex.value == index &&
                           currentTestcases.value.length > 1)
                         InkWell(
-                            onTap: () {
-                              final newTestcases = currentTestcases.value
-                                  .map(
-                                    (e) => e.copy(),
-                                  )
-                                  .toList();
-                              newTestcases.removeAt(index);
-                              currentTestcases.value = newTestcases;
-                              selectedTestcaseIndex.value = min(
-                                newTestcases.length - 1,
-                                selectedTestcaseIndex.value,
-                              );
-                            },
-                            child: CircleAvatar(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.error,
-                              maxRadius: 8,
-                              child: Icon(
-                                Icons.remove,
-                                size: 12,
-                              ),
-                            )),
+                          onTap: () {
+                            AnalyticsService().logCustomEvent(
+                              name: AnalyticsEvents.removeTestCase,
+                            );
+                            final newTestcases = currentTestcases.value
+                                .map(
+                                  (e) => e.copy(),
+                                )
+                                .toList();
+                            newTestcases.removeAt(index);
+                            currentTestcases.value = newTestcases;
+                            selectedTestcaseIndex.value = min(
+                              newTestcases.length - 1,
+                              selectedTestcaseIndex.value,
+                            );
+                          },
+                          child: CircleAvatar(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.error,
+                            maxRadius: 8,
+                            child: const Icon(
+                              Icons.remove,
+                              size: 12,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 );
@@ -147,6 +153,9 @@ class TestCaseManager extends HookWidget {
             if (currentTestcases.value.length < 5 && !readonly)
               IconButton(
                 onPressed: () {
+                    AnalyticsService().logCustomEvent(
+                                name: AnalyticsEvents.addTestCase,
+                              );
                   currentTestcases.value = currentTestcases.value
                       .map(
                         (e) => e.copy(),

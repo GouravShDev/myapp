@@ -28,6 +28,11 @@ class AuthenticatedWithLeetcodeAccount extends Authenticated {
 
   @override
   List<Object> get props => [leetcodeSession, userName];
+
+  @override
+  String toString() {
+    return 'AuthenticatedWithLeetcodeAccount(userName: $userName)';
+  }
 }
 
 class AuthenticatedWithLeetcodeUserName extends Authenticated {
@@ -36,4 +41,9 @@ class AuthenticatedWithLeetcodeUserName extends Authenticated {
   });
   @override
   List<Object> get props => [userName];
+
+  @override
+  String toString() {
+    return 'AuthenticatedWithLeetcodeUserName(userName: $userName)';
+  }
 }

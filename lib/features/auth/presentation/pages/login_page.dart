@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:codersgym/core/services/analytics.dart';
 import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
 import 'package:codersgym/features/auth/presentation/widgets/username_dialog.dart';
 import 'package:codersgym/features/common/widgets/app_updater.dart';
@@ -25,6 +26,7 @@ class LoginPage extends StatelessWidget {
         listener: (context, state) {
           if (state is AuthenticatedWithLeetcodeAccount ||
               state is AuthenticatedWithLeetcodeUserName) {
+            AnalyticsService().logLogin(method: state.toString());
             context.router.root.replace(const DashboardRoute());
           }
         },
