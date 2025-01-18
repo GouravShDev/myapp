@@ -78,6 +78,7 @@ dependencies:
   permission_handler: ^11.3.1
   upgrader: ^11.3.1
   hydrated_bloc: ^9.1.5
+  vibration: ^2.0.1
 
 dev_dependencies:
   flutter_test:

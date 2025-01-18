@@ -70,6 +70,19 @@ class SettingPage extends StatelessWidget {
                             const Divider(),
                             ListTile(
                               leading: Icon(
+                                Icons.terminal,
+                                color: theme.primaryColor,
+                              ),
+                              title: const Text("Coding Expereince"),
+                              onTap: () {
+                                final router = context.router;
+                                router?.push(
+                                  const CodingExperienceRoute(),
+                                );
+                              },
+                            ),
+                            ListTile(
+                              leading: Icon(
                                 Icons.notifications,
                                 color: theme.primaryColor,
                               ),
