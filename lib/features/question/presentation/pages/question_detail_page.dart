@@ -60,10 +60,10 @@ class QuestionDetailPage extends HookWidget implements AutoRouteWrapper {
         child: BlocBuilder<QuestionContentCubit, QuestionContentState>(
           builder: (context, state) {
             final currentQuestion = state.mayBeWhen(
-              orElse: () => question,
+              orElse: () => null,
               onLoaded: (questionWithDetail) => questionWithDetail,
             );
-            if (currentQuestion.codeSnippets == null) {
+            if (currentQuestion == null) {
               return SizedBox.shrink();
             }
             return FloatingActionButton(
