@@ -7,13 +7,13 @@ class NotificationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Notifications"),
-        ),
-        body: const Center(
-          child: const Text("Coming Soon"),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Notifications"),
+      ),
+      body: const SafeArea(
+        child: Center(
+          child: Text("Coming Soon"),
         ),
       ),
     );
