@@ -230,6 +230,8 @@ Future<void> initializeDependencies() async {
     ),
   );
   getIt.registerFactory(
-    () => CustomizeCodingExperienceBloc(),
+    () => CustomizeCodingExperienceBloc(
+      getIt.get(),
+    ),
   );
 }
