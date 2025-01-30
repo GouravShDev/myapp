@@ -1,4 +1,3 @@
-
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/services/analytics.dart';
 import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
@@ -303,6 +302,7 @@ class CodeEditorPageBody extends HookWidget {
                 SingleChildScrollView(
                   child: AppCodeEditorField(
                     codeController: codeController,
+                    editorThemeId: '', // TODO: add theme here
                   ),
                 ),
               ],
