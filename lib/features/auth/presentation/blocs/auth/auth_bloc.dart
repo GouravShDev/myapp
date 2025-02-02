@@ -59,6 +59,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             AuthenticatedWithLeetcodeAccount(
               leetcodeSession: status.credentials,
               userName: status.userName,
+              sessionExpired: status.shouldRenewCredentials,
             ),
           ),
         },
