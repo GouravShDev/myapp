@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:codersgym/core/network/network_service.dart';
 import 'package:codersgym/core/utils/app_constants.dart';
 import 'package:codersgym/core/utils/storage/cookie_encoder.dart';
 import 'package:codersgym/core/utils/storage/storage_manager.dart';
 import 'package:codersgym/features/auth/data/service/auth_service.dart';
+import 'package:codersgym/features/common/widgets/app_error_notifier.dart';
 import 'package:codersgym/injection.dart';
 import 'package:exponential_back_off/exponential_back_off.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -18,6 +20,7 @@ class LeetcodeApi {
   late GraphQLClient _graphQLClient;
   late NetworkService _leetcodeNetworkService;
   late NetworkService _dynamicBaseUrlNetworkService;
+  late AppErrorNotifier _errorNotifier;
 
   final StorageManager _storageManager;
 
@@ -26,6 +29,7 @@ class LeetcodeApi {
     required StorageManager storageManger,
     required NetworkService leetcodeNetworkService,
     required NetworkService dynamicBaseUrlNetworkService,
+    required AppErrorNotifier errorNotifier,
   }) : _storageManager = storageManger {
     _graphQLClient = client ??
         GraphQLClient(
@@ -36,6 +40,7 @@ class LeetcodeApi {
         );
     _leetcodeNetworkService = leetcodeNetworkService;
     _dynamicBaseUrlNetworkService = dynamicBaseUrlNetworkService;
+    _errorNotifier = errorNotifier;
   }
 
   Future<Map<String, dynamic>?> getDailyQuestion() async {
@@ -186,6 +191,10 @@ class LeetcodeApi {
               if (result.exception?.graphqlErrors.firstOrNull?.message ==
                   "That user does not exist.") {
                 throw ApiNotFoundException("User Not Found", result.exception);
+              }
+              if (result.exception?.linkException?.originalException
+                  is SocketException) {
+                _errorNotifier.notify(NoInternetSnackbarNotification());
               }
             }
             throw ApiServerException("Server Error", result.exception);

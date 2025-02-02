@@ -1,10 +1,8 @@
-import 'dart:developer';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:codersgym/core/api/leetcode_api.dart';
 import 'package:codersgym/core/routes/app_router.gr.dart';
 import 'package:codersgym/core/utils/inherited_provider.dart';
-import 'package:codersgym/features/common/widgets/app_webview.dart';
+import 'package:codersgym/features/common/widgets/app_error_widget.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_content/question_content_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_hints/question_hints_cubit.dart';
@@ -13,7 +11,6 @@ import 'package:codersgym/features/question/presentation/blocs/similar_question/
 import 'package:codersgym/features/question/presentation/widgets/question_difficulty_text.dart';
 import 'package:codersgym/features/question/presentation/widgets/question_info_tile.dart';
 import 'package:codersgym/features/question/presentation/widgets/question_status_icon.dart';
-import 'package:codersgym/injection.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -104,7 +101,9 @@ class QuestionDescription extends HookWidget {
                 ),
               );
             },
-            onError: (exception) => Text(exception.toString()),
+            onError: (exception) => const AppErrorWidget(
+              showRetryButton: false,
+            ),
           );
         },
       ),
@@ -115,11 +114,11 @@ class QuestionDescription extends HookWidget {
     return BlocBuilder<QuestionTagsCubit, QuestionTagsState>(
       builder: (context, state) {
         return state.when(
-          onInitial: () => SizedBox.shrink(),
-          onLoading: () => SizedBox.shrink(),
+          onInitial: () => const SizedBox.shrink(),
+          onLoading: () => const SizedBox.shrink(),
           onLoaded: (topicTags) {
             if (topicTags.isEmpty) {
-              return SizedBox.shrink();
+              return const SizedBox.shrink();
             }
             return QuestionInfoTile(
               title: 'Topics',
@@ -162,8 +161,8 @@ class QuestionDescription extends HookWidget {
     return BlocBuilder<QuestionHintsCubit, QuestionHintsState>(
       builder: (context, state) {
         return state.when(
-          onInitial: () => SizedBox.shrink(),
-          onLoading: () => SizedBox.shrink(),
+          onInitial: () => const SizedBox.shrink(),
+          onLoading: () => const SizedBox.shrink(),
           onLoaded: (hints) {
             return Column(
               children: hints?.mapIndexed(

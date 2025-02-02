@@ -1,12 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/routes/app_router.gr.dart';
+import 'package:codersgym/features/common/widgets/app_error_widget.dart';
 import 'package:codersgym/features/common/widgets/app_loading.dart';
 import 'package:codersgym/features/common/widgets/app_pagination_list.dart';
 import 'package:codersgym/features/profile/presentation/widgets/explore_search_delegate.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_archieve/question_archieve_bloc.dart';
 import 'package:codersgym/features/question/presentation/widgets/question_card.dart';
-import 'package:codersgym/features/question/presentation/widgets/question_difficulty_text.dart';
 import 'package:codersgym/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -61,6 +61,17 @@ class ExplorePage extends HookWidget {
       ),
       body: BlocBuilder<QuestionArchieveBloc, QuestionArchieveState>(
         builder: (context, state) {
+          if (state.error != null) {
+            return AppErrorWidget(
+              onRetry: () {
+                questionArchieveBloc.add(
+                  const FetchQuestionsListEvent(
+                    skip: 0,
+                  ),
+                );
+              },
+            );
+          }
           if (state.isLoading && state.questions.isEmpty) {
             return ListView(
               children: List.generate(

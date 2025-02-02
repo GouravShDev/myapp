@@ -75,15 +75,16 @@ class CommunitySolutionsBloc
         emit(
           state.copyWith(
             questions: updatedList,
+            isLoading: false,
             moreQuestionAvailable: moreSolutionAvailable,
           ),
         );
       },
       onFailure: (exception) {
-        emit(state.copyWith(error: exception));
+        emit(
+          state.copyWith(error: exception, isLoading: false),
+        );
       },
     );
-
-    emit(state.copyWith(isLoading: false));
   }
 }

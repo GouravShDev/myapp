@@ -55,7 +55,11 @@ class QuestionArchieveBloc
     if (state.isLoading) {
       return; // Prevent mutliple call resulting in duplicate items
     }
-    emit(state.copyWith(isLoading: true));
+    emit(
+      state.copyWith(
+        isLoading: true,
+      ),
+    );
     final result = await _questionRepository.getProblemQuestion(
       ProblemQuestionQueryInput(
         skip: currentSkip,
@@ -81,15 +85,19 @@ class QuestionArchieveBloc
           state.copyWith(
             questions: updatedList,
             moreQuestionAvailable: moreQuestionAvailable,
+            isLoading: false,
           ),
         );
       },
       onFailure: (exception) {
-        emit(state.copyWith(error: exception));
+        emit(
+          state.copyWith(
+            error: exception,
+            isLoading: false,
+          ),
+        );
       },
     );
-
-    emit(state.copyWith(isLoading: false));
     // result
   }
 
