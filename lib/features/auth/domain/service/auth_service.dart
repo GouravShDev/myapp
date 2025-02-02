@@ -14,10 +14,11 @@ sealed class AuthenticationStatus {}
 class LeetcodeAccountAuthenticated extends AuthenticationStatus {
   final Map<String, dynamic> credentials;
   final String userName;
-
+  final bool shouldRenewCredentials;
   LeetcodeAccountAuthenticated({
     required this.credentials,
     required this.userName,
+    required this.shouldRenewCredentials,
   });
 }
 

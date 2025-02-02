@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/utils/app_constants.dart';
-import 'package:codersgym/features/question/presentation/blocs/upcoming_contests/upcoming_contests_cubit.dart';
-import 'package:codersgym/injection.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:codersgym/features/common/widgets/app_webview.dart';
@@ -23,6 +22,12 @@ class LeetcodeWebPage extends StatelessWidget {
         final cookiesMap = {
           for (var element in leetcodeCookies) element.name: element.value
         };
+        final expiryDate = leetcodeCookies
+            .firstWhereOrNull(
+              (element) => element.name == "LEETCODE_SESSION",
+            )
+            ?.expiresDate;
+        if (expiryDate != null) cookiesMap['expiry'] = expiryDate;
         if (context.mounted) {
           AutoRouter.of(context).maybePop(cookiesMap);
         }

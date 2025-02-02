@@ -95,7 +95,7 @@ class LeetcodeSessionExpiredDialog extends StatelessWidget {
           ),
           ElevatedButton.icon(
             icon: const Icon(Icons.launch, size: 18),
-            onPressed: () => _launchLeetCodeLogin,
+            onPressed: () => _launchLeetCodeLogin(context),
             label: Text(
               'Log In',
               style: textTheme.titleMedium?.copyWith(

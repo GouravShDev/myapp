@@ -21,8 +21,10 @@ class UnAuthenticated extends AuthState {}
 
 class AuthenticatedWithLeetcodeAccount extends Authenticated {
   final Map<String, dynamic> leetcodeSession;
+  final bool sessionExpired;
   const AuthenticatedWithLeetcodeAccount({
     required this.leetcodeSession,
+    required this.sessionExpired,
     required super.userName,
   });
 

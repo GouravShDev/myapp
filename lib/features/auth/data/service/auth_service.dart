@@ -25,10 +25,22 @@ class AuthServiceImp implements AuthService {
       if (leetcodeUserName == null) {
         return UnAuthenticatedStatus();
       }
+      bool shouldRenewCredentials = false;
       if (credentials != null) {
+        if (credentials['expiry'] is int) {
+          int timestamp = credentials['expiry'];
+          // Convert milliseconds to DateTime and adjust to local time
+          DateTime expiryDate =
+              DateTime.fromMillisecondsSinceEpoch(timestamp).toLocal();
+          DateTime currentDateTime = DateTime.now();
+
+          // Check if credentials have expired
+          shouldRenewCredentials = currentDateTime.isAfter(expiryDate);
+        }
         return LeetcodeAccountAuthenticated(
           credentials: credentials,
           userName: leetcodeUserName,
+          shouldRenewCredentials: shouldRenewCredentials,
         );
       }
       return LeetcodeUsernameAuthenticated(userName: leetcodeUserName);
@@ -57,6 +69,7 @@ class AuthServiceImp implements AuthService {
     return LeetcodeAccountAuthenticated(
       credentials: credentials,
       userName: userName,
+      shouldRenewCredentials: false,
     );
   }
 
