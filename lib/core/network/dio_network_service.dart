@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:codersgym/core/network/network_service.dart';
+import 'package:codersgym/features/common/widgets/app_error_notifier.dart';
 import 'package:dio/dio.dart';
 import 'package:exponential_back_off/exponential_back_off.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -13,10 +14,12 @@ class DioNetworkService extends NetworkService {
   DioNetworkService({
     required this.configuration,
     required this.interceptors,
+    required this.appErrorNotifier,
     Dio? dioClient,
   }) : _dio = dioClient;
   Dio? _dio;
   final NetworkConfiguration configuration;
+  final AppErrorNotifier appErrorNotifier;
   final List<Interceptor> interceptors;
   final Map<String, String> _headers = {};
 
@@ -44,7 +47,7 @@ class DioNetworkService extends NetworkService {
       _dio!,
       {..._headers, ...request.headers ?? {}},
     );
-    return executeRequest<Model>(req);
+    return executeRequest<Model>(req, appErrorNotifier);
   }
 }
 
@@ -63,6 +66,7 @@ class PreparedNetworkRequest<Model> {
 
 Future<NetworkResponse<Model>> executeRequest<Model>(
   PreparedNetworkRequest<Model> request,
+  AppErrorNotifier appErrorNotifier,
 ) async {
   try {
     final dynamic body = request.request.data.when(
@@ -111,7 +115,7 @@ Future<NetworkResponse<Model>> executeRequest<Model>(
     final errorBody = error.response?.data;
     if (kReleaseMode) {
       FirebaseCrashlytics.instance.recordError(
-        error,
+        error.response,
         StackTrace.current,
         fatal: false,
       );
@@ -120,31 +124,49 @@ Future<NetworkResponse<Model>> executeRequest<Model>(
     if (errorBody is String) {
       return NetworkResponse.error(
         NetworkUnknownError(
-          code: NetworkErrorCode.UNCATEGORIZED,
+          code: NetworkErrorCode.uncategorized,
           message: "Something went wrong",
         ),
       );
     }
-    if (error.response?.data == null) {
+    if (error.response?.data != null) {
+      if (error.response?.statusCode == 403) {
+        appErrorNotifier.notify(LeetcodeSessionExpireDialogNotification());
+        return NetworkResponse.error(
+          NetworkUnknownError(
+            code: NetworkErrorCode.forbidden,
+            message: error.response?.data?['error'],
+          ),
+        );
+      }
       return NetworkResponse.error(
         NetworkUnknownError(
-            code: NetworkErrorCode.UNCATEGORIZED,
-            message: "Something went wrong"),
+          code: NetworkErrorCode.uncategorized,
+          message: "Something went wrong",
+        ),
       );
     }
-    final errorData = error.response?.data['error'];
-    if (errorData is Map<String, dynamic>) {
-      return NetworkResponse.error(NetworkError.fromJson(errorData));
+    if (error.error is SocketException) {
+      appErrorNotifier.notify(NoInternetSnackbarNotification());
+      return NetworkResponse.error(
+        NetworkUnknownError(
+          code: NetworkErrorCode.socketException,
+          message: "No Internet",
+        ),
+      );
     }
     return NetworkResponse.error(
       NetworkUnknownError(
-          code: NetworkErrorCode.UNCATEGORIZED,
-          message: "Something went wrong"),
+        code: NetworkErrorCode.uncategorized,
+        message: "Something went wrong",
+      ),
     );
   } catch (error) {
     return NetworkResponse.error(
       NetworkUnknownError(
-          code: NetworkErrorCode.UNCATEGORIZED, message: error.toString()),
+        code: NetworkErrorCode.uncategorized,
+        message: error.toString(),
+      ),
     );
   }
 }

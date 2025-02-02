@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/api/api_state.dart';
 import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
+import 'package:codersgym/features/common/widgets/app_error_widget.dart';
 import 'package:codersgym/features/profile/domain/model/user_profile.dart';
 import 'package:codersgym/features/profile/presentation/blocs/user_profile/user_profile_cubit.dart';
 import 'package:codersgym/features/profile/presentation/widgets/leetcode_profile.dart';
@@ -29,7 +30,16 @@ class MyProfilePage extends HookWidget {
                 );
               },
               onError: (exception) {
-                return Text(exception.toString());
+                return AppErrorWidget(
+                  onRetry: () {
+                    final authState = context.read<AuthBloc>().state;
+                    if (authState is Authenticated) {
+                      context
+                          .read<UserProfileCubit>()
+                          .getUserProfile(authState.userName);
+                    }
+                  },
+                );
               },
             );
           },

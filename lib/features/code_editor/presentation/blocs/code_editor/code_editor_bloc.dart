@@ -165,7 +165,11 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
           '',
     );
     if (runSubmitCodeResult.isFailure) {
-      emit(state.copyWith(executionState: CodeExecutionError()));
+      emit(
+        state.copyWith(
+          codeSubmissionState: CodeExecutionError(),
+        ),
+      );
       return;
     }
 
@@ -305,7 +309,13 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
           isCodeFormatting: false,
         ));
       },
-      onFailure: (exception) {},
+      onFailure: (exception) {
+        emit(
+          state.copyWith(
+            isCodeFormatting: false,
+          ),
+        );
+      },
     );
   }
 

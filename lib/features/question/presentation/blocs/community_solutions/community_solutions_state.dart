@@ -29,7 +29,8 @@ class CommunitySolutionsState extends Equatable {
     return CommunitySolutionsState(
       solutions: questions ?? this.solutions,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error:
+          error, // Override error because we don't want to show error with new state
       moreSolutionsAvailable:
           moreQuestionAvailable ?? this.moreSolutionsAvailable,
     );

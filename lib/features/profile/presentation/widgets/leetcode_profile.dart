@@ -1,13 +1,13 @@
-import 'dart:ui';
 
 import 'package:codersgym/core/api/api_state.dart';
 import 'package:codersgym/core/utils/date_time_extension.dart';
+import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
 import 'package:codersgym/features/common/widgets/app_loading.dart';
 import 'package:codersgym/features/profile/domain/model/contest_ranking_info.dart';
 import 'package:codersgym/features/profile/domain/model/user_profile_calendar.dart';
 import 'package:codersgym/features/profile/presentation/blocs/contest_ranking_info/contest_ranking_info_cubit.dart';
 import 'package:codersgym/features/profile/presentation/blocs/cubit/user_profile_calendar_cubit.dart';
-import 'package:codersgym/features/profile/presentation/widgets/badge_carousel.dart';
+import 'package:codersgym/features/profile/presentation/blocs/user_profile/user_profile_cubit.dart';
 import 'package:codersgym/features/profile/presentation/widgets/leetcode_rating_details.dart';
 import 'package:codersgym/features/profile/presentation/widgets/questoin_difficulty_submission_chart.dart';
 import 'package:codersgym/features/profile/presentation/widgets/submission_heat_map_calendart.dart';
@@ -141,18 +141,28 @@ class LeetcodeProfile extends HookWidget {
         },
       ),
     ];
-    return ListView(
-      children: listOfWidget
-          .map(
-            (e) => Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8.0,
-                vertical: 8.0,
+    return RefreshIndicator(
+      onRefresh: () async {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is Authenticated) {
+          await context
+              .read<UserProfileCubit>()
+              .getUserProfile(authState.userName);
+        }
+      },
+      child: ListView(
+        children: listOfWidget
+            .map(
+              (e) => Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 8.0,
+                ),
+                child: e,
               ),
-              child: e,
-            ),
-          )
-          .toList(),
+            )
+            .toList(),
+      ),
     );
   }
 }

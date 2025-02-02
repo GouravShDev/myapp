@@ -12,6 +12,7 @@ import 'package:codersgym/features/code_editor/data/repository/code_editor_repos
 import 'package:codersgym/features/code_editor/domain/repository/code_editor_repository.dart';
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
 import 'package:codersgym/features/common/bloc/app_file_downloader/app_file_downloader_bloc.dart';
+import 'package:codersgym/features/common/widgets/app_error_notifier.dart';
 import 'package:codersgym/features/profile/data/repository/profile_repository.dart';
 import 'package:codersgym/features/profile/presentation/blocs/contest_ranking_info/contest_ranking_info_cubit.dart';
 import 'package:codersgym/features/profile/presentation/blocs/cubit/user_profile_calendar_cubit.dart';
@@ -64,6 +65,9 @@ Future<void> initializeDependencies() async {
   // ROUTER
   getIt.registerSingleton(AppRouter());
 
+  // Notifier
+  getIt.registerSingleton(AppErrorNotifier(getIt.get()));
+
   // SERVICE
   getIt.registerLazySingleton<AuthService>(
     () => AuthServiceImp(
@@ -78,6 +82,7 @@ Future<void> initializeDependencies() async {
       interceptors: [
         AppDioLogger(),
       ],
+      appErrorNotifier: getIt.get(),
     ),
     instanceName: 'leetcodeNetworkService',
   );
@@ -87,6 +92,7 @@ Future<void> initializeDependencies() async {
       interceptors: [
         AppDioLogger(),
       ],
+      appErrorNotifier: getIt.get(),
     ),
     instanceName: 'dynamicBaseUrlNetworkService',
   );
@@ -102,6 +108,7 @@ Future<void> initializeDependencies() async {
   getIt.registerLazySingleton(
     () => LeetcodeApi(
       storageManger: getIt.get(),
+      errorNotifier: getIt.get(),
       leetcodeNetworkService: getIt.get(instanceName: 'leetcodeNetworkService'),
       dynamicBaseUrlNetworkService:
           getIt.get(instanceName: 'dynamicBaseUrlNetworkService'),

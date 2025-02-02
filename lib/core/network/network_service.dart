@@ -143,11 +143,13 @@ class NetworkUnknownError extends NetworkError {
 }
 
 enum NetworkErrorCode {
-  UNCATEGORIZED;
+  socketException,
+  forbidden,
+  uncategorized;
 
   String toJson() => name;
 
   static NetworkErrorCode fromJson(String? json) => json != null
       ? NetworkErrorCode.values.byName(json)
-      : NetworkErrorCode.UNCATEGORIZED;
+      : NetworkErrorCode.uncategorized;
 }

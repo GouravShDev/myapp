@@ -1,4 +1,6 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
+import 'package:codersgym/features/common/widgets/app_error_widget.dart';
 import 'package:codersgym/features/common/widgets/app_loading.dart';
 import 'package:codersgym/features/dashboard/presentation/widgets/upcoming_contest_card.dart';
 import 'package:codersgym/features/profile/domain/model/user_profile.dart';
@@ -33,126 +35,156 @@ class HomePageBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BlocBuilder<UserProfileCubit, ApiState<UserProfile, Exception>>(
-                buildWhen: (previous, current) =>
-                    current.isLoaded || current.isError,
-                builder: (context, state) {
-                  return state.when(
-                    onInitial: () => AppWidgetLoading(
-                      child: UserGreetingCard.loading(),
-                    ),
-                    onLoading: () {
-                      return AppWidgetLoading(
+      child: RefreshIndicator(
+        onRefresh: () async {
+          final dailyChallengeCubit = context.read<DailyChallengeCubit>();
+          final profileCubit = context.read<UserProfileCubit>();
+          final authBloc = context.read<AuthBloc>();
+          final upcomingContestCubit = context.read<UpcomingContestsCubit>();
+
+          await dailyChallengeCubit.getTodayChallenge();
+          await upcomingContestCubit.getUpcomingContest();
+          final authState = authBloc.state;
+          if (authState is Authenticated) {
+            await profileCubit.getUserProfile(authState.userName);
+          }
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BlocBuilder<UserProfileCubit, ApiState<UserProfile, Exception>>(
+                  buildWhen: (previous, current) =>
+                      current.isLoaded ||
+                      (current.isError && !previous.isLoaded),
+                  builder: (context, state) {
+                    return state.when(
+                      onInitial: () => AppWidgetLoading(
                         child: UserGreetingCard.loading(),
-                      );
-                    },
-                    onLoaded: (profile) {
-                      return UserGreetingCard(
-                        userName: profile.realName ?? "",
-                        avatarUrl: profile.userAvatar ?? "",
-                        streak: profile.streakCounter,
-                      );
-                    },
-                    onError: (exception) {
-                      return Text(exception.toString());
-                    },
-                  );
-                },
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Ready For Today's Challenge",
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      onLoading: () {
+                        return AppWidgetLoading(
+                          child: UserGreetingCard.loading(),
+                        );
+                      },
+                      onLoaded: (profile) {
+                        return UserGreetingCard(
+                          userName: profile.realName ?? "",
+                          avatarUrl: profile.userAvatar ?? "",
+                          streak: profile.streakCounter,
+                        );
+                      },
+                      onError: (exception) {
+                        return const SizedBox.shrink();
+                      },
+                    );
+                  },
                 ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              BlocBuilder<DailyChallengeCubit, ApiState<Question, Exception>>(
-                builder: (context, state) {
-                  return state.mayBeWhen(
-                    orElse: () => AppWidgetLoading(
-                      child: DailyQuestionCard.empty(),
-                    ),
-                    onLoaded: (question) {
-                      return DailyQuestionCard(
-                        question: question,
-                        onSolveTapped: () {
-                          AutoRouter.of(context).push(
-                            QuestionDetailRoute(question: question),
-                          );
-                        },
-                      );
-                    },
-                    onError: (exception) {
-                      return Text(exception.toString());
-                    },
-                  );
-                },
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Upcoming Contests",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.left,
+                const SizedBox(
+                  height: 16,
                 ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              BlocBuilder<UpcomingContestsCubit,
-                  ApiState<List<Contest>, Exception>>(
-                builder: (context, state) {
-                  return state.mayBeWhen(
-                    orElse: () => AppWidgetLoading(
-                      child: Column(
-                        children: List.generate(
-                          2,
-                          (index) => UpcomingContestCard.empty(),
+                BlocBuilder<DailyChallengeCubit, ApiState<Question, Exception>>(
+                  buildWhen: (previous, current) =>
+                      current.isLoaded ||
+                      (current.isError && !previous.isLoaded),
+                  builder: (context, state) {
+                    if (state.isError) {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "Ready For Today's Challenge",
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        state.mayBeWhen(
+                          orElse: () => AppWidgetLoading(
+                            child: DailyQuestionCard.empty(),
+                          ),
+                          onLoaded: (question) {
+                            return DailyQuestionCard(
+                              question: question,
+                              onSolveTapped: () {
+                                AutoRouter.of(context).push(
+                                  QuestionDetailRoute(question: question),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "Upcoming Contests",
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                BlocBuilder<UpcomingContestsCubit,
+                    ApiState<List<Contest>, Exception>>(
+                  buildWhen: (previous, current) =>
+                      current.isLoaded ||
+                      (current.isError && !previous.isLoaded),
+                  builder: (context, state) {
+                    return state.mayBeWhen(
+                      orElse: () => AppWidgetLoading(
+                        child: Column(
+                          children: List.generate(
+                            2,
+                            (index) => UpcomingContestCard.empty(),
+                          ),
                         ),
                       ),
-                    ),
-                    onLoaded: (contests) {
-                      // Using column instead of listview because number of
-                      // contests will always be two.
-                      // Atleast for now its just two elements
+                      onLoaded: (contests) {
+                        // Using column instead of listview because number of
+                        // contests will always be two.
+                        // Atleast for now its just two elements
 
-                      return Column(
-                          children: contests
-                              .map(
-                                (contest) => UpcomingContestCard(
-                                  contest: contest,
-                                ),
-                              )
-                              .toList());
-                    },
-                    onError: (exception) {
-                      return Text(exception.toString());
-                    },
-                  );
-                },
-              )
-            ],
+                        return Column(
+                            children: contests
+                                .map(
+                                  (contest) => UpcomingContestCard(
+                                    contest: contest,
+                                  ),
+                                )
+                                .toList());
+                      },
+                      onError: (exception) {
+                        return const AppErrorWidget(
+                          message: "That was not supposed to happen!!",
+                          showRetryButton: false,
+                        );
+                      },
+                    );
+                  },
+                )
+              ],
+            ),
           ),
         ),
       ),
