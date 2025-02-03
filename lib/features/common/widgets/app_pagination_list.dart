@@ -10,6 +10,7 @@ class AppPaginationList extends StatelessWidget {
     this.scrollController,
     this.loadingWidget,
     super.key,
+    this.onRefresh,
   });
   final VoidCallback loadMoreData;
   final bool moreAvailable;
@@ -17,6 +18,7 @@ class AppPaginationList extends StatelessWidget {
   final ScrollController? scrollController;
   final Widget Function(BuildContext context, int index) itemBuilder;
   final Widget? loadingWidget;
+  final Future<void> Function()? onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -30,25 +32,28 @@ class AppPaginationList extends StatelessWidget {
         }
         return false;
       },
-      child: ListView.builder(
-        controller: scrollController,
-        itemCount: itemCount + 1, // Add 1 for loading indicator
-        itemBuilder: (context, index) {
-          if (index < itemCount) {
-            return itemBuilder(context, index);
-          } else {
-            if (!moreAvailable) return Container();
-            loadMoreData(); // fetch more data if reached the end of the list
+      child: RefreshIndicator(
+        onRefresh: onRefresh ?? () async {},
+        child: ListView.builder(
+          controller: scrollController,
+          itemCount: itemCount + 1, // Add 1 for loading indicator
+          itemBuilder: (context, index) {
+            if (index < itemCount) {
+              return itemBuilder(context, index);
+            } else {
+              if (!moreAvailable) return Container();
+              loadMoreData(); // fetch more data if reached the end of the list
 
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: loadingWidget ??
-                  const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-            );
-          }
-        },
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: loadingWidget ??
+                    const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+              );
+            }
+          },
+        ),
       ),
     );
   }

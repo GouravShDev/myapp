@@ -28,8 +28,6 @@ class QuestionArchieveBloc
           case FetchQuestionsListEvent():
             await _onFetchQuestionList(event, emit);
             break;
-          default:
-            break;
         }
       },
       transformer: (events, mapper) => events

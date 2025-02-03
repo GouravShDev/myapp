@@ -1,6 +1,6 @@
 part of 'question_archieve_bloc.dart';
 
-sealed class QuestionArchieveEvent extends Equatable {
+sealed class QuestionArchieveEvent {
   const QuestionArchieveEvent();
 }
 
@@ -24,8 +24,4 @@ class FetchQuestionsListEvent extends QuestionArchieveEvent {
     this.topics,
     this.sortOption,
   });
-
-  @override
-  List<Object?> get props =>
-      [skip, limit, searchKeyword, difficulty, topics, sortOption];
 }

@@ -102,6 +102,20 @@ class ExplorePage extends HookWidget {
                 ),
                 Expanded(
                   child: AppPaginationList(
+                    onRefresh: () async {
+                      final filterState =
+                          context.read<QuestionFilterCubit>().state;
+                      questionArchieveBloc.add(
+                        FetchQuestionsListEvent(
+                          skip: 0,
+                          difficulty: filterState.difficulty,
+                          sortOption: filterState.sortOption,
+                          topics: filterState.topicTags,
+                        ),
+                      );
+                      // To loading effect as we can't await adding events
+                      await Future.delayed(Duration(seconds: 1));
+                    },
                     itemBuilder: (BuildContext context, int index) {
                       return _buildProblemTile(
                         context,
