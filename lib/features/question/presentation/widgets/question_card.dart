@@ -10,11 +10,13 @@ class QuestionCard extends StatelessWidget {
     required this.question,
     required this.onTap,
     this.backgroundColor,
+    this.hideDifficulty,
   });
 
   final Question question;
   final VoidCallback onTap;
   final Color? backgroundColor;
+  final bool? hideDifficulty;
 
   factory QuestionCard.empty() {
     return QuestionCard(
@@ -29,7 +31,7 @@ class QuestionCard extends StatelessWidget {
     final textTheme = theme.textTheme;
     return Card(
       elevation: 4,
-      color: backgroundColor,
+      // color: backgroundColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: InkWell(
         onTap: onTap,
@@ -59,11 +61,15 @@ class QuestionCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  QuestionDifficultyText(question),
+                  QuestionDifficultyText(
+                    key: ValueKey(hideDifficulty),
+                    question,
+                    hideDifficulty: hideDifficulty ?? true,
+                  ),
                   Row(
                     children: [
-                      Text("Acceptance: "),
-                      SizedBox(
+                      const Text("Acceptance: "),
+                      const SizedBox(
                         width: 4,
                       ),
                       Text(

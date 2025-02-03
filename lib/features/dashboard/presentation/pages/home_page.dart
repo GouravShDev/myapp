@@ -96,15 +96,12 @@ class HomePageBody extends StatelessWidget {
                     }
                     return Column(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            "Ready For Today's Challenge",
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
+                        Text(
+                          "Ready For Today's Challenge",
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(
                           height: 16,

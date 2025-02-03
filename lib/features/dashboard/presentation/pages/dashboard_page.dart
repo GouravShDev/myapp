@@ -95,27 +95,43 @@ class DashboardPage extends HookWidget {
               final tabsRouter = AutoTabsRouter.of(context);
               return Scaffold(
                 body: child,
-                bottomNavigationBar: BottomNavigationBar(
-                  currentIndex: tabsRouter.activeIndex,
-                  onTap: tabsRouter.setActiveIndex, // Update selected index
-                  items: const [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.home),
-                      label: 'Home',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.explore_rounded),
-                      label: 'Explore',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.person),
-                      label: 'Profile',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.settings),
-                      label: 'Settings',
-                    ),
-                  ],
+                bottomNavigationBar: Container(
+                  decoration: BoxDecoration(
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color:
+                            Theme.of(context).primaryColorDark.withOpacity(0.8),
+                        blurRadius: 15.0,
+                        offset: const Offset(
+                          0.0,
+                          0.75,
+                        ),
+                      )
+                    ],
+                  ),
+                  child: BottomNavigationBar(
+                    currentIndex: tabsRouter.activeIndex,
+                    elevation: 18,
+                    onTap: tabsRouter.setActiveIndex, // Update selected index
+                    items: const [
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.home),
+                        label: 'Home',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.explore_rounded),
+                        label: 'Explore',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.person),
+                        label: 'Profile',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.settings),
+                        label: 'Settings',
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

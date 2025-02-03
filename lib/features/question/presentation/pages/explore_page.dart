@@ -6,7 +6,9 @@ import 'package:codersgym/features/common/widgets/app_pagination_list.dart';
 import 'package:codersgym/features/profile/presentation/widgets/explore_search_delegate.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_archieve/question_archieve_bloc.dart';
+import 'package:codersgym/features/question/presentation/blocs/question_filter/question_filter_cubit.dart';
 import 'package:codersgym/features/question/presentation/widgets/question_card.dart';
+import 'package:codersgym/features/question/presentation/widgets/question_filter_bar.dart';
 import 'package:codersgym/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +22,7 @@ class ExplorePage extends HookWidget {
     BuildContext context, {
     required Question problem,
     required Color backgroundColor,
+    bool? hideDifficulty,
   }) {
     return QuestionCard(
       onTap: () {
@@ -29,6 +32,7 @@ class ExplorePage extends HookWidget {
       },
       question: problem,
       backgroundColor: backgroundColor,
+      hideDifficulty: hideDifficulty,
     );
   }
 
@@ -37,21 +41,19 @@ class ExplorePage extends HookWidget {
     final questionArchieveBloc = context.read<QuestionArchieveBloc>();
     final theme = Theme.of(context);
     useEffect(() {
-      if (questionArchieveBloc.state.questions.isNotEmpty) {
-        return null;
-      }
-      questionArchieveBloc.add(const FetchQuestionsListEvent());
+      questionArchieveBloc.add(const FetchQuestionsListEvent(skip: 0));
       return null;
     }, []);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Problem List"),
+        title: const Text("Explore Challenges"),
         actions: [
           IconButton(
               onPressed: () {
                 showSearch(
                   context: context,
                   delegate: ExploreSearchDelegate(
+                    getIt.get(),
                     getIt.get(),
                   ),
                 );
@@ -80,23 +82,57 @@ class ExplorePage extends HookWidget {
               ),
             );
           }
-          return AppPaginationList(
-            itemBuilder: (BuildContext context, int index) {
-              return _buildProblemTile(
-                context,
-                problem: state.questions[index],
-                backgroundColor: index % 2 == 0
-                    ? theme.scaffoldBackgroundColor
-                    : theme.hoverColor,
-              );
-            },
-            itemCount: state.questions.length,
-            loadMoreData: () {
-              questionArchieveBloc.add(
-                const FetchQuestionsListEvent(),
-              );
-            },
-            moreAvailable: state.moreQuestionAvailable,
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BlocListener<QuestionFilterCubit, QuestionFilterState>(
+                  listener: (context, state) {
+                    questionArchieveBloc.add(
+                      FetchQuestionsListEvent(
+                        skip: 0,
+                        difficulty: state.difficulty,
+                        sortOption: state.sortOption,
+                        topics: state.topicTags,
+                      ),
+                    );
+                  },
+                  child: const QuestionFilterBar(),
+                ),
+                Expanded(
+                  child: AppPaginationList(
+                    itemBuilder: (BuildContext context, int index) {
+                      return _buildProblemTile(
+                        context,
+                        problem: state.questions[index],
+                        backgroundColor: index % 2 == 0
+                            ? theme.scaffoldBackgroundColor
+                            : theme.hoverColor,
+                        hideDifficulty: context
+                                .read<QuestionFilterCubit>()
+                                .state
+                                .difficulty ==
+                            null,
+                      );
+                    },
+                    itemCount: state.questions.length,
+                    loadMoreData: () {
+                      final filterState =
+                          context.read<QuestionFilterCubit>().state;
+                      questionArchieveBloc.add(
+                        FetchQuestionsListEvent(
+                          difficulty: filterState.difficulty,
+                          sortOption: filterState.sortOption,
+                          topics: filterState.topicTags,
+                        ),
+                      );
+                    },
+                    moreAvailable: state.moreQuestionAvailable,
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),

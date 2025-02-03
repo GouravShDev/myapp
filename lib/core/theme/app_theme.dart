@@ -29,6 +29,13 @@ final ThemeData leetcodeTheme = ThemeData(
       fontSize: 16,
     ),
   ),
+  scrollbarTheme: ScrollbarThemeData(
+    interactive: true,
+    thumbVisibility: WidgetStateProperty.all(true),
+    radius: const Radius.circular(10),
+    thickness: WidgetStateProperty.all(6),
+    minThumbLength: 30,
+  ),
   bottomNavigationBarTheme: BottomNavigationBarThemeData(
     backgroundColor: Colors.grey[850], // Dark background for nav bar
     selectedItemColor:
@@ -63,11 +70,16 @@ final ThemeData leetcodeTheme = ThemeData(
       fontSize: 14,
     ),
   ),
-
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      iconColor: const Color(0xFF2A2A2A),
+    ),
+  ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: const Color(0xFFFF9E0F), // LeetCode orange
-      foregroundColor: const Color(0xFF2A2A2A), // Text color
+      foregroundColor: const Color(0xFF2A2A2A),
+      iconColor: const Color(0xFF2A2A2A), // Text color
       textStyle: const TextStyle(fontWeight: FontWeight.bold),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
     ),

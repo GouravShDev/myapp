@@ -1,3 +1,5 @@
+import 'package:equatable/equatable.dart';
+
 class Question {
   final String? title;
   final String? questionId;
@@ -84,14 +86,19 @@ class Question {
 
   Map<String, Object> toAnalyticsMap() {
     return {
-      "questionId" : questionId ?? '',
-      "title" : title ?? '',
-      "titleSlug" : titleSlug ?? '',
+      "questionId": questionId ?? '',
+      "title": title ?? '',
+      "titleSlug": titleSlug ?? '',
     };
+  }
+
+  @override
+  String toString() {
+    return 'Question{questionId: $frontendQuestionId, title: $title}';
   }
 }
 
-class TopicTags {
+class TopicTags extends Equatable {
   final String? name;
   final String? id;
   final String? slug;
@@ -113,6 +120,9 @@ class TopicTags {
       'slug': slug,
     };
   }
+
+  @override
+  List<Object?> get props => [id];
 }
 
 enum QuestionStatus { accepted, notAccepted, unattempted }

@@ -29,8 +29,13 @@ abstract interface class QuestionRepository {
   Future<Result<List<String>, Exception>> getQuestionHints(
     String questiontitleSlug,
   );
-  Future<Result<( { List<CommunitySolutionPostDetail> solutionList, int totalSolutionCount}), Exception>>
-      getCommunitySolutions(
+  Future<
+      Result<
+          ({
+            List<CommunitySolutionPostDetail> solutionList,
+            int totalSolutionCount
+          }),
+          Exception>> getCommunitySolutions(
     CommunitySolutionsInput input,
   );
   Future<Result<CommunitySolutionPostDetail, Exception>>
@@ -59,6 +64,7 @@ class ProblemFilter {
   final String? searchKeywords;
   final String? listId;
   final String? difficulty;
+  final String? sortOrder;
 
   ProblemFilter({
     this.tags,
@@ -66,6 +72,7 @@ class ProblemFilter {
     this.searchKeywords,
     this.listId,
     this.difficulty,
+    this.sortOrder,
   });
 }
 

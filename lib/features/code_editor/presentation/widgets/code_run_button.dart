@@ -56,8 +56,10 @@ class CodeRunButton extends StatelessWidget {
                         child: OutlinedButton.icon(
                           onPressed: () => LeetcodeLoginDialog.show(context),
 
-                          icon: const Icon(
-                              Icons.lock), // Change to lock icon for clarity
+                          icon: Icon(
+                            Icons.lock,
+                            color: Theme.of(context).primaryColor,
+                          ), // Change to lock icon for clarity
                           label: const Text('Locked'),
                         ),
                       ),

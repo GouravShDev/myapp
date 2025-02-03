@@ -22,6 +22,7 @@ import 'package:codersgym/features/question/presentation/blocs/community_post_de
 import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/official_solution_available/official_solution_available_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_archieve/question_archieve_bloc.dart';
+import 'package:codersgym/features/question/presentation/blocs/question_filter/question_filter_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_hints/question_hints_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_solution/question_solution_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_tags/question_tags_cubit.dart';
@@ -219,5 +220,8 @@ Future<void> initializeDependencies() async {
   );
   getIt.registerFactory(
     () => AppFileDownloaderBloc(),
+  );
+  getIt.registerFactory(
+    () => QuestionFilterCubit(),
   );
 }

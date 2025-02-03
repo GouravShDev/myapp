@@ -274,6 +274,7 @@ extension ProblemFilterExt on ProblemFilter {
       listId: listId,
       orderBy: orderBy,
       searchKeywords: searchKeywords,
+      sortOrder: sortOrder,
       tags: tags,
     );
   }

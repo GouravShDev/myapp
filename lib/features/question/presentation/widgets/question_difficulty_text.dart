@@ -5,23 +5,26 @@ import 'package:codersgym/features/question/domain/model/question.dart';
 class QuestionDifficultyText extends HookWidget {
   const QuestionDifficultyText(
     this.question, {
-      this.showLabel = true,
+    this.showLabel = true,
+    this.hideDifficulty = true,
     super.key,
   });
   final Question question;
   final bool showLabel;
+  final bool hideDifficulty;
 
   @override
   Widget build(BuildContext context) {
-    final isDifficultyVisible = useState(false);
+    final isDifficultyVisible = useState(!hideDifficulty);
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     return Row(
       children: [
-    if(showLabel)    Text(
-          "Difficulty: \t",
-          style: textTheme.bodyMedium?.copyWith(color: theme.hintColor),
-        ),
+        if (showLabel)
+          Text(
+            "Difficulty: \t",
+            style: textTheme.bodyMedium?.copyWith(color: theme.hintColor),
+          ),
         Stack(
           alignment: Alignment.centerLeft,
           children: [

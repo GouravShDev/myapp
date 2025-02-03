@@ -700,6 +700,7 @@ class Variables {
 class Filters {
   final List<String?>? tags;
   final String? orderBy;
+  final String? sortOrder;
   final String? searchKeywords;
   final String? listId;
   final String? difficulty;
@@ -707,6 +708,7 @@ class Filters {
   Filters({
     this.tags,
     this.orderBy,
+    this.sortOrder,
     this.searchKeywords,
     this.listId,
     this.difficulty,
@@ -719,6 +721,7 @@ class Filters {
       if (searchKeywords != null) 'searchKeywords': searchKeywords,
       if (listId != null) 'listId': listId,
       if (difficulty != null) 'difficulty': difficulty,
+      if (sortOrder != null) 'sortOrder': sortOrder,
     };
   }
 }

@@ -1,9 +1,11 @@
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:codersgym/features/question/domain/model/problem_sort_option.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/domain/repository/question_repository.dart';
 import 'package:equatable/equatable.dart';
+import 'package:highlight/languages/diff.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -40,12 +42,10 @@ class QuestionArchieveBloc
     FetchQuestionsListEvent event,
     Emitter<QuestionArchieveState> emit,
   ) async {
-    // resent list if the skip is zero in the event
-    if (event.skip == 0) {
-      emit(state.copyWith(questions: []));
-    }
     // Prevent unnecessary api calls
-    if (state.questions.isNotEmpty && !state.moreQuestionAvailable) {
+    if (event.skip != 0 &&
+        state.questions.isNotEmpty &&
+        !state.moreQuestionAvailable) {
       return;
     }
 
@@ -67,13 +67,27 @@ class QuestionArchieveBloc
         categorySlug: currentCategorySlug,
         filters: ProblemFilter(
           searchKeywords: event.searchKeyword,
+          difficulty: event.difficulty,
+          orderBy: event.sortOption?.orderBy,
+          sortOrder: event.sortOption?.sortOrder,
+          tags: event.topics
+              ?.map(
+                (e) => e.slug,
+              )
+              .toList(),
         ),
       ),
     );
 
     result.when(
       onSuccess: (newQuestionList) {
-        final updatedList = List<Question>.from(state.questions)
+        List<Question> currentQuestionList =
+            List<Question>.from(state.questions);
+        // resent list if the skip is zero in the event
+        if (event.skip == 0) {
+          currentQuestionList.clear();
+        }
+        final updatedList = currentQuestionList
           ..addAll(
             newQuestionList.$1,
           );
