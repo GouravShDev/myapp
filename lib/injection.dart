@@ -15,7 +15,7 @@ import 'package:codersgym/features/code_editor/domain/repository/code_editor_rep
 import 'package:codersgym/features/code_editor/domain/services/coding_key_configuration_service.dart';
 import 'package:codersgym/features/code_editor/domain/services/editor_theme_configuration_service.dart';
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
-import 'package:codersgym/features/code_editor/presentation/blocs/coding_key_configuration/coding_key_configuration_cubit.dart';
+import 'package:codersgym/features/code_editor/presentation/blocs/coding_configuration/coding_configuration_cubit.dart';
 import 'package:codersgym/features/common/bloc/app_file_downloader/app_file_downloader_bloc.dart';
 import 'package:codersgym/features/profile/data/repository/profile_repository.dart';
 import 'package:codersgym/features/profile/presentation/blocs/contest_ranking_info/contest_ranking_info_cubit.dart';
