@@ -90,10 +90,8 @@ class SettingPage extends StatelessWidget {
                                 final Uri emailUri = Uri(
                                   scheme: 'mailto',
                                   path: AppConstants.reportBugEmail,
-                                  queryParameters: {
-                                    'subject': 'Bug Report from ${userName}',
-                                    'body': 'Please describe the issue here...',
-                                  },
+                                  query:
+                                      'subject= Bug Report from $userName&body= Please describe the issue here...',
                                 );
                                 _launchUrl(emailUri);
                               },
