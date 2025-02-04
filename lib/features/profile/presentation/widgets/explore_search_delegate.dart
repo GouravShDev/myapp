@@ -1,11 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/features/common/widgets/app_pagination_list.dart';
-import 'package:codersgym/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_archieve/question_archieve_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_filter/question_filter_cubit.dart';
 import 'package:codersgym/features/question/presentation/widgets/question_card.dart';
 import 'package:codersgym/features/question/presentation/widgets/question_filter_bar.dart';
-import 'package:codersgym/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -54,10 +52,7 @@ class ExploreSearchDelegate extends SearchDelegate<String> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BlocProvider<QuestionFilterCubit>.value(
-              value: _questionFilterCubit,
-              child: const QuestionFilterBar(),
-            ),
+            _buildFilters(query),
             const Spacer(),
             Center(
               child: Text(
@@ -71,13 +66,15 @@ class ExploreSearchDelegate extends SearchDelegate<String> {
         ),
       );
     }
-    _questionArchieveBloc.add(FetchQuestionsListEvent(
-      searchKeyword: query,
-      skip: 0,
-      difficulty: _questionFilterCubit.state.difficulty,
-      sortOption: _questionFilterCubit.state.sortOption,
-      topics: _questionFilterCubit.state.topicTags,
-    ));
+    _questionArchieveBloc.add(
+      FetchQuestionsListEvent(
+        searchKeyword: query,
+        skip: 0,
+        difficulty: _questionFilterCubit.state.difficulty,
+        sortOption: _questionFilterCubit.state.sortOption,
+        topics: _questionFilterCubit.state.topicTags,
+      ),
+    );
     return BlocBuilder<QuestionArchieveBloc, QuestionArchieveState>(
       bloc: _questionArchieveBloc,
       builder: (context, state) {
@@ -86,10 +83,7 @@ class ExploreSearchDelegate extends SearchDelegate<String> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BlocProvider<QuestionFilterCubit>.value(
-                value: _questionFilterCubit,
-                child: const QuestionFilterBar(),
-              ),
+              _buildFilters(query),
               if (state.questions.isNotEmpty)
                 Expanded(
                   child: AppPaginationList(
@@ -134,6 +128,26 @@ class ExploreSearchDelegate extends SearchDelegate<String> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildFilters(String query) {
+    return BlocProvider<QuestionFilterCubit>.value(
+      value: _questionFilterCubit,
+      child: BlocListener<QuestionFilterCubit, QuestionFilterState>(
+        listener: (context, state) {
+          _questionArchieveBloc.add(
+            FetchQuestionsListEvent(
+              skip: 0,
+              searchKeyword: query,
+              difficulty: state.difficulty,
+              sortOption: state.sortOption,
+              topics: state.topicTags,
+            ),
+          );
+        },
+        child: const QuestionFilterBar(),
+      ),
     );
   }
 }

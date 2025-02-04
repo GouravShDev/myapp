@@ -149,30 +149,35 @@ class TopicTagSelectionDialogState extends State<TopicTagSelectionDialog> {
                     children: filteredTags.map((tag) {
                       final isSelected = _tempSelectedTags.contains(tag);
 
-                      return ChoiceChip(
-                        label: Text(tag.name ?? ''),
-                        selected: isSelected,
-                        onSelected: (bool selected) {
+                      return GestureDetector(
+                        onTap: () {
                           setState(() {
-                            if (selected) {
-                              _tempSelectedTags.add(tag);
-                            } else {
+                            if (isSelected) {
                               _tempSelectedTags.remove(tag);
+                            } else {
+                              _tempSelectedTags.add(tag);
                             }
                           });
                         },
-                        showCheckmark: false,
-                        selectedColor: Theme.of(context).primaryColor,
-                        backgroundColor: Theme.of(context).focusColor,
-                        labelStyle: TextStyle(
-                          color: isSelected ? Colors.black : Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          side: BorderSide(
-                            color: Theme.of(context).cardColor,
-                            width: 1.0,
+                        child: Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Theme.of(context).primaryColor
+                                : Theme.of(context).focusColor,
+                            borderRadius: BorderRadius.circular(8.0),
+                            border: Border.all(
+                              color: Theme.of(context).cardColor,
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Text(
+                            tag.name ?? '',
+                            style: TextStyle(
+                              color: isSelected ? Colors.black : Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       );
