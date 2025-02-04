@@ -55,10 +55,8 @@ class CodeRunButton extends StatelessWidget {
                             sigmaX: 10.0, sigmaY: 10.0), // Blur intensity
                         child: OutlinedButton.icon(
                           onPressed: () => LeetcodeLoginDialog.show(context),
-
                           icon: Icon(
                             Icons.lock,
-                            color: Theme.of(context).primaryColor,
                           ), // Change to lock icon for clarity
                           label: const Text('Locked'),
                         ),

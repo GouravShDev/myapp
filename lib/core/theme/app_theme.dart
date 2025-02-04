@@ -72,7 +72,7 @@ final ThemeData leetcodeTheme = ThemeData(
   ),
   outlinedButtonTheme: OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
-      iconColor: const Color(0xFF2A2A2A),
+      iconColor: const Color(0xFFFF9E0F),
     ),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
