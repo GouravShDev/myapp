@@ -113,3 +113,9 @@ class CodeEditorUpdateTestcaseEvent extends CodeEditorEvent with TrackAnalytic {
   @override
   String get eventName => AnalyticsEvents.updateTestCase;
 }
+
+class CodeEditorFocusChangedEvent extends CodeEditorEvent {
+  final bool focus;
+
+  const CodeEditorFocusChangedEvent(this.focus);
+}

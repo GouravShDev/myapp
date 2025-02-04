@@ -9,6 +9,7 @@ class CodeEditorState extends Equatable {
   final CodeExecutionState codeSubmissionState;
   final List<TestCase>? testCases;
   final bool isCodeFormatting;
+  final bool isCodeEditorFocused;
 
   const CodeEditorState({
     required this.isStateInitialized,
@@ -19,6 +20,7 @@ class CodeEditorState extends Equatable {
     required this.codeSubmissionState,
     this.testCases,
     required this.isCodeFormatting,
+    this.isCodeEditorFocused = false,
   });
 
   factory CodeEditorState.initial() {
@@ -39,6 +41,7 @@ class CodeEditorState extends Equatable {
     List<TestCase>? testCases,
     Question? question,
     bool? isCodeFormatting,
+    bool? isCodeEditorFocused,
   }) {
     return CodeEditorState(
       isStateInitialized: isStateInitialized ?? this.isStateInitialized,
@@ -49,6 +52,7 @@ class CodeEditorState extends Equatable {
       codeSubmissionState: codeSubmissionState ?? this.codeSubmissionState,
       question: question ?? this.question,
       isCodeFormatting: isCodeFormatting ?? this.isCodeFormatting,
+      isCodeEditorFocused: isCodeEditorFocused ?? this.isCodeEditorFocused,
     );
   }
 
@@ -61,6 +65,7 @@ class CodeEditorState extends Equatable {
         codeSubmissionState,
         isStateInitialized,
         isCodeFormatting,
+        isCodeEditorFocused,
       ];
 
   @override

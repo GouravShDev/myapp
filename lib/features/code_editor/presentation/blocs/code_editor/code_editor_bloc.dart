@@ -62,6 +62,8 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
         case CodeEditorUpdateTestcaseEvent():
           _onCodeEditorUpdateTestcaseEvent(event, emit);
           break;
+        case CodeEditorFocusChangedEvent():
+          _onCodeEditorFocusChangedEvent(event, emit);
       }
     });
   }
@@ -359,5 +361,16 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
       "code": state.code,
       "language": state.language?.name,
     };
+  }
+
+  void _onCodeEditorFocusChangedEvent(
+    CodeEditorFocusChangedEvent event,
+    Emitter<CodeEditorState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        isCodeEditorFocused: event.focus,
+      ),
+    );
   }
 }

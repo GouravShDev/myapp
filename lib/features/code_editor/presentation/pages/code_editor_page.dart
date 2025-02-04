@@ -1,4 +1,3 @@
-
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/services/analytics.dart';
 import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
@@ -155,6 +154,7 @@ class CodeEditorPageBody extends HookWidget {
     // Use hooks for state management
     final isFullScreen = useState(false);
     final codeEditorBloc = context.read<CodeEditorBloc>();
+    final focusNode = useFocusNode();
 
     // Create a code controller using useRef to persist across rebuilds
     final codeControllerState = useState(
@@ -177,6 +177,13 @@ class CodeEditorPageBody extends HookWidget {
           ),
         );
       });
+      focusNode.addListener(
+        () {
+          codeEditorBloc.add(
+            CodeEditorFocusChangedEvent(focusNode.hasFocus),
+          );
+        },
+      );
       final stateListner = codeEditorBloc.stream.listen(
         (newState) {
           final prevState = codeEditorBloc.previousState;
@@ -206,59 +213,61 @@ class CodeEditorPageBody extends HookWidget {
 
     // Build the main scaffold
     return Scaffold(
-        bottomNavigationBar: // Action Buttons and Run Results
-            Container(
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).canvasColor,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Test Results
-              TextButton.icon(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (context) {
-                      return BlocProvider.value(
-                        value: codeEditorBloc,
-                        child: TestCaseBottomSheet(
-                          testcases: codeEditorBloc.state.testCases ?? [],
-                          onRunCode: onCodeRun,
-                        ),
-                      );
-                    },
-                  );
-                },
-                label: const Text("Test Cases"),
-                icon: const Icon(Icons.bug_report),
-              ),
-
-              CodeRunButton(runCode: onCodeRun),
-            ],
-          ),
+      bottomNavigationBar: // Action Buttons and Run Results
+          Container(
+        padding: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context).canvasColor,
         ),
-        appBar: isFullScreen.value
-            ? null
-            : AppBar(
-                title: Text(
-                  question.title ?? '',
-                ),
-                actions: [
-                  // Language Dropdown
-                  CodeEditorLanguageDropDown(
-                    question: question,
-                  ),
-                ],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Test Results
+            TextButton.icon(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) {
+                    return BlocProvider.value(
+                      value: codeEditorBloc,
+                      child: TestCaseBottomSheet(
+                        testcases: codeEditorBloc.state.testCases ?? [],
+                        onRunCode: onCodeRun,
+                      ),
+                    );
+                  },
+                );
+              },
+              label: const Text("Test Cases"),
+              icon: const Icon(Icons.bug_report),
+            ),
+
+            CodeRunButton(runCode: onCodeRun),
+          ],
+        ),
+      ),
+      appBar: isFullScreen.value
+          ? null
+          : AppBar(
+              title: Text(
+                question.title ?? '',
               ),
-        body: _buildEditorLayout(
-          context,
-          codeController,
-          isFullScreen,
-          onCodeRun,
-        ));
+              actions: [
+                // Language Dropdown
+                CodeEditorLanguageDropDown(
+                  question: question,
+                ),
+              ],
+            ),
+      body: _buildEditorLayout(
+        context,
+        codeController,
+        isFullScreen,
+        onCodeRun,
+        focusNode,
+      ),
+    );
   }
 
   Widget _buildEditorLayout(
@@ -266,6 +275,7 @@ class CodeEditorPageBody extends HookWidget {
     CodeController codeController,
     ValueNotifier<bool> isFullScreen,
     VoidCallback runCode,
+    FocusNode focusNode,
   ) {
     final theme = Theme.of(context);
     return SafeArea(
@@ -303,6 +313,7 @@ class CodeEditorPageBody extends HookWidget {
                       child: CodeField(
                         controller: codeController,
                         expands: false,
+                        focusNode: focusNode,
                         wrap: true,
                         textStyle: Theme.of(context).textTheme.bodyMedium,
                         background: theme.scaffoldBackgroundColor,
@@ -326,8 +337,23 @@ class CodeEditorPageBody extends HookWidget {
               ],
             ),
           ),
-          CodingKeys(
-            codeController: codeController,
+          BlocBuilder<CodeEditorBloc, CodeEditorState>(
+            buildWhen: (previous, current) =>
+                previous.isCodeEditorFocused != current.isCodeEditorFocused,
+            builder: (context, state) {
+              return AnimatedSize(
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.elasticInOut,
+                child: Builder(builder: (context) {
+                  if (!state.isCodeEditorFocused) {
+                    return const SizedBox.shrink();
+                  }
+                  return CodingKeys(
+                    codeController: codeController,
+                  );
+                }),
+              );
+            },
           ),
         ],
       ),
