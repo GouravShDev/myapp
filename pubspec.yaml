@@ -78,6 +78,8 @@ dependencies:
   permission_handler: ^11.3.1
   upgrader: ^11.3.1
   hydrated_bloc: ^9.1.5
+  lottie: ^3.2.0
+  focus_detector: ^2.0.1
 
 dev_dependencies:
   flutter_test:
@@ -115,6 +117,7 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+    - assets/lotties/
     - shorebird.yaml
   #   - images/a_dot_ham.jpeg
 
@@ -160,6 +163,10 @@ flutter:
   
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_gen:
+  integrations:
+    lottie: true
 
 dependency_overrides:
   http: ^1.0.0
