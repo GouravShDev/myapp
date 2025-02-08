@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:codersgym/features/dashboard/presentation/widgets/contest_reminder_dialog.dart';
 import 'package:codersgym/features/question/domain/model/contest.dart';
 import 'package:flutter/material.dart';
 import 'package:codersgym/core/utils/date_time_extension.dart';
@@ -150,14 +151,16 @@ class UpcomingContestCard extends HookWidget {
                   width: 8,
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    // show snackbar comming soon
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Coming Soon"),
-                      ),
-                    );
-                  },
+                  onPressed: contest.startTime != null
+                      ? () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => ContestReminderDialog(
+                              contestDateTime: contest.startTime!,
+                            ),
+                          );
+                        }
+                      : null,
                   child: Text(
                     "Set Reminder",
                   ),
