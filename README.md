@@ -16,6 +16,12 @@ Features of Coders Gym
 - **Built-In Code Editor**: Write, test, and submit your solutions directly within the app
 - **Question Discussions and Solutions**: Dive deeper into problems by exploring community discussions and expert solutions.
 
+## 🎥 Video Demo:
+
+[![Watch the Demo](https://img.youtube.com/vi/QZZ6yvH8G6g/maxresdefault.jpg)](https://www.youtube.com/watch?v=Dj-9ehezqAU&list=PLaa4Z8KUulZNOncf6XdcbMYHZUzc8E7VP)
+
+🔗 **[Watch the Full Demo](https://www.youtube.com/watch?v=Dj-9ehezqAU&list=PLaa4Z8KUulZNOncf6XdcbMYHZUzc8E7VP)**  
+
 
 ## 🔮 Future Scope
 
