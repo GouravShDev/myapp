@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
 import 'package:codersgym/features/common/widgets/app_error_widget.dart';
 import 'package:codersgym/features/common/widgets/app_loading.dart';
+import 'package:codersgym/features/dashboard/presentation/blocs/contest_reminder_cubit.dart';
 import 'package:codersgym/features/dashboard/presentation/widgets/upcoming_contest_card.dart';
 import 'package:codersgym/features/profile/domain/model/user_profile.dart';
 import 'package:codersgym/features/profile/presentation/blocs/user_profile/user_profile_cubit.dart';
@@ -41,6 +42,7 @@ class HomePageBody extends StatelessWidget {
           final profileCubit = context.read<UserProfileCubit>();
           final authBloc = context.read<AuthBloc>();
           final upcomingContestCubit = context.read<UpcomingContestsCubit>();
+          final contestReminderCubit = context.read<ContestReminderCubit>();
 
           await dailyChallengeCubit.getTodayChallenge();
           await upcomingContestCubit.getUpcomingContest();
@@ -48,6 +50,7 @@ class HomePageBody extends StatelessWidget {
           if (authState is Authenticated) {
             await profileCubit.getUserProfile(authState.userName);
           }
+          contestReminderCubit.checkSchedulesContests();
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),

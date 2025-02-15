@@ -11,10 +11,20 @@ final class ContestReminderInitial extends ContestReminderState {}
 final class ContestReminderLoading extends ContestReminderState {}
 
 final class ContestReminderLoaded extends ContestReminderState {
-  final Set<String> scheduledContests;
+  final Set<ScheduledContest> scheduledContests;
 
   ContestReminderLoaded({required this.scheduledContests});
 
   @override
   List<Object?> get props => [scheduledContests];
+}
+
+class ScheduledContest {
+  final String titleSlug;
+  final int scheduledId;
+
+  ScheduledContest({
+    required this.titleSlug,
+    required this.scheduledId,
+  });
 }

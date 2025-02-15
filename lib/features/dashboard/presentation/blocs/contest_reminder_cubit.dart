@@ -17,10 +17,13 @@ class ContestReminderCubit extends Cubit<ContestReminderState> {
         await _notificationScheduler.getAllScheduledNotifications();
     emit(
       ContestReminderLoaded(
-        scheduledContests: Set.from(
+        scheduledContests: Set<ScheduledContest>.from(
           scheduledNotifications
               .map(
-                (e) => e.title,
+                (e) => ScheduledContest(
+                  titleSlug: e.payload?['contestTitleSlug'] ?? "",
+                  scheduledId: e.id,
+                ),
               )
               .toList(),
         ),
@@ -28,29 +31,44 @@ class ContestReminderCubit extends Cubit<ContestReminderState> {
     );
   }
 
-  Future<void> scheduleContestNotification(Contest contest) async {
-    if (contest.title == null) return;
-    if (contest.startTime != null) {
-      await _notificationScheduler.scheduleNotification(
-        title: contest.title ?? '',
-        body: contest.titleSlug ?? '',
-        scheduledTime: contest.startTime!,
-      );
-      final currentState = state;
-      if (currentState is ContestReminderLoaded) {
-        emit(
-          ContestReminderLoaded(
-            scheduledContests: currentState.scheduledContests
-              ..add(contest.title!),
-          ),
-        );
-      } else {
-        emit(
-          ContestReminderLoaded(
-            scheduledContests: {contest.title!},
-          ),
-        );
-      }
+  Future<void> scheduleContestNotification({
+    required Contest contest,
+    required Duration reminderOffset,
+  }) async {
+    if (contest.title == null || contest.startTime == null) return;
+
+    final scheduledTime = contest.startTime!.subtract(reminderOffset);
+
+    if (scheduledTime.isBefore(DateTime.now())) {
+      return;
     }
+
+    await _notificationScheduler.scheduleNotification(
+        title: 'Upcoming Leetcode Contest: ${contest.title}',
+        body:
+            'Starts in ${_formatDuration(reminderOffset)}. Get ready to solve some exciting problems!',
+        scheduledTime: scheduledTime,
+        payload: {
+          "contestTitleSlug": contest.titleSlug,
+        });
+
+    checkSchedulesContests();
+  }
+
+  void cancelContestNotification(ScheduledContest scheduledContest) async {
+    await _notificationScheduler.cancelNotification(scheduledContest.scheduledId);
+    checkSchedulesContests();
+  }
+}
+
+String _formatDuration(Duration duration) {
+  if (duration.inDays > 0) {
+    return '${duration.inDays} day${duration.inDays > 1 ? 's' : ''}';
+  } else if (duration.inHours > 0) {
+    return '${duration.inHours} hour${duration.inHours > 1 ? 's' : ''}';
+  } else if (duration.inMinutes > 0) {
+    return '${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''}';
+  } else {
+    return '${duration.inSeconds} second${duration.inSeconds > 1 ? 's' : ''}';
   }
 }

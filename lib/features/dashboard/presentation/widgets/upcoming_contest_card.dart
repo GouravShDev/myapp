@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:codersgym/features/dashboard/presentation/blocs/contest_reminder_cubit.dart';
 import 'package:codersgym/features/dashboard/presentation/widgets/contest_reminder_dialog.dart';
 import 'package:codersgym/features/question/domain/model/contest.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:codersgym/core/utils/date_time_extension.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -139,8 +140,8 @@ class UpcomingContestCard extends HookWidget {
                       if (contest.startTime != null)
                         Text(
                           contest.startTime!
-                                  .toLocal()
-                                  .formatToDayTimeWithTimezone(),
+                              .toLocal()
+                              .formatToDayTimeWithTimezone(),
                           style: textTheme.labelMedium
                               ?.copyWith(color: theme.hintColor),
                         ),
@@ -153,27 +154,71 @@ class UpcomingContestCard extends HookWidget {
                 ),
                 BlocBuilder<ContestReminderCubit, ContestReminderState>(
                   builder: (context, state) {
-                    final isReminderSet = state is ContestReminderLoaded &&
-                        state.scheduledContests.contains(contest.title);
-                    final contestReminderCubit = context.read<ContestReminderCubit>();
+                    final currentScheduledContest = state is ContestReminderLoaded ? state.scheduledContests.firstWhereOrNull(
+                      (element) => element.titleSlug == contest.titleSlug,
+                    ) : null;
+                    final isReminderSet = currentScheduledContest != null;
+                    final contestReminderCubit =
+                        context.read<ContestReminderCubit>();
                     final theme = Theme.of(context);
 
                     return ElevatedButton.icon(
                       onPressed: contest.startTime != null
-                          ? () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => BlocProvider.value(
-                            value: contestReminderCubit,
-                            child: ContestReminderDialog(
-                              contest: contest,
-                            ),
-                          ),
-                        );
-                      }
+                          ? () async {
+                              if (isReminderSet) {
+                                // Show confirmation dialog before canceling the reminder
+                                final confirmCancel = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Cancel Reminder'),
+                                    content: Text(
+                                        'Are you sure you want to cancel the reminder for "${contest.title}"?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(false),
+                                        child: const Text('No'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(true),
+                                        child: const Text('Yes'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+
+                                if (confirmCancel == true) {
+                                  contestReminderCubit
+                                      .cancelContestNotification(
+                                      currentScheduledContest,
+                                  );
+                                }
+                                return;
+                              }
+                              final selectedDuration =
+                                  await showDialog<Duration?>(
+                                context: context,
+                                builder: (context) => BlocProvider.value(
+                                  value: contestReminderCubit,
+                                  child: ContestReminderDialog(
+                                    contest: contest,
+                                  ),
+                                ),
+                              );
+                              if (selectedDuration != null) {
+                                contestReminderCubit
+                                    .scheduleContestNotification(
+                                  contest: contest,
+                                  reminderOffset: selectedDuration,
+                                );
+                              }
+                            }
                           : null,
                       icon: Icon(
-                        isReminderSet ? Icons.notifications_active : Icons.add_alert,
+                        isReminderSet
+                            ? Icons.notifications_active
+                            : Icons.add_alert,
                         color: isReminderSet
                             ? theme.colorScheme.primary
                             : theme.colorScheme.onPrimary,
@@ -189,7 +234,8 @@ class UpcomingContestCard extends HookWidget {
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isReminderSet
-                            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.1)
+                            ? theme.colorScheme.primaryContainer
+                                .withValues(alpha: 0.1)
                             : theme.colorScheme.primary,
                         side: BorderSide(
                           color: isReminderSet
@@ -200,7 +246,9 @@ class UpcomingContestCard extends HookWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12,
+                        ),
                         elevation: isReminderSet ? 0 : 3,
                       ),
                     );

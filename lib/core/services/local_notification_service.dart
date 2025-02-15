@@ -128,6 +128,7 @@ class LocalNotificationService {
       'Default Channel',
       importance: Importance.max,
       priority: Priority.high,
+      styleInformation: BigTextStyleInformation(''),
     );
 
     const iosDetails = DarwinNotificationDetails();

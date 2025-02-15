@@ -1,7 +1,5 @@
-import 'package:codersgym/features/dashboard/presentation/blocs/contest_reminder_cubit.dart';
 import 'package:codersgym/features/question/domain/model/contest.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ContestReminderDialog extends StatefulWidget {
   final Contest contest;
@@ -16,7 +14,7 @@ class ContestReminderDialog extends StatefulWidget {
 }
 
 class _ContestReminderDialogState extends State<ContestReminderDialog> {
-  ReminderType _selectedType = ReminderType.notification;
+  // ReminderType _selectedType = ReminderType.notification;
   Duration _selectedDuration = const Duration(hours: 1);
 
   @override
@@ -39,27 +37,27 @@ class _ContestReminderDialogState extends State<ContestReminderDialog> {
             const SizedBox(height: 24),
 
             // Reminder Type Selector
-            Row(
-              children: [
-                _ReminderTypeOption(
-                  icon: Icons.notifications_outlined,
-                  label: 'Notification',
-                  isSelected: _selectedType == ReminderType.notification,
-                  onTap: () =>
-                      setState(() => _selectedType = ReminderType.notification),
-                ),
-                const SizedBox(width: 12),
-                _ReminderTypeOption(
-                  icon: Icons.alarm_outlined,
-                  label: 'Alarm',
-                  isSelected: _selectedType == ReminderType.alarm,
-                  onTap: () =>
-                      setState(() => _selectedType = ReminderType.alarm),
-                ),
-              ],
-            ),
+            // Row(
+            //   children: [
+                // _ReminderTypeOption(
+                //   icon: Icons.notifications_outlined,
+                //   label: 'Notification',
+                //   isSelected: _selectedType == ReminderType.notification,
+                //   onTap: () =>
+                //       setState(() => _selectedType = ReminderType.notification),
+                // ),
+                // const SizedBox(width: 12),
+                // _ReminderTypeOption(
+                //   icon: Icons.alarm_outlined,
+                //   label: 'Alarm',
+                //   isSelected: _selectedType == ReminderType.alarm,
+                //   onTap: () =>
+                //       setState(() => _selectedType = ReminderType.alarm),
+                // ),
+            //   ],
+            // ),
 
-            const SizedBox(height: 24),
+            // const SizedBox(height: 24),
             Text(
               'Remind me before:',
               style: theme.textTheme.titleSmall,
@@ -99,13 +97,9 @@ class _ContestReminderDialogState extends State<ContestReminderDialog> {
   }
 
   void _saveReminder(BuildContext context) {
-    context
-        .read<ContestReminderCubit>()
-        .scheduleContestNotification(widget.contest);
-    Navigator.of(context).pop({
-      'type': _selectedType,
-      'duration': _selectedDuration,
-    });
+    Navigator.of(context).pop(
+      _selectedDuration,
+    );
   }
 }
 
@@ -227,64 +221,63 @@ class _TimePoint extends StatelessWidget {
   }
 }
 
-class _ReminderTypeOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ReminderTypeOption({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Expanded(
-      child: Material(
-        color: isSelected
-            ? theme.primaryColor.withOpacity(0.1)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: isSelected ? theme.primaryColor : theme.dividerColor,
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  icon,
-                  color: isSelected ? theme.primaryColor : theme.hintColor,
-                  size: 28,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: isSelected ? theme.primaryColor : theme.hintColor,
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-enum ReminderType { notification, alarm }
+// class _ReminderTypeOption extends StatelessWidget {
+//   final IconData icon;
+//   final String label;
+//   final bool isSelected;
+//   final VoidCallback onTap;
+//
+//   const _ReminderTypeOption({
+//     required this.icon,
+//     required this.label,
+//     required this.isSelected,
+//     required this.onTap,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//
+//     return Expanded(
+//       child: Material(
+//         color: isSelected
+//             ? theme.primaryColor.withOpacity(0.1)
+//             : Colors.transparent,
+//         borderRadius: BorderRadius.circular(12),
+//         child: InkWell(
+//           onTap: onTap,
+//           borderRadius: BorderRadius.circular(12),
+//           child: Container(
+//             padding: const EdgeInsets.symmetric(vertical: 16),
+//             decoration: BoxDecoration(
+//               border: Border.all(
+//                 color: isSelected ? theme.primaryColor : theme.dividerColor,
+//                 width: 2,
+//               ),
+//               borderRadius: BorderRadius.circular(12),
+//             ),
+//             child: Column(
+//               children: [
+//                 Icon(
+//                   icon,
+//                   color: isSelected ? theme.primaryColor : theme.hintColor,
+//                   size: 28,
+//                 ),
+//                 const SizedBox(height: 8),
+//                 Text(
+//                   label,
+//                   style: TextStyle(
+//                     color: isSelected ? theme.primaryColor : theme.hintColor,
+//                     fontWeight:
+//                         isSelected ? FontWeight.bold : FontWeight.normal,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+//
