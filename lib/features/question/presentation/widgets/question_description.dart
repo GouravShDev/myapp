@@ -1,4 +1,3 @@
-
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/routes/app_router.gr.dart';
 import 'package:codersgym/core/utils/inherited_provider.dart';
@@ -54,6 +53,7 @@ class QuestionDescription extends HookWidget {
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Flexible(
                             child: Text(
@@ -63,10 +63,17 @@ class QuestionDescription extends HookWidget {
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ),
-                          if (question.status != null)
-                            QuestionStatusIcon(
-                              status: question.status!,
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4.0),
+                            child: Column(
+                              children: [
+                                if (question.status != null)
+                                QuestionStatusIcon(
+                                  status: question.status!,
+                                ),
+                              ],
                             ),
+                          ),
                         ],
                       ),
                     ),
@@ -127,11 +134,11 @@ class QuestionDescription extends HookWidget {
                 Wrap(
                   spacing: 8.0,
                   children: topicTags
-                          ?.map(
+                          .map(
                             (e) => e.name ?? '',
                           )
                           .toList()
-                          ?.map(
+                          .map(
                             (tag) => Chip(
                               label: Text(tag),
                               shape: RoundedRectangleBorder(
@@ -143,8 +150,7 @@ class QuestionDescription extends HookWidget {
                               ),
                             ),
                           )
-                          .toList() ??
-                      [],
+                          .toList(),
                 ),
               ],
             );
@@ -165,7 +171,7 @@ class QuestionDescription extends HookWidget {
           onLoading: () => const SizedBox.shrink(),
           onLoaded: (hints) {
             return Column(
-              children: hints?.mapIndexed(
+              children: hints.mapIndexed(
                     (
                       index,
                       hint,
@@ -178,8 +184,7 @@ class QuestionDescription extends HookWidget {
                         ],
                       );
                     },
-                  ).toList() ??
-                  [],
+                  ).toList(),
             );
           },
           onError: (exception) => Text(

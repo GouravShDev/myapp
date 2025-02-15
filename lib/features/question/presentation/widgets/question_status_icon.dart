@@ -1,7 +1,5 @@
 import 'package:codersgym/core/theme/app_theme.dart';
-import 'package:codersgym/features/code_editor/presentation/widgets/code_successful_submission_dialog.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class QuestionStatusIcon extends StatelessWidget {
@@ -13,15 +11,27 @@ class QuestionStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Icon(
-      getStatusIcon(),
-      color: getStatusColor(context),
+    return Row(
+      children: [
+        Text(
+          getStatusText(),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).hintColor,
+          ),
+        ),
+        const SizedBox(width: 8), // Add spacing between icon and text
+        Icon(
+          getStatusIcon(),
+          size: 14,
+          color: getStatusColor(context),
+        ),
+      ],
     );
   }
 
   IconData? getStatusIcon() {
     return switch (status) {
-      QuestionStatus.accepted => Icons.check_circle,
+      QuestionStatus.accepted => Icons.check_circle_outlined,
       QuestionStatus.notAccepted => Icons.incomplete_circle,
       _ => null,
     };
@@ -35,4 +45,13 @@ class QuestionStatusIcon extends StatelessWidget {
       _ => theme.hintColor,
     };
   }
+
+  String getStatusText() {
+    return switch (status) {
+      QuestionStatus.accepted => 'Solved',
+      QuestionStatus.notAccepted => 'Attempted',
+      _ => '',
+    };
+  }
+
 }

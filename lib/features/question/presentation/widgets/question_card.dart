@@ -1,6 +1,5 @@
 import 'package:codersgym/features/question/presentation/widgets/question_status_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/presentation/widgets/question_difficulty_text.dart';
 
@@ -52,8 +51,11 @@ class QuestionCard extends StatelessWidget {
                     ),
                   ),
                   if (question.status != null)
-                    QuestionStatusIcon(
-                      status: question.status!,
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4.0),
+                      child: QuestionStatusIcon(
+                        status: question.status!,
+                      ),
                     ),
                 ],
               ),
