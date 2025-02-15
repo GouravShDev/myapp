@@ -57,16 +57,16 @@ class ScheduledNotification {
           : null,
     );
   }
-  
+
   bool get isExpired => !isRepeating && scheduledTime.isBefore(DateTime.now());
 }
 
 class NotificationScheduler {
   final StorageManager _storage;
   final LocalNotificationService _notificationService;
- static const String _storageKey = 'scheduled_notifications';
+  static const String _storageKey = 'scheduled_notifications';
   static const String _lastCleanupKey = 'last_notification_cleanup';
-  
+
   // Cleanup configuration
   static const Duration cleanupInterval = Duration(days: 1);
   static const Duration retentionPeriod = Duration(days: 7);
@@ -77,10 +77,7 @@ class NotificationScheduler {
   })  : _storage = storage,
         _notificationService = notificationService;
 
-  Future<List<ScheduledNotification>> getAllScheduledNotifications() async {
-    // Attempt cleanup before fetching notifications
-    await _attemptCleanup();
-    
+  Future<List<ScheduledNotification>> _getAllScheduledNotifications() async {
     final storedData = await _storage.getStringList(_storageKey);
     if (storedData == null) return [];
 
@@ -88,17 +85,24 @@ class NotificationScheduler {
         .map((item) => ScheduledNotification.fromJson(jsonDecode(item)))
         .toList();
   }
+
+  Future<List<ScheduledNotification>> getAllScheduledNotifications() async {
+    // Attempt cleanup before fetching notifications
+    await _attemptCleanup();
+
+    return _getAllScheduledNotifications();
+  }
+
   Future<void> _attemptCleanup() async {
     try {
       final lastCleanupStr = await _storage.getString(_lastCleanupKey);
-      final lastCleanup = lastCleanupStr != null 
-          ? DateTime.parse(lastCleanupStr)
-          : null;
+      final lastCleanup =
+          lastCleanupStr != null ? DateTime.parse(lastCleanupStr) : null;
 
       final now = DateTime.now();
-      
+
       // Check if cleanup is needed
-      if (lastCleanup == null || 
+      if (lastCleanup == null ||
           now.difference(lastCleanup) >= cleanupInterval) {
         await cleanupOldNotifications();
       }
@@ -106,28 +110,28 @@ class NotificationScheduler {
       print('Error during cleanup attempt: $e');
     }
   }
-  
+
   Future<bool> cleanupOldNotifications() async {
     try {
       final now = DateTime.now();
-      final allNotifications = await getAllScheduledNotifications();
-      
+      final allNotifications = await _getAllScheduledNotifications();
+
       // Filter out expired non-repeating notifications and old completed ones
       final validNotifications = allNotifications.where((notification) {
         if (notification.isRepeating) return true;
-        
+
         // Keep notifications that are either:
         // 1. Not yet expired, or
         // 2. Expired but within retention period
-        return !notification.isExpired || 
-               now.difference(notification.scheduledTime) <= retentionPeriod;
+        return !notification.isExpired ||
+            now.difference(notification.scheduledTime) <= retentionPeriod;
       }).toList();
 
       // Cancel expired notifications in the system
       final expiredNotifications = allNotifications
           .where((notification) => notification.isExpired)
           .toList();
-      
+
       for (var notification in expiredNotifications) {
         await _notificationService.cancelNotification(notification.id);
       }
@@ -136,7 +140,7 @@ class NotificationScheduler {
       final notificationStrings = validNotifications
           .map((notification) => jsonEncode(notification.toJson()))
           .toList();
-      
+
       // Store the cleanup time
       await _storage.putString(
         _lastCleanupKey,
@@ -149,20 +153,21 @@ class NotificationScheduler {
       return false;
     }
   }
- Future<List<ScheduledNotification>> getExpiredNotifications({
+
+  Future<List<ScheduledNotification>> getExpiredNotifications({
     Duration? within,
   }) async {
-    final allNotifications = await getAllScheduledNotifications();
+    final allNotifications = await _getAllScheduledNotifications();
     final now = DateTime.now();
-    
+
     return allNotifications.where((notification) {
       if (!notification.isExpired) return false;
-      
+
       if (within != null) {
         final expiryDuration = now.difference(notification.scheduledTime);
         return expiryDuration <= within;
       }
-      
+
       return true;
     }).toList();
   }
@@ -191,10 +196,11 @@ class NotificationScheduler {
         repeatInterval: repeatInterval,
       );
 
+      bool result = false;
       // Schedule the actual notification
       if (type == NotificationType.alarm) {
         // Configure with alarm sound and different channel for alarm type
-        await _notificationService.scheduleNotification(
+        result = await _notificationService.scheduleNotification(
           id: id,
           title: title,
           body: body,
@@ -202,7 +208,7 @@ class NotificationScheduler {
           payload: jsonEncode(payload),
         );
       } else {
-        await _notificationService.scheduleNotification(
+        result = await _notificationService.scheduleNotification(
           id: id,
           title: title,
           body: body,
@@ -210,9 +216,10 @@ class NotificationScheduler {
           payload: jsonEncode(payload),
         );
       }
+      if (!result) return false;
 
       // Store notification data
-      final existingNotifications = await getAllScheduledNotifications();
+      final existingNotifications = await _getAllScheduledNotifications();
       existingNotifications.add(notification);
 
       final notificationStrings = existingNotifications
@@ -226,14 +233,13 @@ class NotificationScheduler {
     }
   }
 
- Future<Map<String, int>> getNotificationStats() async {
-    final allNotifications = await getAllScheduledNotifications();
-    final now = DateTime.now();
-    
+  Future<Map<String, int>> getNotificationStats() async {
+    final allNotifications = await _getAllScheduledNotifications();
+
     int activeCount = 0;
     int expiredCount = 0;
     int repeatingCount = 0;
-    
+
     for (var notification in allNotifications) {
       if (notification.isRepeating) {
         repeatingCount++;
@@ -244,7 +250,7 @@ class NotificationScheduler {
         activeCount++;
       }
     }
-    
+
     return {
       'active': activeCount,
       'expired': expiredCount,
@@ -252,13 +258,14 @@ class NotificationScheduler {
       'total': allNotifications.length,
     };
   }
+
   Future<bool> cancelNotification(int id) async {
     try {
       // Cancel the actual notification
       await _notificationService.cancelNotification(id);
 
       // Remove from storage
-      final existingNotifications = await getAllScheduledNotifications();
+      final existingNotifications = await _getAllScheduledNotifications();
       final updatedNotifications = existingNotifications
           .where((notification) => notification.id != id)
           .toList();
@@ -285,7 +292,7 @@ class NotificationScheduler {
   }
 
   Future<List<ScheduledNotification>> getUpcomingNotifications() async {
-    final allNotifications = await getAllScheduledNotifications();
+    final allNotifications = await _getAllScheduledNotifications();
     final now = DateTime.now();
 
     return allNotifications
@@ -296,7 +303,7 @@ class NotificationScheduler {
 
   Future<List<ScheduledNotification>> getNotificationsByType(
       NotificationType type) async {
-    final allNotifications = await getAllScheduledNotifications();
+    final allNotifications = await _getAllScheduledNotifications();
     return allNotifications
         .where((notification) => notification.type == type)
         .toList();
@@ -310,7 +317,7 @@ class NotificationScheduler {
     Map<String, dynamic>? payload,
   }) async {
     try {
-      final existingNotifications = await getAllScheduledNotifications();
+      final existingNotifications = await _getAllScheduledNotifications();
       final notificationIndex = existingNotifications
           .indexWhere((notification) => notification.id == id);
 

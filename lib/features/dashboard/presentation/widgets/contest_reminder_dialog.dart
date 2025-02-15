@@ -1,11 +1,14 @@
+import 'package:codersgym/features/dashboard/presentation/blocs/contest_reminder_cubit.dart';
+import 'package:codersgym/features/question/domain/model/contest.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ContestReminderDialog extends StatefulWidget {
-  final DateTime contestDateTime;
+  final Contest contest;
 
   const ContestReminderDialog({
     Key? key,
-    required this.contestDateTime,
+    required this.contest,
   }) : super(key: key);
 
   @override
@@ -96,6 +99,9 @@ class _ContestReminderDialogState extends State<ContestReminderDialog> {
   }
 
   void _saveReminder(BuildContext context) {
+    context
+        .read<ContestReminderCubit>()
+        .scheduleContestNotification(widget.contest);
     Navigator.of(context).pop({
       'type': _selectedType,
       'duration': _selectedDuration,
@@ -204,7 +210,8 @@ class _TimePoint extends StatelessWidget {
               ),
             ),
             child: isSelected
-                ? const Icon(Icons.check, size: 16, color: Colors.white)
+                ? Icon(Icons.check_rounded,
+                    size: 18, color: theme.colorScheme.onPrimary)
                 : null,
           ),
         ],

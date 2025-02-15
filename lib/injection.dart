@@ -2,6 +2,8 @@ import 'package:codersgym/core/network/app_dio_logger.dart';
 import 'package:codersgym/core/network/dio_network_service.dart';
 import 'package:codersgym/core/network/network_service.dart';
 import 'package:codersgym/core/services/github_updater.dart';
+import 'package:codersgym/core/services/local_notification_service.dart';
+import 'package:codersgym/core/services/notification_scheduler.dart';
 import 'package:codersgym/core/utils/app_constants.dart';
 import 'package:codersgym/core/utils/storage/local_storage_manager.dart';
 import 'package:codersgym/core/utils/storage/storage_manager.dart';
@@ -13,6 +15,7 @@ import 'package:codersgym/features/code_editor/domain/repository/code_editor_rep
 import 'package:codersgym/features/code_editor/presentation/blocs/code_editor/code_editor_bloc.dart';
 import 'package:codersgym/features/common/bloc/app_file_downloader/app_file_downloader_bloc.dart';
 import 'package:codersgym/features/common/widgets/app_error_notifier.dart';
+import 'package:codersgym/features/dashboard/presentation/blocs/contest_reminder_cubit.dart';
 import 'package:codersgym/features/profile/data/repository/profile_repository.dart';
 import 'package:codersgym/features/profile/presentation/blocs/contest_ranking_info/contest_ranking_info_cubit.dart';
 import 'package:codersgym/features/profile/presentation/blocs/cubit/user_profile_calendar_cubit.dart';
@@ -103,6 +106,12 @@ Future<void> initializeDependencies() async {
         repoName: AppConstants.githubRepo,
         username: AppConstants.githubUsername,
         storageManager: getIt.get()),
+  );
+  getIt.registerLazySingleton<NotificationScheduler>(
+    () => NotificationScheduler(
+      notificationService: LocalNotificationService(),
+      storage: getIt.get(),
+    ),
   );
 
   // REPOSITORY
@@ -223,5 +232,10 @@ Future<void> initializeDependencies() async {
   );
   getIt.registerFactory(
     () => QuestionFilterCubit(),
+  );
+  getIt.registerFactory(
+    () => ContestReminderCubit(
+      getIt.get(),
+    ),
   );
 }

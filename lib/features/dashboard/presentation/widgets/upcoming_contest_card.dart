@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:codersgym/features/dashboard/presentation/blocs/contest_reminder_cubit.dart';
 import 'package:codersgym/features/dashboard/presentation/widgets/contest_reminder_dialog.dart';
 import 'package:codersgym/features/question/domain/model/contest.dart';
 import 'package:flutter/material.dart';
 import 'package:codersgym/core/utils/date_time_extension.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -138,8 +140,7 @@ class UpcomingContestCard extends HookWidget {
                         Text(
                           contest.startTime!
                                   .toLocal()
-                                  .formatToDayTimeWithTimezone() ??
-                              "",
+                                  .formatToDayTimeWithTimezone(),
                           style: textTheme.labelMedium
                               ?.copyWith(color: theme.hintColor),
                         ),
@@ -150,21 +151,61 @@ class UpcomingContestCard extends HookWidget {
                 const SizedBox(
                   width: 8,
                 ),
-                ElevatedButton(
-                  onPressed: contest.startTime != null
-                      ? () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => ContestReminderDialog(
-                              contestDateTime: contest.startTime!,
+                BlocBuilder<ContestReminderCubit, ContestReminderState>(
+                  builder: (context, state) {
+                    final isReminderSet = state is ContestReminderLoaded &&
+                        state.scheduledContests.contains(contest.title);
+                    final contestReminderCubit = context.read<ContestReminderCubit>();
+                    final theme = Theme.of(context);
+
+                    return ElevatedButton.icon(
+                      onPressed: contest.startTime != null
+                          ? () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => BlocProvider.value(
+                            value: contestReminderCubit,
+                            child: ContestReminderDialog(
+                              contest: contest,
                             ),
-                          );
-                        }
-                      : null,
-                  child: Text(
-                    "Set Reminder",
-                  ),
-                ),
+                          ),
+                        );
+                      }
+                          : null,
+                      icon: Icon(
+                        isReminderSet ? Icons.notifications_active : Icons.add_alert,
+                        color: isReminderSet
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onPrimary,
+                      ),
+                      label: Text(
+                        isReminderSet ? 'Reminder On' : 'Set Reminder',
+                        style: TextStyle(
+                          color: isReminderSet
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isReminderSet
+                            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.1)
+                            : theme.colorScheme.primary,
+                        side: BorderSide(
+                          color: isReminderSet
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.primary,
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        elevation: isReminderSet ? 0 : 3,
+                      ),
+                    );
+                  },
+                )
               ],
             ),
           ),
