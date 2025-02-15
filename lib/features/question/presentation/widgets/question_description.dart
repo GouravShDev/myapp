@@ -1,8 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/routes/app_router.gr.dart';
+import 'package:codersgym/core/theme/app_theme.dart';
 import 'package:codersgym/core/utils/inherited_provider.dart';
 import 'package:codersgym/features/common/widgets/app_error_widget.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
+import 'package:codersgym/features/question/presentation/blocs/online_user_count/online_user_count_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_content/question_content_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_hints/question_hints_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_tags/question_tags_cubit.dart';
@@ -63,21 +65,56 @@ class QuestionDescription extends HookWidget {
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 4.0),
-                            child: Column(
-                              children: [
-                                if (question.status != null)
-                                QuestionStatusIcon(
-                                  status: question.status!,
-                                ),
-                              ],
+                          if (question.status != null)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 4.0),
+                              child: QuestionStatusIcon(
+                                status: question.status!,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
-                    QuestionDifficultyText(question),
+                    Row(
+                      children: [
+                        QuestionDifficultyText(question),
+                        const SizedBox(
+                          width: 12,
+                        ),
+                        BlocBuilder<OnlineUserCountCubit, OnlineUserCountState>(
+                          builder: (context, state) {
+                            return switch (state) {
+                              OnlineUserCountConnectedState() => Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .successColor,
+                                      size: 12,
+                                    ),
+                                    const SizedBox(
+                                      width: 4,
+                                    ),
+                                    Text(
+                                      '${state.userCount} Online',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: Theme.of(context).hintColor,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              _ => const SizedBox(
+                                  height: 12,
+                                )
+                            };
+                          },
+                        ),
+                      ],
+                    ),
                     HtmlWidget(
                       question.content ?? '',
                       renderMode: RenderMode.column,
@@ -134,23 +171,23 @@ class QuestionDescription extends HookWidget {
                 Wrap(
                   spacing: 8.0,
                   children: topicTags
-                          .map(
-                            (e) => e.name ?? '',
-                          )
-                          .toList()
-                          .map(
-                            (tag) => Chip(
-                              label: Text(tag),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                side: BorderSide(
-                                  color: Theme.of(context).cardColor,
-                                  width: 1.0,
-                                ),
-                              ),
+                      .map(
+                        (e) => e.name ?? '',
+                      )
+                      .toList()
+                      .map(
+                        (tag) => Chip(
+                          label: Text(tag),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            side: BorderSide(
+                              color: Theme.of(context).cardColor,
+                              width: 1.0,
                             ),
-                          )
-                          .toList(),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
               ],
             );
@@ -172,19 +209,19 @@ class QuestionDescription extends HookWidget {
           onLoaded: (hints) {
             return Column(
               children: hints.mapIndexed(
-                    (
-                      index,
-                      hint,
-                    ) {
-                      return QuestionInfoTile(
-                        title: 'Hint ${index + 1}',
-                        icon: Icons.lightbulb_outline_sharp,
-                        children: [
-                          Text(hint),
-                        ],
-                      );
-                    },
-                  ).toList(),
+                (
+                  index,
+                  hint,
+                ) {
+                  return QuestionInfoTile(
+                    title: 'Hint ${index + 1}',
+                    icon: Icons.lightbulb_outline_sharp,
+                    children: [
+                      Text(hint),
+                    ],
+                  );
+                },
+              ).toList(),
             );
           },
           onError: (exception) => Text(

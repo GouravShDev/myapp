@@ -3,9 +3,8 @@ import 'package:codersgym/core/routes/app_router.gr.dart';
 import 'package:codersgym/core/services/analytics.dart';
 import 'package:codersgym/core/utils/inherited_provider.dart';
 import 'package:codersgym/features/common/data/models/analytics_events.dart';
-import 'package:codersgym/features/profile/presentation/blocs/user_profile/user_profile_cubit.dart';
-import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/official_solution_available/official_solution_available_cubit.dart';
+import 'package:codersgym/features/question/presentation/blocs/online_user_count/online_user_count_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_hints/question_hints_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_solution/question_solution_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_tags/question_tags_cubit.dart';
@@ -25,6 +24,7 @@ import 'package:codersgym/injection.dart';
 @RoutePage()
 class QuestionDetailPage extends HookWidget implements AutoRouteWrapper {
   final Question question;
+
   const QuestionDetailPage({super.key, required this.question});
 
   @override
@@ -141,7 +141,9 @@ class QuestionDetailPage extends HookWidget implements AutoRouteWrapper {
           create: (context) => getIt.get<OfficialSolutionAvailableCubit>(),
         ),
         BlocProvider(
-          create: (context) => getIt.get<CommunitySolutionsBloc>(),
+          create: (context) => getIt.get<OnlineUserCountCubit>(
+            param1: question.titleSlug,
+          ),
         ),
       ],
       child: this,
@@ -155,6 +157,7 @@ class QuestionDetailPageBody extends HookWidget {
     required this.question,
     required this.tabItems,
   });
+
   final Question question;
   final List<TabBarItem> tabItems;
 

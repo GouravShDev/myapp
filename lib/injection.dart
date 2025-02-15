@@ -24,6 +24,7 @@ import 'package:codersgym/features/question/data/parser/leetcode_solution_parser
 import 'package:codersgym/features/question/presentation/blocs/community_post_detail/community_post_detail_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/official_solution_available/official_solution_available_cubit.dart';
+import 'package:codersgym/features/question/presentation/blocs/online_user_count/online_user_count_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_archieve/question_archieve_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_filter/question_filter_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_hints/question_hints_cubit.dart';
@@ -236,6 +237,11 @@ Future<void> initializeDependencies() async {
   getIt.registerFactory(
     () => ContestReminderCubit(
       getIt.get(),
+    ),
+  );
+  getIt.registerFactoryParam<OnlineUserCountCubit, String, void>(
+    (questionId, _) => OnlineUserCountCubit(
+      questionTitleSlug: questionId,
     ),
   );
 }
