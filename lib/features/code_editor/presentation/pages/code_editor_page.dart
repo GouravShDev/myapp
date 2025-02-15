@@ -21,6 +21,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_highlight/themes/monokai-sublime.dart';
 import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:in_app_review/in_app_review.dart';
 
 @RoutePage()
 class CodeEditorPage extends HookWidget implements AutoRouteWrapper {
@@ -70,6 +71,7 @@ class CodeEditorPageBody extends HookWidget {
     super.key,
     required this.question,
   });
+
   final Question question;
 
   final modifiers = [
@@ -390,6 +392,15 @@ class CodeEditorPageBody extends HookWidget {
       name: AnalyticsEvents.questionsCompleted,
       parameters: question.toAnalyticsMap(),
     );
+    final InAppReview inAppReview = InAppReview.instance;
+    inAppReview.isAvailable().then(
+      (available) {
+        if (available) {
+          inAppReview.requestReview();
+        }
+      },
+    );
+
     final codeEditorBloc = context.read<CodeEditorBloc>();
     if (result.didCodeResultInError) {
       showModalBottomSheet(
