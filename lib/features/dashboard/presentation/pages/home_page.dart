@@ -68,9 +68,15 @@ class HomePageBody extends StatelessWidget {
                       onInitial: () => AppWidgetLoading(
                         child: UserGreetingCard.loading(),
                       ),
-                      onLoading: () {
-                        return AppWidgetLoading(
-                          child: UserGreetingCard.loading(),
+                      onLoading: (cachedData) {
+                        if (cachedData == null) {
+                          return UserGreetingCard.loading();
+                        }
+                        return UserGreetingCard(
+                          userName: cachedData.realName ?? "",
+                          avatarUrl: cachedData.userAvatar ?? "",
+                          streak: cachedData.streakCounter,
+                          isFetching: true,
                         );
                       },
                       onLoaded: (profile) {
@@ -92,6 +98,7 @@ class HomePageBody extends StatelessWidget {
                 BlocBuilder<DailyChallengeCubit, ApiState<Question, Exception>>(
                   buildWhen: (previous, current) =>
                       current.isLoaded ||
+                      current.isLoading ||
                       (current.isError && !previous.isLoaded),
                   builder: (context, state) {
                     if (state.isError) {
@@ -114,20 +121,21 @@ class HomePageBody extends StatelessWidget {
                           height: 16,
                         ),
                         state.mayBeWhen(
+                          onLoaded: (question) => _buildQuestionCard(
+                            context,
+                            question: question,
+                          ),
+                          onLoading: (cachedData) => cachedData != null
+                              ? _buildQuestionCard(
+                                  context,
+                                  question: cachedData,
+                                  isFetching: true,
+                                )
+                              : DailyQuestionCard.empty(),
                           orElse: () => AppWidgetLoading(
                             child: DailyQuestionCard.empty(),
                           ),
-                          onLoaded: (question) {
-                            return DailyQuestionCard(
-                              question: question,
-                              onSolveTapped: () {
-                                AutoRouter.of(context).push(
-                                  QuestionDetailRoute(question: question),
-                                );
-                              },
-                            );
-                          },
-                        ),
+                        )
                       ],
                     );
                   },
@@ -192,6 +200,22 @@ class HomePageBody extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildQuestionCard(
+    BuildContext context, {
+    required Question question,
+    bool isFetching = false,
+  }) {
+    return DailyQuestionCard(
+      question: question,
+      isFetching: isFetching,
+      onSolveTapped: () {
+        AutoRouter.of(context).push(
+          QuestionDetailRoute(question: question),
+        );
+      },
     );
   }
 }

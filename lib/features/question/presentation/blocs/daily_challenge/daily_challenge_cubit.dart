@@ -1,4 +1,3 @@
-import 'package:bloc/bloc.dart';
 import 'package:codersgym/core/api/api_state.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/domain/repository/question_repository.dart';
@@ -25,7 +24,7 @@ class DailyChallengeCubit extends HydratedCubit<ApiState<Question, Exception>> {
     if (json.isEmpty) {
       return ApiState.initial();
     }
-    return ApiLoaded(Question.fromJson(json));
+    return ApiLoading(cachedData: Question.fromJson(json));
   }
 
   @override

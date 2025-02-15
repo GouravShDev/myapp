@@ -41,7 +41,7 @@ class QuestionDescription extends HookWidget {
         builder: (context, state) {
           return state.when(
             onInitial: () => const CircularProgressIndicator(),
-            onLoading: () => const CircularProgressIndicator(),
+            onLoading: (_) => const CircularProgressIndicator(),
             onLoaded: (question) {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -130,7 +130,7 @@ class QuestionDescription extends HookWidget {
                       builder: (context, state) {
                         return state.when(
                           onInitial: () => const SizedBox.shrink(),
-                          onLoading: () => const SizedBox.shrink(),
+                          onLoading: (_) => const SizedBox.shrink(),
                           onLoaded: (similarQuestionList) {
                             return _buildSimilarQuestionsTiles(
                               context,
@@ -159,7 +159,7 @@ class QuestionDescription extends HookWidget {
       builder: (context, state) {
         return state.when(
           onInitial: () => const SizedBox.shrink(),
-          onLoading: () => const SizedBox.shrink(),
+          onLoading: (_) => const SizedBox.shrink(),
           onLoaded: (topicTags) {
             if (topicTags.isEmpty) {
               return const SizedBox.shrink();
@@ -205,7 +205,7 @@ class QuestionDescription extends HookWidget {
       builder: (context, state) {
         return state.when(
           onInitial: () => const SizedBox.shrink(),
-          onLoading: () => const SizedBox.shrink(),
+          onLoading: (_) => const SizedBox.shrink(),
           onLoaded: (hints) {
             return Column(
               children: hints.mapIndexed(

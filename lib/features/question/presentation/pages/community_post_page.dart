@@ -18,6 +18,7 @@ class CommunityPostPage extends HookWidget implements AutoRouteWrapper {
     super.key,
     required this.postDetail,
   });
+
   final CommunitySolutionPostDetail postDetail;
 
   @override
@@ -29,7 +30,7 @@ class CommunityPostPage extends HookWidget implements AutoRouteWrapper {
     }, []);
     return Scaffold(
         appBar: AppBar(
-          title: Text(postDetail?.title ?? 'Post detail'),
+          title: Text(postDetail.title ?? 'Post detail'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -37,8 +38,9 @@ class CommunityPostPage extends HookWidget implements AutoRouteWrapper {
               BlocBuilder<CommunityPostDetailCubit, CommunityPostDetailState>(
             builder: (context, state) {
               return state.when(
-                onInitial: () => SizedBox.shrink(),
-                onLoading: () => Center(child: CircularProgressIndicator()),
+                onInitial: () => const SizedBox.shrink(),
+                onLoading: (_) =>
+                    const Center(child: CircularProgressIndicator()),
                 onLoaded: (updatedPostDetail) {
                   return Markdown(
                     data: updatedPostDetail.post?.content ?? '',

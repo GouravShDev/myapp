@@ -1,8 +1,6 @@
-import 'package:bloc/bloc.dart';
 import 'package:codersgym/core/api/api_state.dart';
 import 'package:codersgym/features/profile/domain/model/user_profile.dart';
 import 'package:codersgym/features/profile/domain/repository/profile_repository.dart';
-import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 class UserProfileCubit extends HydratedCubit<ApiState<UserProfile, Exception>> {
@@ -26,7 +24,7 @@ class UserProfileCubit extends HydratedCubit<ApiState<UserProfile, Exception>> {
     if (json.isEmpty) {
       return ApiState.initial();
     }
-    return ApiLoaded(UserProfile.fromJson(json));
+    return ApiLoading(cachedData: UserProfile.fromJson(json));
   }
 
   @override

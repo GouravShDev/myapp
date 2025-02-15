@@ -87,7 +87,7 @@ class QuestionDetailPage extends HookWidget implements AutoRouteWrapper {
         listener: (context, state) {
           state.when(
             onInitial: () {},
-            onLoading: () {},
+            onLoading: (_) {},
             onLoaded: (isAvailable) {
               if (isAvailable) {
                 tabsItems = List.from(tabsItems)
