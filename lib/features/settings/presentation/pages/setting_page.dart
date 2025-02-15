@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:codersgym/core/utils/app_constants.dart';
-import 'package:codersgym/core/routes/app_router.gr.dart';
 import 'package:codersgym/features/auth/presentation/blocs/auth/auth_bloc.dart';
 import 'package:codersgym/features/settings/presentation/blocs/app_info/app_info_cubit.dart';
 import 'package:codersgym/gen/assets.gen.dart';
@@ -68,17 +67,17 @@ class SettingPage extends StatelessWidget {
                               ),
                             ),
                             const Divider(),
-                            ListTile(
-                              leading: Icon(
-                                Icons.notifications,
-                                color: theme.primaryColor,
-                              ),
-                              title: const Text("Notifications"),
-                              onTap: () {
-                                AutoRouter.of(context)
-                                    .push(const NotificationRoute());
-                              },
-                            ),
+                            // ListTile(
+                            //   leading: Icon(
+                            //     Icons.notifications,
+                            //     color: theme.primaryColor,
+                            //   ),
+                            //   title: const Text("Notifications"),
+                            //   onTap: () {
+                            //     AutoRouter.of(context)
+                            //         .push(const NotificationRoute());
+                            //   },
+                            // ),
                             // Report Bug Section
                             ListTile(
                               leading: Icon(
