@@ -3,6 +3,7 @@ import 'package:codersgym/core/routes/app_router.gr.dart';
 import 'package:codersgym/core/services/analytics.dart';
 import 'package:codersgym/core/utils/inherited_provider.dart';
 import 'package:codersgym/features/common/data/models/analytics_events.dart';
+import 'package:codersgym/features/question/presentation/blocs/community_solutions/community_solutions_bloc.dart';
 import 'package:codersgym/features/question/presentation/blocs/official_solution_available/official_solution_available_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/online_user_count/online_user_count_cubit.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_hints/question_hints_cubit.dart';
@@ -139,6 +140,9 @@ class QuestionDetailPage extends HookWidget implements AutoRouteWrapper {
         ),
         BlocProvider(
           create: (context) => getIt.get<OfficialSolutionAvailableCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt.get<CommunitySolutionsBloc>(),
         ),
         BlocProvider(
           create: (context) => getIt.get<OnlineUserCountCubit>(
