@@ -80,7 +80,7 @@ dependencies:
   hydrated_bloc: ^9.1.5
   lottie: ^3.2.0
   focus_detector: ^2.0.1
-  flutter_local_notifications: ^18.0.1
+  flutter_local_notifications: 19.0.0-dev.6
   firebase_messaging: ^15.2.2
   flutter_timezone: ^4.1.0
 

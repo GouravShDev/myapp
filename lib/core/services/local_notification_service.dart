@@ -18,8 +18,7 @@ class LocalNotificationService {
 
   Future<void> initialize() async {
     _configureLocalTimeZone();
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('app_icon');
     const iosSettings = DarwinInitializationSettings(
       requestSoundPermission: true,
       requestBadgePermission: true,
@@ -146,8 +145,7 @@ class LocalNotificationService {
       body,
       tz.TZDateTime.from(scheduledDate, tz.local),
       notificationDetails,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
       payload: payload,
       androidScheduleMode: AndroidScheduleMode.alarmClock,
     );
