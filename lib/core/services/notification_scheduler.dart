@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:codersgym/core/services/local_notification_service.dart';
 import 'package:codersgym/core/utils/storage/storage_manager.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 enum NotificationType { notification, alarm }
 
@@ -85,12 +86,15 @@ class NotificationScheduler {
         .map((item) => ScheduledNotification.fromJson(jsonDecode(item)))
         .toList();
   }
-
   Future<List<ScheduledNotification>> getAllScheduledNotifications() async {
     // Attempt cleanup before fetching notifications
     await _attemptCleanup();
 
     return _getAllScheduledNotifications();
+  }
+
+  Future<PermissionStatus> requestNotificationPermission() async {
+    return await Permission.notification.request();
   }
 
   Future<void> _attemptCleanup() async {

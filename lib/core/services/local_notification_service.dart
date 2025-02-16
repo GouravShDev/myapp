@@ -39,7 +39,8 @@ class LocalNotificationService {
         }
       },
     );
-    _requestPermissions();
+    // Not asking permission here as already asked by firebase messaging
+    // _requestPermissions();
   }
 
   Future<void> _requestPermissions() async {

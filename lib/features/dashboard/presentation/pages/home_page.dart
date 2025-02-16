@@ -17,6 +17,7 @@ import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/presentation/blocs/daily_challenge/daily_challenge_cubit.dart';
 import 'package:codersgym/features/question/presentation/widgets/daily_question_card.dart';
 import 'package:codersgym/features/dashboard/presentation/widgets/user_greeting_card.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 @RoutePage()
 class HomePage extends HookWidget {
@@ -177,14 +178,25 @@ class HomePageBody extends StatelessWidget {
                         // contests will always be two.
                         // Atleast for now its just two elements
 
-                        return Column(
-                            children: contests
-                                .map(
-                                  (contest) => UpcomingContestCard(
-                                    contest: contest,
-                                  ),
-                                )
-                                .toList());
+                        return BlocListener<ContestReminderCubit,
+                            ContestReminderState>(
+                          listener: (context, state) {
+                            if (state is ContestReminderLoaded) {
+                              final error = state.error;
+                              if (error != null) {
+                                _handleScheduleFailure(context, error);
+                              }
+                            }
+                          },
+                          child: Column(
+                              children: contests
+                                  .map(
+                                    (contest) => UpcomingContestCard(
+                                      contest: contest,
+                                    ),
+                                  )
+                                  .toList()),
+                        );
                       },
                       onError: (exception) {
                         return const AppErrorWidget(
@@ -216,6 +228,43 @@ class HomePageBody extends StatelessWidget {
           QuestionDetailRoute(question: question),
         );
       },
+    );
+  }
+
+  void _handleScheduleFailure(BuildContext context, SetReminderError error) {
+    switch (error) {
+      case SetReminderError.notificationPermissionDenied:
+      case SetReminderError.notificationPermissionDeniedPermanently:
+        _showSettingsDialog(context);
+      case SetReminderError.alarmNotificationPermissionDenied:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please allow alarm permission')),
+        );
+    }
+  }
+
+  void _showSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Enable Notifications"),
+        content: const Text(
+          "Notifications are disabled. Please enable them in settings.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            child: const Text("Open Settings"),
+          ),
+        ],
+      ),
     );
   }
 }

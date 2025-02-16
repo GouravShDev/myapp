@@ -10,7 +10,6 @@ class FirebasePushNotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   Future<void> initialize() async {
-    // Request permission for iOS
     await _firebaseMessaging.requestPermission(
       alert: true,
       badge: true,
@@ -18,8 +17,8 @@ class FirebasePushNotificationService {
     );
 
     // Get FCM token
-    String? token = await _firebaseMessaging.getToken();
-    print('FCM Token: $token');
+    // String? token = await _firebaseMessaging.getToken();
+    // print('FCM Token: $token');
 
     // Listen to token refresh
     _firebaseMessaging.onTokenRefresh.listen((newToken) {

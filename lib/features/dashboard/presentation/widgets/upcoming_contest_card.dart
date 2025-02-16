@@ -81,7 +81,7 @@ class UpcomingContestCard extends HookWidget {
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  padding: EdgeInsets.only(left: 12, bottom: 12, top: 40),
+                  padding: const EdgeInsets.only(left: 12, bottom: 12, top: 40),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.bottomCenter,

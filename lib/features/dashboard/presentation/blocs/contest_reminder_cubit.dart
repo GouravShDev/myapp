@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:codersgym/core/services/notification_scheduler.dart';
 import 'package:codersgym/features/question/domain/model/contest.dart';
-import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 part 'contest_reminder_state.dart';
 
@@ -43,20 +43,47 @@ class ContestReminderCubit extends Cubit<ContestReminderState> {
       return;
     }
 
-    await _notificationScheduler.scheduleNotification(
+    final permissionStatus =
+        await _notificationScheduler.requestNotificationPermission();
+    final currentState = state;
+    if (!permissionStatus.isGranted && currentState is ContestReminderLoaded) {
+      if (permissionStatus.isDenied) {
+        _notificationScheduler.requestNotificationPermission();
+      }
+      emit(
+        ContestReminderLoaded(
+          scheduledContests: currentState.scheduledContests,
+          error: permissionStatus.isPermanentlyDenied
+              ? SetReminderError.notificationPermissionDeniedPermanently
+              : SetReminderError.notificationPermissionDenied,
+        ),
+      );
+      return;
+    }
+
+    final scheduledSuccessfully = await _notificationScheduler.scheduleNotification(
         title: 'Upcoming Leetcode Contest: ${contest.title}',
         body:
             'Starts in ${_formatDuration(reminderOffset)}. Get ready to solve some exciting problems!',
-        scheduledTime: scheduledTime,
+        scheduledTime: scheduledTime.toLocal(),
         payload: {
           "contestTitleSlug": contest.titleSlug,
         });
-
+    if (!scheduledSuccessfully && currentState is ContestReminderLoaded) {
+      emit(
+        ContestReminderLoaded(
+          scheduledContests: currentState.scheduledContests,
+          error: SetReminderError.alarmNotificationPermissionDenied,
+        ),
+      );
+      return;
+    }
     checkSchedulesContests();
   }
 
   void cancelContestNotification(ScheduledContest scheduledContest) async {
-    await _notificationScheduler.cancelNotification(scheduledContest.scheduledId);
+    await _notificationScheduler
+        .cancelNotification(scheduledContest.scheduledId);
     checkSchedulesContests();
   }
 }

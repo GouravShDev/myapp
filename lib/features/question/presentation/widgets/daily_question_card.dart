@@ -50,14 +50,8 @@ class DailyQuestionCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     QuestionDifficultyText(question),
-                    ElevatedButton.icon(
+                    ElevatedButton(
                       onPressed: onSolveTapped,
-                      icon: isFetching
-                          ? null
-                          : const Icon(
-                              Icons.code_outlined,
-                              size: 18,
-                            ),
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -66,7 +60,7 @@ class DailyQuestionCard extends StatelessWidget {
                             ? Theme.of(context).primaryColor.withOpacity(0.7)
                             : null,
                       ),
-                      label: AnimatedSwitcher(
+                      child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
                         child: isFetching
                             ? Row(

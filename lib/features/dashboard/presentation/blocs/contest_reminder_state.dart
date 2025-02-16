@@ -1,10 +1,7 @@
 part of 'contest_reminder_cubit.dart';
 
 @immutable
-sealed class ContestReminderState extends Equatable {
-  @override
-  List<Object?> get props => [];
-}
+sealed class ContestReminderState {}
 
 final class ContestReminderInitial extends ContestReminderState {}
 
@@ -12,11 +9,12 @@ final class ContestReminderLoading extends ContestReminderState {}
 
 final class ContestReminderLoaded extends ContestReminderState {
   final Set<ScheduledContest> scheduledContests;
+  final SetReminderError? error;
 
-  ContestReminderLoaded({required this.scheduledContests});
-
-  @override
-  List<Object?> get props => [scheduledContests];
+  ContestReminderLoaded({
+    required this.scheduledContests,
+    this.error,
+  });
 }
 
 class ScheduledContest {
@@ -27,4 +25,10 @@ class ScheduledContest {
     required this.titleSlug,
     required this.scheduledId,
   });
+}
+
+enum SetReminderError {
+  notificationPermissionDenied,
+  notificationPermissionDeniedPermanently,
+  alarmNotificationPermissionDenied,
 }

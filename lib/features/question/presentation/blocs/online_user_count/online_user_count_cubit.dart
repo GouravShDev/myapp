@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:codersgym/core/utils/app_constants.dart';
 import 'package:equatable/equatable.dart';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -19,7 +20,9 @@ class OnlineUserCountCubit extends Cubit<OnlineUserCountState> {
       emit(OnlineUserCountConnectingState());
 
       final wsUrl = Uri.parse(
-          'wss://collaboration-ws.leetcode.com/problems/$questionTitleSlug');
+        LeetcodeConstants.onlineUserSocket
+            .replaceAll('{slug}', questionTitleSlug),
+      );
       _channel = WebSocketChannel.connect(wsUrl);
 
       _channel?.stream.listen(
@@ -29,14 +32,6 @@ class OnlineUserCountCubit extends Cubit<OnlineUserCountState> {
         onError: (error) {
           emit(OnlineUserCountConnectionFailedState());
         },
-        onDone: () {
-          // Attempt to reconnect when connection is closed
-          Future.delayed(const Duration(seconds: 5), () {
-            if (state is! OnlineUserCountConnectionFailedState) {
-              connectToWebSocket();
-            }
-          });
-        },
       );
     } catch (e) {
       emit(OnlineUserCountConnectionFailedState());
@@ -45,7 +40,6 @@ class OnlineUserCountCubit extends Cubit<OnlineUserCountState> {
 
   void _handleWebSocketMessage(dynamic message) {
     try {
-
       final userCount = int.tryParse(message);
       // Check if the message contains user count information
       if (userCount != null) {
