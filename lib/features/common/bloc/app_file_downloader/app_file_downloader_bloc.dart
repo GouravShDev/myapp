@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
+import 'package:codersgym/core/utils/bloc_extension.dart';
 import 'package:equatable/equatable.dart';
 // import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path_provider/path_provider.dart';
@@ -36,7 +37,7 @@ class AppFileDownloaderBloc
     AppFileDownloadRequest event,
     Emitter<AppFileDownloaderState> emit,
   ) async {
-    emit(AppFileIntiatingDownload());
+    safeEmit(AppFileIntiatingDownload());
 
     // Extract file name
     String fileName = Uri.parse(event.downloadUrl).pathSegments.last;

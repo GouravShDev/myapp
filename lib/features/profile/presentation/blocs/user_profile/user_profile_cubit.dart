@@ -1,4 +1,5 @@
 import 'package:codersgym/core/api/api_state.dart';
+import 'package:codersgym/core/utils/bloc_extension.dart';
 import 'package:codersgym/features/profile/domain/model/user_profile.dart';
 import 'package:codersgym/features/profile/domain/repository/profile_repository.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -11,10 +12,10 @@ class UserProfileCubit extends HydratedCubit<ApiState<UserProfile, Exception>> {
     final result = await _profileRepository.getUserProfile(userName);
     result.when(
       onSuccess: (profile) {
-        emit(ApiLoaded(profile));
+        safeEmit(ApiLoaded(profile));
       },
       onFailure: (exception) {
-        emit(ApiError(exception));
+        safeEmit(ApiError(exception));
       },
     );
   }

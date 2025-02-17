@@ -1,11 +1,10 @@
-import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:codersgym/core/utils/bloc_extension.dart';
 import 'package:codersgym/features/question/domain/model/problem_sort_option.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/domain/repository/question_repository.dart';
 import 'package:equatable/equatable.dart';
-import 'package:highlight/languages/diff.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -53,7 +52,7 @@ class QuestionArchieveBloc
     if (state.isLoading) {
       return; // Prevent mutliple call resulting in duplicate items
     }
-    emit(
+    safeEmit(
       state.copyWith(
         isLoading: true,
       ),
@@ -93,7 +92,7 @@ class QuestionArchieveBloc
         // Update currentSkip
         currentSkip = updatedList.length;
 
-        emit(
+        safeEmit(
           state.copyWith(
             questions: updatedList,
             moreQuestionAvailable: moreQuestionAvailable,
@@ -102,7 +101,7 @@ class QuestionArchieveBloc
         );
       },
       onFailure: (exception) {
-        emit(
+        safeEmit(
           state.copyWith(
             error: exception,
             isLoading: false,

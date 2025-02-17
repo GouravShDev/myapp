@@ -1,4 +1,5 @@
 import 'package:codersgym/core/api/api_state.dart';
+import 'package:codersgym/core/utils/bloc_extension.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/domain/repository/question_repository.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -11,10 +12,10 @@ class DailyChallengeCubit extends HydratedCubit<ApiState<Question, Exception>> {
     final result = await _questionRepository.getTodayChallenge();
     result.when(
       onSuccess: (value) {
-        emit(ApiLoaded(value));
+        safeEmit(ApiLoaded(value));
       },
       onFailure: (exception) {
-        emit(ApiError(exception));
+        safeEmit(ApiError(exception));
       },
     );
   }

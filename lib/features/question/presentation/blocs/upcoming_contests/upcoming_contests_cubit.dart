@@ -1,5 +1,5 @@
-import 'package:bloc/bloc.dart';
 import 'package:codersgym/core/api/api_state.dart';
+import 'package:codersgym/core/utils/bloc_extension.dart';
 import 'package:codersgym/features/question/domain/model/contest.dart';
 import 'package:codersgym/features/question/domain/repository/question_repository.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -13,10 +13,10 @@ class UpcomingContestsCubit
     final result = await _questionRepository.getUpcomingContests();
     result.when(
       onSuccess: (contests) {
-        emit(ApiLoaded(contests));
+        safeEmit(ApiLoaded(contests));
       },
       onFailure: (exception) {
-        emit(ApiError(exception));
+        safeEmit(ApiError(exception));
       },
     );
   }

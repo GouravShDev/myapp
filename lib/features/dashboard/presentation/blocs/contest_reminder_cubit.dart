@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:codersgym/core/services/notification_scheduler.dart';
+import 'package:codersgym/core/utils/bloc_extension.dart';
 import 'package:codersgym/features/question/domain/model/contest.dart';
 import 'package:meta/meta.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -12,10 +13,10 @@ class ContestReminderCubit extends Cubit<ContestReminderState> {
   final NotificationScheduler _notificationScheduler;
 
   Future<void> checkSchedulesContests() async {
-    emit(ContestReminderLoading());
+    safeEmit(ContestReminderLoading());
     final scheduledNotifications =
         await _notificationScheduler.getAllScheduledNotifications();
-    emit(
+    safeEmit(
       ContestReminderLoaded(
         scheduledContests: Set<ScheduledContest>.from(
           scheduledNotifications
@@ -50,7 +51,7 @@ class ContestReminderCubit extends Cubit<ContestReminderState> {
       if (permissionStatus.isDenied) {
         _notificationScheduler.requestNotificationPermission();
       }
-      emit(
+      safeEmit(
         ContestReminderLoaded(
           scheduledContests: currentState.scheduledContests,
           error: permissionStatus.isPermanentlyDenied
@@ -70,7 +71,7 @@ class ContestReminderCubit extends Cubit<ContestReminderState> {
           "contestTitleSlug": contest.titleSlug,
         });
     if (!scheduledSuccessfully && currentState is ContestReminderLoaded) {
-      emit(
+      safeEmit(
         ContestReminderLoaded(
           scheduledContests: currentState.scheduledContests,
           error: SetReminderError.alarmNotificationPermissionDenied,
