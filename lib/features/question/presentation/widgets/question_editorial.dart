@@ -1,7 +1,8 @@
+import 'package:codersgym/core/utils/app_constants.dart';
 import 'package:codersgym/core/utils/inherited_provider.dart';
+import 'package:codersgym/features/common/widgets/leetcode_markdown/leetcode_markdown_widget.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_solution/question_solution_cubit.dart';
-import 'package:codersgym/features/question/presentation/widgets/editorial_html.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -27,16 +28,11 @@ class QuestionEditorial extends HookWidget {
           onInitial: () => const CircularProgressIndicator(),
           onLoading: (_) => const CircularProgressIndicator(),
           onLoaded: (solution) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CustomScrollView(
-                controller: InheritedDataProvider.of<ScrollController>(context),
-                slivers: [
-                  EditorialHtml(
-                    solutionContent: solution.content ?? '',
-                  ),
-                ],
-              ),
+            return LeetcodeMarkdownWidget(
+              controller: InheritedDataProvider.of<ScrollController>(context),
+              assetsBaseUrl:
+                  "${LeetcodeConstants.leetcodeUrl}/problems/${question.titleSlug}",
+              data: solution.content ?? '',
             );
           },
           onError: (exception) => Text(exception.toString()),

@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:codersgym/core/api/api_state.dart';
-import 'package:codersgym/features/question/data/parser/leetcode_solution_parser.dart';
 import 'package:codersgym/features/question/domain/model/community_solution_post_detail.dart';
 import 'package:codersgym/features/question/domain/repository/question_repository.dart';
 
@@ -27,7 +26,7 @@ class CommunityPostDetailCubit extends Cubit<CommunityPostDetailState> {
     final solutionDetail = result.getSuccessValue;
 
     final parsedContentResult =
-        solutionDetail.post?.content?.replaceAll(r'\n', '\n');
+        solutionDetail.post?.content?.replaceAll('\\n', "  \n").replaceAll('<br>', "  \n");
 
     emit(
       ApiLoaded(

@@ -1,7 +1,5 @@
-import 'dart:developer';
 
 import 'package:codersgym/core/error/result.dart';
-import 'package:markdown/markdown.dart';
 
 /// Parser for HTML and Markdown combination content returns in the
 /// leetcode api in editorial solution
@@ -18,9 +16,9 @@ class HTMLMarkdownParser {
       // Replace special character '$$' with '*' present in the solutions
       // content. Leetcode wrap content around this charater to provide
       // special styling. Example :  $$O(n)$$ time
-      final filterContent = content.replaceAll('\$\$', '*');
-      final htmlContent = markdownToHtml(filterContent);
-      return Success(htmlContent);
+      // final filterContent = content.replaceAll('', '*');
+      // final htmlContent = markdownToHtml(content);
+      return Success(content);
     } catch (e) {
       return Failure(InvalidFormatFailure());
     }
