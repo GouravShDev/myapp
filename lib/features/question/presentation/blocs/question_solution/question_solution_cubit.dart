@@ -24,7 +24,7 @@ class QuestionSolutionCubit extends Cubit<QuestionSolutionState> {
       return;
     }
     final solution = result.getSuccessValue;
-    if (solution == null) {
+    if (solution == null || (solution.content?.isEmpty ?? true)) {
       emit(ApiError(Exception('Solution not found')));
       return;
     }

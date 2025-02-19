@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:codersgym/core/services/analytics.dart';
+import 'package:codersgym/core/utils/bloc_extension.dart';
 import 'package:codersgym/core/utils/storage/storage_manager.dart';
 import 'package:codersgym/core/utils/track_analytic_mixin.dart';
 import 'package:codersgym/features/code_editor/domain/model/code_execution_result.dart';
@@ -88,7 +89,7 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
     CodeEditorRunCodeEvent event,
     Emitter<CodeEditorState> emit,
   ) async {
-    emit(
+    safeEmit(
       state.copyWith(
         executionState: CodeExecutionPending(),
         testCases: state.testCases,
@@ -128,7 +129,7 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
     CodeEditorRunCodeResultUpdateEvent event,
     Emitter<CodeEditorState> emit,
   ) {
-    emit(
+    safeEmit(
       state.copyWith(
         executionState: event.executionResult,
       ),
@@ -137,7 +138,7 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
 
   void _onCodeEditorCodeUpdateEvent(
       CodeEditorCodeUpdateEvent event, Emitter<CodeEditorState> emit) {
-    emit(
+    safeEmit(
       state.copyWith(
         code: event.updatedCode,
       ),
@@ -148,7 +149,7 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
     CodeEditorSubmitCodeEvent event,
     Emitter<CodeEditorState> emit,
   ) async {
-    emit(
+    safeEmit(
       state.copyWith(
         codeSubmissionState: CodeExecutionPending(),
         testCases: state.testCases,
@@ -167,7 +168,7 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
           '',
     );
     if (runSubmitCodeResult.isFailure) {
-      emit(
+      safeEmit(
         state.copyWith(
           codeSubmissionState: CodeExecutionError(),
         ),
@@ -230,7 +231,7 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
   void _onCodeEditorSubmitCodeResultUpdateEvent(
       CodeEditorSubmitCodeResultUpdateEvent event,
       Emitter<CodeEditorState> emit) {
-    emit(
+    safeEmit(
       state.copyWith(
         codeSubmissionState: event.executionResult,
       ),
@@ -255,7 +256,7 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
     // Get the cached values if its exists
     final currentCode = state.code;
     final currentProgrammingLanguage = state.language;
-    emit(
+    safeEmit(
       state.copyWith(
         isStateInitialized: true,
         language: currentProgrammingLanguage ?? language,
@@ -282,7 +283,7 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
           (element) => element.langSlug == event.language.name,
         )
         ?.code;
-    emit(
+    safeEmit(
       state.copyWith(
         language: event.language,
         code: code,
@@ -294,7 +295,7 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
     CodeEditorFormatCodeEvent event,
     Emitter<CodeEditorState> emit,
   ) async {
-    emit(state.copyWith(
+    safeEmit(state.copyWith(
       isCodeFormatting: true,
     ));
     final codeFormatResult = await _codeEdtiorRepository.formatCode(
@@ -306,13 +307,13 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
 
     codeFormatResult.when(
       onSuccess: (formattedCode) {
-        emit(state.copyWith(
+        safeEmit(state.copyWith(
           code: formattedCode,
           isCodeFormatting: false,
         ));
       },
       onFailure: (exception) {
-        emit(
+        safeEmit(
           state.copyWith(
             isCodeFormatting: false,
           ),
@@ -332,14 +333,14 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
               (state.language ?? ProgrammingLanguage.cpp).name,
         )
         ?.code;
-    emit(
+    safeEmit(
       state.copyWith(code: code),
     );
   }
 
   void _onCodeEditorUpdateTestcaseEvent(
       CodeEditorUpdateTestcaseEvent event, Emitter<CodeEditorState> emit) {
-    emit(
+    safeEmit(
       state.copyWith(
         testCases: event.testcases,
       ),
@@ -367,7 +368,7 @@ class CodeEditorBloc extends HydratedBloc<CodeEditorEvent, CodeEditorState> {
     CodeEditorFocusChangedEvent event,
     Emitter<CodeEditorState> emit,
   ) {
-    emit(
+    safeEmit(
       state.copyWith(
         isCodeEditorFocused: event.focus,
       ),

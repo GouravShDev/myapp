@@ -1,5 +1,6 @@
 import 'package:codersgym/core/utils/app_constants.dart';
 import 'package:codersgym/core/utils/inherited_provider.dart';
+import 'package:codersgym/features/common/widgets/app_error_widget.dart';
 import 'package:codersgym/features/common/widgets/leetcode_markdown/leetcode_markdown_widget.dart';
 import 'package:codersgym/features/question/domain/model/question.dart';
 import 'package:codersgym/features/question/presentation/blocs/question_solution/question_solution_cubit.dart';
@@ -14,6 +15,7 @@ class QuestionEditorial extends HookWidget {
   });
 
   final Question question;
+
   @override
   Widget build(BuildContext context) {
     final questionSolutionCubit = context.read<QuestionSolutionCubit>();
@@ -35,7 +37,10 @@ class QuestionEditorial extends HookWidget {
               data: solution.content ?? '',
             );
           },
-          onError: (exception) => Text(exception.toString()),
+          onError: (exception) => const AppErrorWidget(
+            message: "Solution Not Available",
+            showRetryButton: false,
+          ),
         );
       },
     );
