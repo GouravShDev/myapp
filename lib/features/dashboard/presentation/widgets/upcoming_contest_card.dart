@@ -154,9 +154,13 @@ class UpcomingContestCard extends HookWidget {
                 ),
                 BlocBuilder<ContestReminderCubit, ContestReminderState>(
                   builder: (context, state) {
-                    final currentScheduledContest = state is ContestReminderLoaded ? state.scheduledContests.firstWhereOrNull(
-                      (element) => element.titleSlug == contest.titleSlug,
-                    ) : null;
+                    final currentScheduledContest =
+                        state is ContestReminderLoaded
+                            ? state.scheduledContests.firstWhereOrNull(
+                                (element) =>
+                                    element.titleSlug == contest.titleSlug,
+                              )
+                            : null;
                     final isReminderSet = currentScheduledContest != null;
                     final contestReminderCubit =
                         context.read<ContestReminderCubit>();
@@ -191,7 +195,7 @@ class UpcomingContestCard extends HookWidget {
                                 if (confirmCancel == true) {
                                   contestReminderCubit
                                       .cancelContestNotification(
-                                      currentScheduledContest,
+                                    currentScheduledContest,
                                   );
                                 }
                                 return;
@@ -235,7 +239,7 @@ class UpcomingContestCard extends HookWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isReminderSet
                             ? theme.colorScheme.primaryContainer
-                                .withValues(alpha: 0.1)
+                                .withOpacity(0.1)
                             : theme.colorScheme.primary,
                         side: BorderSide(
                           color: isReminderSet
@@ -247,7 +251,8 @@ class UpcomingContestCard extends HookWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12,
+                          horizontal: 16,
+                          vertical: 12,
                         ),
                         elevation: isReminderSet ? 0 : 3,
                       ),
